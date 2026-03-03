@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { db } from "../firebase"; // The "../" moves up one folder level
+import { useState, useEffect } from "react"; // Added useEffect for SEO
+import { db } from "../firebase"; 
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 
@@ -7,6 +7,15 @@ export default function InterestForm() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   
+  // --- SEO INJECTION ---
+  useEffect(() => {
+    document.title = "Join the Priority Waitlist | SnapCopy AI Business Solutions";
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) {
+      metaDesc.setAttribute("content", "Register for exclusive access to SnapCopy's AI Micro SaaS tools. Get custom AI content solutions and enterprise-level automation for your business.");
+    }
+  }, []);
+
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -73,7 +82,7 @@ export default function InterestForm() {
   };
 
   return (
-    <div style={{
+    <main style={{ // Changed to <main> for SEO
       width: "100vw",
       margin: "0",
       padding: "0",
@@ -104,12 +113,12 @@ export default function InterestForm() {
       }}>
 
         {/* --- PAGE TITLE (Centered Top) --- */}
-        <div style={{ textAlign: "center", marginBottom: "60px", width: "100%", maxWidth: "900px" }}>
+        <header style={{ textAlign: "center", marginBottom: "60px", width: "100%", maxWidth: "900px" }}>
           <h1 style={{ fontSize: "42px", fontWeight: "800", color: "#2d3748", marginBottom: "15px" }}>
             Partner With Us for Smarter Business Solutions
           </h1>
           <div style={{ width: "80px", height: "5px", background: "#860aa5", margin: "0 auto", borderRadius: "10px" }}></div>
-        </div>
+        </header>
 
         {/* --- CONTENT AREA (Form + Sidebar) --- */}
         <div style={{
@@ -123,9 +132,9 @@ export default function InterestForm() {
         }}>
 
           {/* LEFT COLUMN: The Form */}
-          <div style={{ flex: "1 1 550px", maxWidth: "650px" }}>
+          <section style={{ flex: "1 1 550px", maxWidth: "650px" }} aria-labelledby="form-heading">
             <div style={{ marginBottom: "30px" }}>
-              <h2 style={{ fontSize: "28px", color: "#860aa5", marginBottom: "10px" }}>
+              <h2 id="form-heading" style={{ fontSize: "28px", color: "#860aa5", marginBottom: "10px" }}>
                 Exclusive Access & Custom Solutions
               </h2>
               <p style={{ color: "#718096", lineHeight: "1.6" }}>
@@ -135,6 +144,7 @@ export default function InterestForm() {
 
             <form 
               onSubmit={handleSubmit}
+              aria-label="Waitlist registration form"
               style={{ 
                 display: "grid", 
                 gridTemplateColumns: "1fr 1fr", 
@@ -159,36 +169,36 @@ export default function InterestForm() {
               </div>
 
               <div>
-                <label style={{ display: "block", marginBottom: "5px", fontWeight: "600" }}>Full Name *</label>
-                <input required style={fieldStyle} placeholder="John Doe" 
+                <label htmlFor="fullName" style={{ display: "block", marginBottom: "5px", fontWeight: "600" }}>Full Name *</label>
+                <input id="fullName" required style={fieldStyle} placeholder="John Doe" 
                   onChange={(e) => setFormData({...formData, fullName: e.target.value})} />
               </div>
               <div>
-                <label style={{ display: "block", marginBottom: "5px", fontWeight: "600" }}>Email Address *</label>
-                <input type="email" required style={fieldStyle} placeholder="john@company.com" 
+                <label htmlFor="email" style={{ display: "block", marginBottom: "5px", fontWeight: "600" }}>Email Address *</label>
+                <input id="email" type="email" required style={fieldStyle} placeholder="john@company.com" 
                   onChange={(e) => setFormData({...formData, email: e.target.value})} />
               </div>
 
               <div>
-                <label style={{ display: "block", marginBottom: "5px", fontWeight: "600" }}>Phone Number</label>
-                <input style={fieldStyle} placeholder="(555) 000-0000" 
+                <label htmlFor="phone" style={{ display: "block", marginBottom: "5px", fontWeight: "600" }}>Phone Number</label>
+                <input id="phone" style={fieldStyle} placeholder="(555) 000-0000" 
                   onChange={(e) => setFormData({...formData, phone: e.target.value})} />
               </div>
               <div>
-                <label style={{ display: "block", marginBottom: "5px", fontWeight: "600" }}>Company Name</label>
-                <input style={fieldStyle} placeholder="Acme Corp" 
+                <label htmlFor="companyName" style={{ display: "block", marginBottom: "5px", fontWeight: "600" }}>Company Name</label>
+                <input id="companyName" style={fieldStyle} placeholder="Acme Corp" 
                   onChange={(e) => setFormData({...formData, companyName: e.target.value})} />
             </div>
 
               <div style={{ gridColumn: "span 2" }}>
-                <label style={{ display: "block", marginBottom: "5px", fontWeight: "600" }}>Website or Social Link</label>
-                <input style={fieldStyle} placeholder="https://..." 
+                <label htmlFor="website" style={{ display: "block", marginBottom: "5px", fontWeight: "600" }}>Website or Social Link</label>
+                <input id="website" style={fieldStyle} placeholder="https://..." 
                   onChange={(e) => setFormData({...formData, website: e.target.value})} />
               </div>
 
               <div>
-                <label style={{ display: "block", marginBottom: "5px", fontWeight: "600" }}>Business Type</label>
-                <select required style={fieldStyle} onChange={(e) => setFormData({...formData, businessType: e.target.value})}>
+                <label htmlFor="businessType" style={{ display: "block", marginBottom: "5px", fontWeight: "600" }}>Business Type</label>
+                <select id="businessType" required style={fieldStyle} onChange={(e) => setFormData({...formData, businessType: e.target.value})}>
                   <option value="">Select Industry...</option>
                   <option value="Real Estate">Real Estate</option>
                   <option value="Marketing">Marketing</option>
@@ -200,8 +210,8 @@ export default function InterestForm() {
                 </select>
               </div>
               <div>
-                <label style={{ display: "block", marginBottom: "5px", fontWeight: "600" }}>Company Size</label>
-                <select required style={fieldStyle} onChange={(e) => setFormData({...formData, companySize: e.target.value})}>
+                <label htmlFor="companySize" style={{ display: "block", marginBottom: "5px", fontWeight: "600" }}>Company Size</label>
+                <select id="companySize" required style={fieldStyle} onChange={(e) => setFormData({...formData, companySize: e.target.value})}>
                   <option value="">Select Size...</option>
                   <option value="Solo">Solo</option>
                   <option value="2-5">2–5 employees</option>
@@ -212,8 +222,8 @@ export default function InterestForm() {
               </div>
 
               <div>
-                <label style={{ display: "block", marginBottom: "5px", fontWeight: "600" }}>Primary Use Case</label>
-                <select required style={fieldStyle} onChange={(e) => setFormData({...formData, primaryUseCase: e.target.value})}>
+                <label htmlFor="useCase" style={{ display: "block", marginBottom: "5px", fontWeight: "600" }}>Primary Use Case</label>
+                <select id="useCase" required style={fieldStyle} onChange={(e) => setFormData({...formData, primaryUseCase: e.target.value})}>
                   <option value="">Select Use Case...</option>
                   <option value="Content creation">Content Creation</option>
                   <option value="Automation">Process Automation</option>
@@ -223,8 +233,8 @@ export default function InterestForm() {
                 </select>
               </div>
               <div>
-                <label style={{ display: "block", marginBottom: "5px", fontWeight: "600" }}>Access Level Interest</label>
-                <select required style={fieldStyle} onChange={(e) => setFormData({...formData, accessLevel: e.target.value})}>
+                <label htmlFor="accessLevel" style={{ display: "block", marginBottom: "5px", fontWeight: "600" }}>Access Level Interest</label>
+                <select id="accessLevel" required style={fieldStyle} onChange={(e) => setFormData({...formData, accessLevel: e.target.value})}>
                   <option value="">Select Interest...</option>
                   <option value="Private Single Tool">Private Single Tool</option>
                   <option value="Full Access">Full Access to All Tools</option>
@@ -234,8 +244,9 @@ export default function InterestForm() {
               </div>
 
               <div style={{ gridColumn: "span 2" }}>
-                <label style={{ display: "block", marginBottom: "5px", fontWeight: "600" }}>Additional Comments or Specific Needs</label>
+                <label htmlFor="notes" style={{ display: "block", marginBottom: "5px", fontWeight: "600" }}>Additional Comments or Specific Needs</label>
                 <textarea 
+                  id="notes"
                   style={{ ...fieldStyle, height: "100px", resize: "none" }} 
                   placeholder="Tell us a bit more about what you're looking for..."
                   onChange={(e) => setFormData({...formData, additionalNotes: e.target.value})}
@@ -246,6 +257,7 @@ export default function InterestForm() {
                 <button 
                   type="submit" 
                   disabled={loading}
+                  aria-busy={loading}
                   style={{ 
                     width: "100%", padding: "15px", background: "#860aa5", color: "white", 
                     border: "none", borderRadius: "8px", fontSize: "16px", fontWeight: "bold", 
@@ -254,15 +266,20 @@ export default function InterestForm() {
                 >
                   {loading ? "Registering Interest..." : "Join Priority Waitlist"}
                 </button>
-                <button type="button" onClick={() => navigate("/")} style={{ width: "100%", background: "none", border: "none", color: "#718096", marginTop: "15px", cursor: "pointer", textDecoration: "underline" }}>
+                <button 
+                  type="button" 
+                  onClick={() => navigate("/")} 
+                  aria-label="Return to the main tools page"
+                  style={{ width: "100%", background: "none", border: "none", color: "#718096", marginTop: "15px", cursor: "pointer", textDecoration: "underline" }}
+                >
                   Return to Tools
                 </button>
               </div>
             </form>
-          </div>
+          </section>
 
-          {/* RIGHT COLUMN: The Why AI Text (Lowered with marginTop) */}
-          <div style={{ 
+          {/* RIGHT COLUMN: The Why AI Text */}
+          <aside style={{ // Changed to <aside> for SEO
             flex: "1 1 350px", 
             maxWidth: "500px",
             padding: "35px", 
@@ -271,7 +288,7 @@ export default function InterestForm() {
             borderRadius: "15px", 
             boxShadow: "0 4px 15px rgba(0,0,0,0.03)",
             color: "#2d3748",
-            marginTop: "163px", // Lowered this column to align better with the form body
+            marginTop: "163px", 
           }}>
             <h3 style={sectionHeaderStyle}>Sign up for Micro SaaS Access</h3>
             <p style={{ lineHeight: "1.6", marginBottom: "20px" }}>
@@ -295,9 +312,9 @@ export default function InterestForm() {
             <p style={{ lineHeight: "1.6" }}>
               Half of all small businesses plan to adopt AI in the next year. Getting early access means you're ahead of them—not playing catch-up.
             </p>
-          </div>
+          </aside>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

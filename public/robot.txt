@@ -1,0 +1,13 @@
+# Allow all search engines
+User-agent: *
+
+# Don't let search engines index your node_modules or private config if they happen to see them
+Disallow: /node_modules/
+Disallow: /.env
+Disallow: /private/
+
+# Allow everything else
+Allow: /
+
+# The most important part: Pointing to your sitemap
+Sitemap: https://snapcopy.online/sitemap.xml
