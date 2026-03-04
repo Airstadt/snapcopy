@@ -1,26 +1,19 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import path from 'path'
+import path from 'path' // Required for folder aliasing
 
+// https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
   base: '/',
   resolve: {
     alias: {
+      // This maps the word "pages" directly to your src/pages folder
       "pages": path.resolve(__dirname, "./src/pages"),
+      // Optional: adds "@" as a shortcut for the src folder
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  build: {
-    // This ensures that assets are hashed correctly for cache-busting
-    rollupOptions: {
-      output: {
-        chunkFileNames: 'assets/js/[name]-[hash].js',
-        entryFileNames: 'assets/js/[name]-[hash].js',
-        assetFileNames: 'assets/[ext]/[name]-[hash].[ext]',
-      },
-    },
-    // Cleans the dist folder before building to prevent old file conflicts
-    emptyOutDir: true,
-  },
 })
+
+
