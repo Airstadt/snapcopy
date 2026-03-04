@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import { useState, useRef, useEffect } from "react"; // Added useEffect for SEO injection
+import { useState, useRef, useEffect } from "react"; 
 import snapcopyLogo from "./assets/snapcopyLogo.png";
 import airStadtLogo from "./assets/AirStadtLogo.png";
 import InterestForm from "./pages/InterestForm"; 
@@ -22,7 +22,6 @@ function HomePage() {
 
   const formRef = useRef(null);
 
-  // --- SEO INJECTION ---
   useEffect(() => {
     document.title = "SnapCopy | AI Content Toolkit for Small Businesses";
     const metaDesc = document.querySelector('meta[name="description"]');
@@ -34,6 +33,7 @@ function HomePage() {
   const colors = {
     deepBlue: "#860aa5",
     purple: "#390b64",
+    orange: "#ff8c00", // Added for the new button
     darkSlate: "#2d3748", 
     lightGray: "#e2e8f0",
     textDark: "#1a202c",
@@ -127,7 +127,7 @@ function HomePage() {
   }
 
   return (
-    <main style={{ // Changed div to main for SEO
+    <main style={{ 
       display: "flex", flexDirection: "column", alignItems: "center",
       minHeight: "100vh", width: "100vw", background: "#f0f2f5",
       padding: "20px", paddingTop: "10px", boxSizing: "border-box",
@@ -140,7 +140,7 @@ function HomePage() {
         padding: "60px 20px", display: "flex", flexDirection: "column", alignItems: "center" 
       }}>
         <div style={{ width: 180, height: 180, marginBottom: "20px" }}>
-          <img src={snapcopyLogo} alt="SnapCopy - The AI Content Generator Logo" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }} />
+          <img src={snapcopyLogo} alt="SnapCopy Logo" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }} />
         </div>
         <h1 style={{ 
           fontSize: "48px", fontWeight: "800", marginBottom: "15px",
@@ -155,7 +155,7 @@ function HomePage() {
         <div style={{ display: "flex", gap: "15px", flexWrap: "wrap", justifyContent: "center" }}>
           <button 
             onClick={scrollToForm}
-            aria-label="Scroll to AI content tools"
+            aria-label="Explore tools"
             style={{ 
               padding: "16px 32px", background: colors.deepBlue, color: "white", 
               border: "none", borderRadius: "50px", fontWeight: "bold", fontSize: "18px",
@@ -200,20 +200,37 @@ function HomePage() {
       {/* --- WHO THIS IS FOR --- */}
       <section aria-label="Target Audience" style={{ width: "100%", maxWidth: 1000, textAlign: "center", marginBottom: "60px" }}>
         <h2 style={{ color: colors.textDark, marginBottom: "20px" }}>Who This Is For</h2>
-        <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "10px" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "10px", marginBottom: "30px" }}>
           {["Contractors", "Home Service Businesses", "Freelancers", "Small Business Owners", "Agencies"].map((item) => (
             <span key={item} style={{ padding: "8px 20px", background: "white", borderRadius: "50px", border: `1px solid ${colors.lightGray}`, color: colors.purple, fontWeight: "600", fontSize: "14px" }}>
               {item}
             </span>
           ))}
         </div>
+        
+        {/* NEW ORANGE BUTTON */}
+        <a 
+          href="https://snapmatrix.org" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          style={{ textDecoration: "none" }}
+        >
+          <button 
+            style={{ 
+              padding: "16px 32px", background: colors.orange, color: "white", 
+              border: "none", borderRadius: "50px", fontWeight: "bold", fontSize: "18px",
+              cursor: "pointer", boxShadow: "0 10px 20px rgba(255, 140, 0, 0.2)"
+            }}
+          >
+            Visit SnapMatrix
+          </button>
+        </a>
       </section>
 
       {/* --- MAIN APP SECTION --- */}
       <div ref={formRef} style={{ width: "100%", maxWidth: 800 }}>
         <Link to="/interest" style={{ textDecoration: "none", marginBottom: "20px", display: "block" }}>
            <button 
-             aria-label="Join SnapCopy Interest List"
              style={{ 
                width: "100%", padding: "12px", background: "white", color: colors.deepBlue, 
                border: `2px solid ${colors.deepBlue}`, borderRadius: "8px", fontWeight: "bold", 
@@ -223,7 +240,7 @@ function HomePage() {
            </button>
         </Link>
 
-        <nav aria-label="Tool selection" style={{ display: "flex", gap: "10px", marginBottom: "25px" }}>
+        <nav style={{ display: "flex", gap: "10px", marginBottom: "25px" }}>
           <button onClick={() => handleModeSwitch("about")} style={{ flex: 1, padding: "12px", background: mode === "about" ? colors.deepBlue : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>About Us</button>
           <button onClick={() => handleModeSwitch("responder")} style={{ flex: 1, padding: "12px", background: mode === "responder" ? colors.purple : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>Responder</button>
           <button onClick={() => handleModeSwitch("sentiment")} style={{ flex: 1, padding: "12px", background: mode === "sentiment" ? colors.darkSlate : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>Sentiment</button>
@@ -267,7 +284,7 @@ function HomePage() {
             <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
               <div>
                 <label style={{ fontSize: "14px", fontWeight: "600", color: "#4a5568" }}>Business Type</label>
-                <select aria-label="Select Business Type" value={businessType} onChange={(e) => setBusinessType(e.target.value)} style={inputStyle}>
+                <select value={businessType} onChange={(e) => setBusinessType(e.target.value)} style={inputStyle}>
                   <option value="">Select a type...</option>
                   <option value="landscaper">Landscaper</option>
                   <option value="realtor">Realtor</option>
@@ -278,7 +295,7 @@ function HomePage() {
               </div>
               <div>
                 <label style={{ fontSize: "14px", fontWeight: "600", color: "#4a5568" }}>Tone</label>
-                <select aria-label="Select Content Tone" value={tone} onChange={(e) => setTone(e.target.value)} style={inputStyle}>
+                <select value={tone} onChange={(e) => setTone(e.target.value)} style={inputStyle}>
                   <option value="">Select a tone...</option>
                   <option value="professional">Professional</option>
                   <option value="friendly">Friendly</option>
@@ -293,7 +310,7 @@ function HomePage() {
           {mode === "sentiment" && (
             <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
               <label style={{ fontSize: "14px", fontWeight: "600", color: "#4a5568" }}>Paste Content / Comments</label>
-              <textarea aria-label="Paste comments for analysis" value={rawComments} onChange={(e) => setRawComments(e.target.value)} placeholder="Paste comments here..." style={{ ...inputStyle, height: "150px", resize: "none" }} />
+              <textarea value={rawComments} onChange={(e) => setRawComments(e.target.value)} placeholder="Paste comments here..." style={{ ...inputStyle, height: "150px", resize: "none" }} />
             </div>
           )}
 
@@ -301,24 +318,24 @@ function HomePage() {
             {loading ? "Analyzing..." : "Run Snap"}
           </button>
 
-          {error && <div role="alert" style={{ color: colors.errorRed, marginTop: "15px", textAlign: "center", fontSize: "14px", backgroundColor: "#fff5f5", padding: "10px", borderRadius: "8px" }}>{error}</div>}
+          {error && <div style={{ color: colors.errorRed, marginTop: "15px", textAlign: "center", fontSize: "14px", backgroundColor: "#fff5f5", padding: "10px", borderRadius: "8px" }}>{error}</div>}
 
           {output && (
             <div style={{ marginTop: "30px", borderTop: `1px solid ${colors.lightGray}`, paddingTop: "20px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
                 <h3 style={{ fontSize: "14px", color: colors.deepBlue, margin: 0 }}>Result:</h3>
-                <button onClick={copyToClipboard} aria-label="Copy result to clipboard" style={{ padding: "6px 12px", background: copied ? colors.successGreen : colors.deepBlue, color: "white", border: "none", borderRadius: "6px", fontSize: "12px", cursor: "pointer" }}>
+                <button onClick={copyToClipboard} style={{ padding: "6px 12px", background: copied ? colors.successGreen : colors.deepBlue, color: "white", border: "none", borderRadius: "6px", fontSize: "12px", cursor: "pointer" }}>
                   {copied ? "Copied!" : "Copy"}
                 </button>
               </div>
-              <textarea aria-label="Generated AI content" value={output} readOnly style={{ width: "100%", height: "250px", padding: "15px", borderRadius: "12px", border: `1px solid ${colors.lightGray}`, backgroundColor: "#f8fafc", fontSize: "14px", lineHeight: "1.6", color: colors.textDark, resize: "none" }} />
+              <textarea value={output} readOnly style={{ width: "100%", height: "250px", padding: "15px", borderRadius: "12px", border: `1px solid ${colors.lightGray}`, backgroundColor: "#f8fafc", fontSize: "14px", lineHeight: "1.6", color: colors.textDark, resize: "none" }} />
             </div>
           )}
         </div>
       </div>
 
       <footer style={{ marginTop: "auto", width: "100%", maxWidth: 500, display: "flex", flexDirection: "column", alignItems: "center", gap: "10px", padding: "20px 0", borderTop: `1px solid ${colors.lightGray}88` }}>
-        <img src={airStadtLogo} alt="AirStadt Company Logo" style={{ height: "30px", width: "auto" }} />
+        <img src={airStadtLogo} alt="AirStadt Logo" style={{ height: "30px", width: "auto" }} />
         <p style={{ fontSize: "13px", color: colors.footerText, margin: 0 }}>&copy; {new Date().getFullYear()} AirStadt. All rights reserved.</p>
       </footer>
     </main>
@@ -337,7 +354,6 @@ function InputField({ label, value, onChange, placeholder, type = "text", colors
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         style={getInputStyle(focused)}
-        aria-label={label}
       />
     </div>
   );
