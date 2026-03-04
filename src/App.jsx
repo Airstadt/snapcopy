@@ -33,7 +33,7 @@ function HomePage() {
   const colors = {
     deepBlue: "#860aa5",
     purple: "#390b64",
-    orange: "#ff8c00", // Added for the new button
+    orange: "#ff8c00",
     darkSlate: "#2d3748", 
     lightGray: "#e2e8f0",
     textDark: "#1a202c",
@@ -208,7 +208,6 @@ function HomePage() {
           ))}
         </div>
         
-        {/* NEW ORANGE BUTTON */}
         <a 
           href="https://snapmatrix.org" 
           target="_blank" 
@@ -286,11 +285,53 @@ function HomePage() {
                 <label style={{ fontSize: "14px", fontWeight: "600", color: "#4a5568" }}>Business Type</label>
                 <select value={businessType} onChange={(e) => setBusinessType(e.target.value)} style={inputStyle}>
                   <option value="">Select a type...</option>
-                  <option value="landscaper">Landscaper</option>
-                  <option value="realtor">Realtor</option>
-                  <option value="barber">Barber</option>
-                  <option value="hvac">HVAC</option>
-                  <option value="dentist">Dentist</option>
+                  
+                  <optgroup label="Originals">
+                    <option value="landscaper">Landscaper</option>
+                    <option value="realtor">Realtor</option>
+                    <option value="barber">Barber</option>
+                    <option value="hvac">HVAC</option>
+                    <option value="dentist">Dentist</option>
+                  </optgroup>
+
+                  <optgroup label="Trades">
+                    <option value="electrician">Electrician</option>
+                    <option value="plumber">Plumber</option>
+                    <option value="carpenter">Carpenter</option>
+                    <option value="mechanic">Mechanic</option>
+                    <option value="welder">Welder</option>
+                  </optgroup>
+
+                  <optgroup label="Medical">
+                    <option value="doctor">Doctor</option>
+                    <option value="nurse">Nurse</option>
+                    <option value="therapist">Therapist</option>
+                  </optgroup>
+
+                  <optgroup label="Business / Office">
+                    <option value="manager">Manager</option>
+                    <option value="analyst">Analyst</option>
+                    <option value="accountant">Accountant</option>
+                    <option value="consultant">Consultant</option>
+                  </optgroup>
+
+                  <optgroup label="Creative">
+                    <option value="writer">Writer</option>
+                    <option value="designer">Designer</option>
+                    <option value="photographer">Photographer</option>
+                  </optgroup>
+
+                  <optgroup label="Public Service">
+                    <option value="firefighter">Firefighter</option>
+                    <option value="officer">Officer</option>
+                    <option value="soldier">Soldier</option>
+                  </optgroup>
+
+                  <optgroup label="Tech">
+                    <option value="developer">Developer</option>
+                    <option value="engineer">Engineer</option>
+                    <option value="programmer">Programmer</option>
+                  </optgroup>
                 </select>
               </div>
               <div>
