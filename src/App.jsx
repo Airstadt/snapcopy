@@ -110,7 +110,7 @@ function HomePage() {
     else payload = { ...payload, rawComments };
 
     try {
-      const response = await fetch("https://api.snapcopy.online/generate", {
+      const response = await fetch("http://api.snapcopy.online/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
