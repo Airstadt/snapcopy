@@ -299,7 +299,7 @@ useEffect(() => {
                border: `2px solid ${colors.deepBlue}`, borderRadius: "8px", fontWeight: "bold", 
                cursor: "pointer", boxShadow: "0 4px 10px rgba(0,0,0,0.05)" 
              }}>
-             Interested in Snapcopy or SnapMatix? Get added to the wait list Here.
+             Interested in SnapCopy or SnapMatrix? Join the waitlist today.
            </button>
         </Link>
 
