@@ -1,3 +1,4 @@
+import { useSearchParams } from "react-router-dom";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import { useState, useRef, useEffect } from "react"; 
 import snapcopyLogo from "./assets/snapcopyLogo.png";
@@ -5,6 +6,7 @@ import airStadtLogo from "./assets/AirStadtLogo.png";
 import InterestForm from "./pages/InterestForm"; 
 
 function HomePage() {
+  
   const [mode, setMode] = useState("about");
   const [industry, setIndustry] = useState("");
   const [city, setCity] = useState("");
@@ -12,13 +14,28 @@ function HomePage() {
   
   const [businessType, setBusinessType] = useState("");
   const [tone, setTone] = useState("");
-  const [description, setDescription] = useState("");
+  const [description, setDescription] = useState(""); // Used for Responder
+
+  const [issueType, setIssueType] = useState(""); 
+  const [apologyContext, setApologyContext] = useState(""); // Dedicated Apology State
   
   const [rawComments, setRawComments] = useState("");
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
+
+  const [searchParams] = useSearchParams();
+
+useEffect(() => {
+  const urlMode = searchParams.get("mode");
+  const allowedModes = ["about", "responder", "apology", "sentiment"];
+
+  if (urlMode && allowedModes.includes(urlMode.toLowerCase())) {
+    setMode(urlMode.toLowerCase());
+  }
+}, []); // ← runs once, prevents infinite loops
+
 
   const formRef = useRef(null);
 
@@ -76,11 +93,25 @@ function HomePage() {
   });
 
   const handleModeSwitch = (newMode) => {
-    setIndustry(""); setCity(""); setYears("");
-    setBusinessType(""); setTone(""); setDescription("");
-    setRawComments(""); setOutput(""); setError("");
-    setCopied(false); setMode(newMode);
-  };
+  const allowedModes = ["about", "responder", "apology", "sentiment"];
+  const finalMode = allowedModes.includes(newMode) ? newMode : "about";
+
+  setIndustry(""); 
+  setCity(""); 
+  setYears("");
+  setBusinessType(""); 
+  setTone(""); 
+  setDescription("");
+  setIssueType(""); 
+  setApologyContext("");
+  setRawComments(""); 
+  setOutput(""); 
+  setError("");
+  setCopied(false); 
+
+  setMode(finalMode); // ← FIXED
+};
+
 
   const copyToClipboard = async () => {
     if (!output) return;
@@ -94,30 +125,62 @@ function HomePage() {
   };
 
   async function generate() {
+    console.log("FRONTEND SENDING MODE:", mode); // Check your browser console!
     setOutput(""); setError(""); setCopied(false);
-    if (mode === "about" && (!industry.trim() || !city.trim() || !years.trim())) {
-      setError("Please fill out all About Us fields"); return;
-    } else if (mode === "responder" && (!businessType || !tone)) {
-      setError("Please select a Business Type and Tone"); return;
-    } else if (mode === "sentiment" && !rawComments.trim()) {
-      setError("Please paste the page content or comments"); return;
+    
+    // 1. Strict Validation Logic
+    if (mode === "about") {
+        if (!industry.trim() || !city.trim() || !years.trim()) {
+            setError("Please fill out all About Us fields"); return;
+        }
+    } else if (mode === "responder") {
+        if (!businessType || !tone) {
+            setError("Please select a Business Type and Tone"); return;
+        }
+    } else if (mode === "apology") {
+        if (!issueType || !apologyContext.trim()) {
+            setError("Apology Error: Please select an issue type and provide context."); return;
+        }
+    } else if (mode === "sentiment") {
+        if (!rawComments.trim()) {
+            setError("Please paste content to analyze."); return;
+        }
     }
     
     setLoading(true);
-    let payload = { mode };
-    if (mode === "about") payload = { ...payload, industry, city, years };
-    else if (mode === "responder") payload = { ...payload, businessType, tone, description };
-    else payload = { ...payload, rawComments };
+
+    // 2. Clean Payload Construction
+    let payload = { mode: mode.toLowerCase().trim() };
+
+    if (mode === "about") {
+        payload = { ...payload, industry, city, years };
+    } else if (mode === "responder") {
+        payload = { ...payload, businessType, tone, description };
+    } else if (mode === "apology") {
+        // FIXED: Send issueType and apologyContext to match backend expectations
+        payload = { ...payload, issueType, apologyContext };
+    } else if (mode === "sentiment") {
+        payload = { ...payload, rawComments };
+    }
 
     try {
-      const response = await fetch("http://api.snapcopy.online/generate", {
+      const response = await fetch("https://api.snapcopy.online/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
+      
       const data = await response.json();
+      
       if (!response.ok) throw new Error(data.error || `Server error: ${response.status}`);
-      const result = mode === "about" ? data.about : (mode === "responder" ? data.reply : data.sentiment);
+      
+      // 3. Mapping data keys
+      const result = 
+        mode === "about" ? data.about : 
+        mode === "responder" ? data.reply : 
+        mode === "apology" ? data.apology : 
+        data.sentiment;
+
       setOutput(result);
     } catch (err) {
       setError(err.message || "Could not reach the AI backend.");
@@ -143,14 +206,14 @@ function HomePage() {
           <img src={snapcopyLogo} alt="SnapCopy Logo" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }} />
         </div>
         <h1 style={{ 
-          fontSize: "48px", fontWeight: "800", marginBottom: "15px",
+          fontSize: "48px", fontWeight: "800", marginBottom: "15px", paddingBottom: "10px",
           background: `linear-gradient(to right, ${colors.deepBlue}, ${colors.purple})`, 
           WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent"
         }}>
           The Complete AI Content Toolkit for Growing Businesses
         </h1>
         <p style={{ fontSize: "18px", color: "#4a5568", maxWidth: "700px", lineHeight: "1.6", marginBottom: "30px" }}>
-          From professional "About Us" bios to social media management and sentiment analysis SnapCopy is your all-in-one suite for high-impact business content.
+          From professional "About Us" bios to social media management and sentiment analysis. SnapCopy is your all-in-one suite for high-impact content.
         </p>
         <div style={{ display: "flex", gap: "15px", flexWrap: "wrap", justifyContent: "center" }}>
           <button 
@@ -191,6 +254,7 @@ function HomePage() {
           <ul style={{ color: "#4a5568", fontSize: "15px", paddingLeft: "20px", lineHeight: "2" }}>
             <li><b>About Us:</b> SEO-ready business bios.</li>
             <li><b>Responder:</b> Engaging social media captions.</li>
+            <li><b>Apology:</b> Polished customer resolution writing.</li>
             <li><b>Sentiment:</b> Deep emotional feedback analysis.</li>
             <li style={{ color: colors.deepBlue }}><b>More Tools:</b> Coming soon...</li>
           </ul>
@@ -235,20 +299,21 @@ function HomePage() {
                border: `2px solid ${colors.deepBlue}`, borderRadius: "8px", fontWeight: "bold", 
                cursor: "pointer", boxShadow: "0 4px 10px rgba(0,0,0,0.05)" 
              }}>
-             Get on the list for full and custom access to SnapCopy!
+             Interested in Snapcopy or SnapMatix? Get added to the wait list Here.
            </button>
         </Link>
 
         <nav style={{ display: "flex", gap: "10px", marginBottom: "25px" }}>
           <button onClick={() => handleModeSwitch("about")} style={{ flex: 1, padding: "12px", background: mode === "about" ? colors.deepBlue : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>About Us</button>
           <button onClick={() => handleModeSwitch("responder")} style={{ flex: 1, padding: "12px", background: mode === "responder" ? colors.purple : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>Responder</button>
+          <button onClick={() => handleModeSwitch("apology")} style={{ flex: 1, padding: "12px", background: mode === "apology" ? colors.orange : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>Apology</button>
           <button onClick={() => handleModeSwitch("sentiment")} style={{ flex: 1, padding: "12px", background: mode === "sentiment" ? colors.darkSlate : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>Sentiment</button>
         </nav>
 
         <div style={{ background: "white", padding: "40px", borderRadius: "20px", boxShadow: "0 20px 40px rgba(0,0,0,0.08)", marginBottom: "40px" }}>
           <header style={{ textAlign: "center", marginBottom: "30px" }}>
             <h2 style={{ fontSize: "36px", margin: 0, fontWeight: "800", background: `linear-gradient(to right, ${colors.deepBlue}, ${colors.purple})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-              {mode === "about" ? "About Us Snap" : mode === "responder" ? "Responder Snap" : "Sentiment Snap"}
+              {mode === "about" ? "About Us Snap" : mode === "responder" ? "Responder Snap" : mode === "apology" ? "Apology Snap" : "Sentiment Snap"}
             </h2>
             <p style={{ fontSize: "12px", fontWeight: "bold", color: colors.deepBlue, textTransform: "uppercase", letterSpacing: "2px" }}>
               {mode === "sentiment" ? "AI Feedback Analysis" : "AI Powered Content"}
@@ -257,17 +322,23 @@ function HomePage() {
 
           {mode === "about" && (
             <div style={instructionStyle}>
-              <strong>Instructions:</strong> Enter your industry, city, and years of experience. SnapCopy will generate a professional "About Us" bio perfect for your website or profile.
+              <strong>Instructions:</strong> Enter your industry, city, and years of experience. SnapCopy will generate a professional "About Us" bio.
             </div>
           )}
           {mode === "responder" && (
             <div style={instructionStyle}>
-              <strong>Instructions:</strong> Select your business type and tone. SnapCopy will generate 5 captions, 5 hashtags, 3 ideas, and 1 CTA.
+              <strong>Instructions:</strong> Select your business type and tone. SnapCopy will generate captions, hashtags, and CTAs.
+            </div>
+          )}
+          {mode === "apology" && (
+            <div style={instructionStyle}>
+              <strong>Instructions:</strong> Select the issue type and provide context. SnapCopy writes a polished apology to preserve your brand.
             </div>
           )}
           {mode === "sentiment" && (
             <div style={instructionStyle}>
-              <strong>Instructions:</strong> Drag and copy comments. SnapCopy will filter the junk and give you clear emotional insights. 
+              <strong>Instructions:</strong> Start at the top of the comments section, 
+              copy everything, and paste it here. SnapCopy will remove the junk and analyze the overall mood for you.
             </div>
           )}
 
@@ -285,52 +356,13 @@ function HomePage() {
                 <label style={{ fontSize: "14px", fontWeight: "600", color: "#4a5568" }}>Business Type</label>
                 <select value={businessType} onChange={(e) => setBusinessType(e.target.value)} style={inputStyle}>
                   <option value="">Select a type...</option>
-                  
-                  <optgroup label="Originals">
+                  <optgroup label="Popular">
                     <option value="landscaper">Landscaper</option>
                     <option value="realtor">Realtor</option>
                     <option value="barber">Barber</option>
                     <option value="hvac">HVAC</option>
                     <option value="dentist">Dentist</option>
-                  </optgroup>
-
-                  <optgroup label="Trades">
-                    <option value="electrician">Electrician</option>
-                    <option value="plumber">Plumber</option>
-                    <option value="carpenter">Carpenter</option>
-                    <option value="mechanic">Mechanic</option>
-                    <option value="welder">Welder</option>
-                  </optgroup>
-
-                  <optgroup label="Medical">
-                    <option value="doctor">Doctor</option>
-                    <option value="nurse">Nurse</option>
-                    <option value="therapist">Therapist</option>
-                  </optgroup>
-
-                  <optgroup label="Business / Office">
-                    <option value="manager">Manager</option>
-                    <option value="analyst">Analyst</option>
-                    <option value="accountant">Accountant</option>
-                    <option value="consultant">Consultant</option>
-                  </optgroup>
-
-                  <optgroup label="Creative">
-                    <option value="writer">Writer</option>
-                    <option value="designer">Designer</option>
-                    <option value="photographer">Photographer</option>
-                  </optgroup>
-
-                  <optgroup label="Public Service">
-                    <option value="firefighter">Firefighter</option>
-                    <option value="officer">Officer</option>
-                    <option value="soldier">Soldier</option>
-                  </optgroup>
-
-                  <optgroup label="Tech">
                     <option value="developer">Developer</option>
-                    <option value="engineer">Engineer</option>
-                    <option value="programmer">Programmer</option>
                   </optgroup>
                 </select>
               </div>
@@ -345,6 +377,30 @@ function HomePage() {
                 </select>
               </div>
               <InputField label="Short Description (Optional)" value={description} onChange={setDescription} placeholder="What is this post about?" colors={colors} getInputStyle={getInputStyle} />
+            </div>
+          )}
+
+          {mode === "apology" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+              <div>
+                <label style={{ fontSize: "14px", fontWeight: "600", color: "#4a5568" }}>Issue Type</label>
+                <select value={issueType} onChange={(e) => setIssueType(e.target.value)} style={inputStyle}>
+                  <option value="">What went wrong?</option>
+                  <option value="missed appointment">Missed Appointment</option>
+                  <option value="delay">Delay</option>
+                  <option value="mistake">Mistake</option>
+                  <option value="miscommunication">Miscommunication</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ fontSize: "14px", fontWeight: "600", color: "#4a5568" }}>Context / Details</label>
+                <textarea 
+                  value={apologyContext} 
+                  onChange={(e) => setApologyContext(e.target.value)} 
+                  placeholder="Provide context (e.g., 'Technician was sick', 'Software bug')..." 
+                  style={{ ...inputStyle, height: "100px", resize: "none" }} 
+                />
+              </div>
             </div>
           )}
 
