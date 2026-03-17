@@ -197,6 +197,25 @@ useEffect(() => {
       fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
     }}>
 
+      {/* --- MAINTENANCE NOTICE --- */}
+      <section style={{ 
+        width: "100%", maxWidth: 1000, 
+        backgroundColor: "#fff5f5", 
+        border: `1px solid ${colors.orange}`, 
+        borderRadius: "12px", 
+        padding: "20px", 
+        marginBottom: "20px", 
+        boxSizing: "border-box",
+        textAlign: "center"
+      }}>
+        <h2 style={{ color: colors.orange, margin: "0 0 10px 0", fontSize: "20px", fontWeight: "800" }}>
+          Scheduled Maintenance Notice
+        </h2>
+        <p style={{ color: "#4a5568", margin: 0, lineHeight: "1.6", fontSize: "15px" }}>
+          SnapCopy will be temporarily offline for approximately three weeks as we complete a major system migration and finalize new licensing requirements. This upgrade is essential to improving long‑term stability, performance, and security. SnapMatrix is still functioning normally
+        </p>
+      </section>
+
       {/* --- HERO SECTION --- */}
       <section aria-label="SnapCopy Hero" style={{ 
         width: "100%", maxWidth: 1000, textAlign: "center", 
@@ -256,7 +275,7 @@ useEffect(() => {
             <li><b>Responder:</b> Engaging social media captions.</li>
             <li><b>Apology:</b> Polished customer resolution writing.</li>
             <li><b>Sentiment:</b> Deep emotional feedback analysis.</li>
-            <li style={{ color: colors.deepBlue }}><b>More Tools:</b> Coming soon...</li>
+            <li><b style={{ color: colors.deepBlue }}>More Tools:</b> Coming soon...</li>
           </ul>
         </div>
       </section>
