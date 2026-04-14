@@ -208,7 +208,8 @@ useEffect(() => {
         boxSizing: "border-box",
         textAlign: "center"
       }}>
-        
+       
+      </section>
 
       {/* --- HERO SECTION --- */}
       <section aria-label="SnapCopy Hero" style={{ 
