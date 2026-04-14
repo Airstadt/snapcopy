@@ -197,19 +197,7 @@ useEffect(() => {
       fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
     }}>
 
-      {/* --- MAINTENANCE NOTICE --- */}
-      <section style={{ 
-        width: "100%", maxWidth: 1000, 
-        backgroundColor: "#fff5f5", 
-        border: `1px solid ${colors.orange}`, 
-        borderRadius: "12px", 
-        padding: "20px", 
-        marginBottom: "20px", 
-        boxSizing: "border-box",
-        textAlign: "center"
-      }}>
-       
-      </section>
+     
 
       {/* --- HERO SECTION --- */}
       <section aria-label="SnapCopy Hero" style={{ 
