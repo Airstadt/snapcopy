@@ -208,13 +208,7 @@ useEffect(() => {
         boxSizing: "border-box",
         textAlign: "center"
       }}>
-        <h2 style={{ color: colors.orange, margin: "0 0 10px 0", fontSize: "20px", fontWeight: "800" }}>
-          Scheduled Maintenance Notice
-        </h2>
-        <p style={{ color: "#4a5568", margin: 0, lineHeight: "1.6", fontSize: "15px" }}>
-          SnapCopy will be temporarily offline for approximately three weeks as we complete a major system migration and finalize new licensing requirements. This upgrade is essential to improving long‑term stability, performance, and security. SnapMatrix is still functioning normally
-        </p>
-      </section>
+        
 
       {/* --- HERO SECTION --- */}
       <section aria-label="SnapCopy Hero" style={{ 
