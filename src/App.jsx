@@ -20,6 +20,16 @@ function HomePage() {
   const [apologyContext, setApologyContext] = useState(""); // Dedicated Apology State
   
   const [rawComments, setRawComments] = useState("");
+
+  // --- NEW STATE FOR PURCHASE ORDER ---
+  const [partNumber, setPartNumber] = useState("");
+  const [expectedPrice, setExpectedPrice] = useState("");
+  const [partDescription, setPartDescription] = useState("");
+  const [vendorName, setVendorName] = useState("");
+  const [quantity, setQuantity] = useState("");
+  const [customVendor, setCustomVendor] = useState("");
+  // -------------------------------------
+
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -29,12 +39,13 @@ function HomePage() {
 
 useEffect(() => {
   const urlMode = searchParams.get("mode");
-  const allowedModes = ["about", "responder", "apology", "sentiment"];
+  // Updated allowedModes to include 'po'
+  const allowedModes = ["about", "responder", "apology", "sentiment", "po"];
 
   if (urlMode && allowedModes.includes(urlMode.toLowerCase())) {
     setMode(urlMode.toLowerCase());
   }
-}, []); // ← runs once, prevents infinite loops
+}, []);
 
 
   const formRef = useRef(null);
@@ -56,7 +67,8 @@ useEffect(() => {
     textDark: "#1a202c",
     errorRed: "#e53e3e",
     successGreen: "#38a169",
-    footerText: "#718096"
+    footerText: "#718096",
+    poGreen: "#2d6a4f" // New color for PO Tab
   };
 
   const scrollToForm = () => {
@@ -93,7 +105,7 @@ useEffect(() => {
   });
 
   const handleModeSwitch = (newMode) => {
-  const allowedModes = ["about", "responder", "apology", "sentiment"];
+  const allowedModes = ["about", "responder", "apology", "sentiment", "po"];
   const finalMode = allowedModes.includes(newMode) ? newMode : "about";
 
   setIndustry(""); 
@@ -105,11 +117,18 @@ useEffect(() => {
   setIssueType(""); 
   setApologyContext("");
   setRawComments(""); 
+  // Reset PO Fields
+  setPartNumber("");
+  setExpectedPrice("");
+  setPartDescription("");
+  setVendorName("");
+  setQuantity("");
+  
   setOutput(""); 
   setError("");
   setCopied(false); 
 
-  setMode(finalMode); // ← FIXED
+  setMode(finalMode);
 };
 
 
@@ -125,10 +144,10 @@ useEffect(() => {
   };
 
   async function generate() {
-    console.log("FRONTEND SENDING MODE:", mode); // Check your browser console!
+    console.log("FRONTEND SENDING MODE:", mode);
     setOutput(""); setError(""); setCopied(false);
     
-    // 1. Strict Validation Logic
+    // 1. Validation Logic (Updated for PO)
     if (mode === "about") {
         if (!industry.trim() || !city.trim() || !years.trim()) {
             setError("Please fill out all About Us fields"); return;
@@ -145,11 +164,17 @@ useEffect(() => {
         if (!rawComments.trim()) {
             setError("Please paste content to analyze."); return;
         }
+    } else if (mode === "po") {
+    // Check if vendor is selected OR custom vendor is typed in
+    const finalVendor = vendorName === "custom" ? customVendor : vendorName;
+    if (!partNumber.trim() || !expectedPrice.trim() || !finalVendor.trim()) {
+        setError("Please fill out Part #, Price, and Vendor for the PO."); return;
     }
+}
     
     setLoading(true);
 
-    // 2. Clean Payload Construction
+    // 2. Payload Construction
     let payload = { mode: mode.toLowerCase().trim() };
 
     if (mode === "about") {
@@ -157,11 +182,13 @@ useEffect(() => {
     } else if (mode === "responder") {
         payload = { ...payload, businessType, tone, description };
     } else if (mode === "apology") {
-        // FIXED: Send issueType and apologyContext to match backend expectations
         payload = { ...payload, issueType, apologyContext };
     } else if (mode === "sentiment") {
         payload = { ...payload, rawComments };
-    }
+    } else if (mode === "po") {
+    const finalVendor = vendorName === "custom" ? customVendor : vendorName;
+    payload = { ...payload, partNumber, expectedPrice, partDescription, vendorName: finalVendor, quantity };
+}
 
     try {
       const response = await fetch("https://api.snapcopy.online/generate", {
@@ -174,12 +201,13 @@ useEffect(() => {
       
       if (!response.ok) throw new Error(data.error || `Server error: ${response.status}`);
       
-      // 3. Mapping data keys
+      // 3. Mapping data keys (Updated for PO)
       const result = 
         mode === "about" ? data.about : 
         mode === "responder" ? data.reply : 
         mode === "apology" ? data.apology : 
-        data.sentiment;
+        mode === "sentiment" ? data.sentiment : 
+        data.po; // Backend should return PDF download link or PO text under 'po'
 
       setOutput(result);
     } catch (err) {
@@ -196,8 +224,6 @@ useEffect(() => {
       padding: "20px", paddingTop: "10px", boxSizing: "border-box",
       fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
     }}>
-
-     
 
       {/* --- HERO SECTION --- */}
       <section aria-label="SnapCopy Hero" style={{ 
@@ -258,7 +284,7 @@ useEffect(() => {
             <li><b>Responder:</b> Engaging social media captions.</li>
             <li><b>Apology:</b> Polished customer resolution writing.</li>
             <li><b>Sentiment:</b> Deep emotional feedback analysis.</li>
-            <li><b style={{ color: colors.deepBlue }}>More Tools:</b> Coming soon...</li>
+            <li><b style={{ color: colors.poGreen }}>PO Generator:</b> Instant PDF Purchase Orders.</li>
           </ul>
         </div>
       </section>
@@ -273,23 +299,6 @@ useEffect(() => {
             </span>
           ))}
         </div>
-        
-        <a 
-          href="https://snapmatrix.org" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          style={{ textDecoration: "none" }}
-        >
-          <button 
-            style={{ 
-              padding: "16px 32px", background: colors.orange, color: "white", 
-              border: "none", borderRadius: "50px", fontWeight: "bold", fontSize: "18px",
-              cursor: "pointer", boxShadow: "0 10px 20px rgba(255, 140, 0, 0.2)"
-            }}
-          >
-            Visit SnapMatrix
-          </button>
-        </a>
       </section>
 
       {/* --- MAIN APP SECTION --- */}
@@ -305,23 +314,27 @@ useEffect(() => {
            </button>
         </Link>
 
-        <nav style={{ display: "flex", gap: "10px", marginBottom: "25px" }}>
-          <button onClick={() => handleModeSwitch("about")} style={{ flex: 1, padding: "12px", background: mode === "about" ? colors.deepBlue : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>About Us</button>
-          <button onClick={() => handleModeSwitch("responder")} style={{ flex: 1, padding: "12px", background: mode === "responder" ? colors.purple : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>Responder</button>
-          <button onClick={() => handleModeSwitch("apology")} style={{ flex: 1, padding: "12px", background: mode === "apology" ? colors.orange : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>Apology</button>
-          <button onClick={() => handleModeSwitch("sentiment")} style={{ flex: 1, padding: "12px", background: mode === "sentiment" ? colors.darkSlate : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>Sentiment</button>
+        {/* --- NAVIGATION TABS --- */}
+        <nav style={{ display: "flex", gap: "10px", marginBottom: "25px", flexWrap: "wrap" }}>
+          <button onClick={() => handleModeSwitch("about")} style={{ flex: 1, minWidth: "120px", padding: "12px", background: mode === "about" ? colors.deepBlue : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>About Us</button>
+          <button onClick={() => handleModeSwitch("responder")} style={{ flex: 1, minWidth: "120px", padding: "12px", background: mode === "responder" ? colors.purple : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>Responder</button>
+          <button onClick={() => handleModeSwitch("apology")} style={{ flex: 1, minWidth: "120px", padding: "12px", background: mode === "apology" ? colors.orange : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>Apology</button>
+          <button onClick={() => handleModeSwitch("sentiment")} style={{ flex: 1, minWidth: "120px", padding: "12px", background: mode === "sentiment" ? colors.darkSlate : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>Sentiment</button>
+          {/* NEW PO TAB BUTTON */}
+          <button onClick={() => handleModeSwitch("po")} style={{ flex: 1, minWidth: "120px", padding: "12px", background: mode === "po" ? colors.poGreen : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>PO Generator</button>
         </nav>
 
         <div style={{ background: "white", padding: "40px", borderRadius: "20px", boxShadow: "0 20px 40px rgba(0,0,0,0.08)", marginBottom: "40px" }}>
           <header style={{ textAlign: "center", marginBottom: "30px" }}>
-            <h2 style={{ fontSize: "36px", margin: 0, fontWeight: "800", background: `linear-gradient(to right, ${colors.deepBlue}, ${colors.purple})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-              {mode === "about" ? "About Us Snap" : mode === "responder" ? "Responder Snap" : mode === "apology" ? "Apology Snap" : "Sentiment Snap"}
+            <h2 style={{ fontSize: "36px", margin: 0, fontWeight: "800", background: mode === "po" ? colors.poGreen : `linear-gradient(to right, ${colors.deepBlue}, ${colors.purple})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+              {mode === "about" ? "About Us Snap" : mode === "responder" ? "Responder Snap" : mode === "apology" ? "Apology Snap" : mode === "sentiment" ? "Sentiment Snap" : "Purchase Order Snap"}
             </h2>
-            <p style={{ fontSize: "12px", fontWeight: "bold", color: colors.deepBlue, textTransform: "uppercase", letterSpacing: "2px" }}>
-              {mode === "sentiment" ? "AI Feedback Analysis" : "AI Powered Content"}
+            <p style={{ fontSize: "12px", fontWeight: "bold", color: mode === "po" ? colors.poGreen : colors.deepBlue, textTransform: "uppercase", letterSpacing: "2px" }}>
+              {mode === "sentiment" ? "AI Feedback Analysis" : mode === "po" ? "PDF Generation" : "AI Powered Content"}
             </p>
           </header>
 
+          {/* --- INSTRUCTIONS --- */}
           {mode === "about" && (
             <div style={instructionStyle}>
               <strong>Instructions:</strong> Enter your industry, city, and years of experience. SnapCopy will generate a professional "About Us" bio.
@@ -339,11 +352,17 @@ useEffect(() => {
           )}
           {mode === "sentiment" && (
             <div style={instructionStyle}>
-              <strong>Instructions:</strong> Start at the top of the comments section, 
-              copy everything, and paste it here. SnapCopy will remove the junk and analyze the overall mood for you.
+              <strong>Instructions:</strong> Start at the top of the comments section, copy everything, and paste it here. SnapCopy will analyze the overall mood.
+            </div>
+          )}
+          {/* NEW PO INSTRUCTIONS */}
+          {mode === "po" && (
+            <div style={{ ...instructionStyle, borderLeftColor: colors.poGreen }}>
+              <strong>Instructions:</strong> Enter the part details and vendor information. SnapCopy will generate a professional PDF Purchase Order for your records.
             </div>
           )}
 
+          {/* --- INPUT FIELDS --- */}
           {mode === "about" && (
             <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
               <InputField label="Industry" value={industry} onChange={setIndustry} placeholder="HVAC, Roofing..." colors={colors} getInputStyle={getInputStyle} />
@@ -413,8 +432,67 @@ useEffect(() => {
             </div>
           )}
 
-          <button onClick={generate} disabled={loading} style={{ width: "100%", padding: "15px", background: `linear-gradient(135deg, ${colors.deepBlue}, ${colors.purple})`, color: "white", border: "none", borderRadius: "10px", fontSize: "16px", fontWeight: "600", cursor: loading ? "not-allowed" : "pointer", marginTop: "20px" }}>
-            {loading ? "Analyzing..." : "Run Snap"}
+          {/* --- NEW PO INPUT FIELDS --- */}
+          {mode === "po" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+              <div style={{ display: "flex", gap: "15px" }}>
+                <div style={{ flex: 1 }}>
+                  <InputField label="Part Number" value={partNumber} onChange={setPartNumber} placeholder="SKU-12345" colors={colors} getInputStyle={getInputStyle} />
+                </div>
+                <div style={{ flex: 1 }}>
+                   <InputField label="Quantity" value={quantity} onChange={setQuantity} placeholder="1" type="number" colors={colors} getInputStyle={getInputStyle} />
+                </div>
+              </div>
+              
+              <div>
+                <label style={{ fontSize: "14px", fontWeight: "600", color: "#4a5568" }}>Select Vendor</label>
+                <select 
+                  value={vendorName} 
+                  onChange={(e) => {
+                    setVendorName(e.target.value);
+                    if (e.target.value !== "custom") setCustomVendor(""); // Clear custom if switching back
+                  }} 
+                  style={inputStyle}
+                >
+                  <option value="">Choose a Vendor...</option>
+                  <option value="Global Supply Co">Global Supply Co</option>
+                  <option value="TechParts Inc">TechParts Inc</option>
+                  <option value="AirStadt Logistics">AirStadt Logistics</option>
+                  <option value="Local Hardware Hub">Local Hardware Hub</option>
+                  <option value="custom">-- Add Custom Vendor --</option>
+                </select>
+              </div>
+
+              {/* CONDITIONAL CUSTOM VENDOR INPUT */}
+                {vendorName === "custom" && (
+                  <div style={{ marginTop: "10px" }}>
+                    <InputField 
+                      label="Custom Vendor Name" 
+                      value={customVendor} 
+                      onChange={setCustomVendor} 
+                      placeholder="Enter vendor name..." 
+                      colors={colors} 
+                      getInputStyle={getInputStyle} 
+                    />
+                  </div>
+                )}
+
+              <InputField label="Expected Price ($)" value={expectedPrice} onChange={setExpectedPrice} placeholder="99.99" type="number" colors={colors} getInputStyle={getInputStyle} />
+              
+              <div>
+                <label style={{ fontSize: "14px", fontWeight: "600", color: "#4a5568" }}>Part Description</label>
+                <textarea 
+                  value={partDescription} 
+                  onChange={(e) => setPartDescription(e.target.value)} 
+                  placeholder="Details about the item being ordered..." 
+                  style={{ ...inputStyle, height: "80px", resize: "none" }} 
+                />
+              </div>
+            </div>
+          )}
+
+          <button onClick={generate} disabled={loading} style={{ width: "100%", padding: "15px", background: mode === "po" ? colors.poGreen : `linear-gradient(135deg, ${colors.deepBlue}, ${colors.purple})`, color: "white", border: "none", borderRadius: "10px", fontSize: "16px", fontWeight: "600", cursor: loading ? "not-allowed" : "pointer", marginTop: "20px" }}>
+            {loading ? "Processing..." : mode === "po" ? "Generate PDF PO" : "Run Snap"}
           </button>
 
           {error && <div style={{ color: colors.errorRed, marginTop: "15px", textAlign: "center", fontSize: "14px", backgroundColor: "#fff5f5", padding: "10px", borderRadius: "8px" }}>{error}</div>}
@@ -422,8 +500,8 @@ useEffect(() => {
           {output && (
             <div style={{ marginTop: "30px", borderTop: `1px solid ${colors.lightGray}`, paddingTop: "20px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-                <h3 style={{ fontSize: "14px", color: colors.deepBlue, margin: 0 }}>Result:</h3>
-                <button onClick={copyToClipboard} style={{ padding: "6px 12px", background: copied ? colors.successGreen : colors.deepBlue, color: "white", border: "none", borderRadius: "6px", fontSize: "12px", cursor: "pointer" }}>
+                <h3 style={{ fontSize: "14px", color: mode === "po" ? colors.poGreen : colors.deepBlue, margin: 0 }}>Result:</h3>
+                <button onClick={copyToClipboard} style={{ padding: "6px 12px", background: copied ? colors.successGreen : (mode === "po" ? colors.poGreen : colors.deepBlue), color: "white", border: "none", borderRadius: "6px", fontSize: "12px", cursor: "pointer" }}>
                   {copied ? "Copied!" : "Copy"}
                 </button>
               </div>
