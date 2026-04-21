@@ -274,22 +274,7 @@ useEffect(() => {
           ))}
         </div>
         
-        <a 
-          href="https://snapmatrix.org" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          style={{ textDecoration: "none" }}
-        >
-          <button 
-            style={{ 
-              padding: "16px 32px", background: colors.orange, color: "white", 
-              border: "none", borderRadius: "50px", fontWeight: "bold", fontSize: "18px",
-              cursor: "pointer", boxShadow: "0 10px 20px rgba(255, 140, 0, 0.2)"
-            }}
-          >
-            Visit SnapMatrix
-          </button>
-        </a>
+        
       </section>
 
       {/* --- MAIN APP SECTION --- */}
