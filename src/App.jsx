@@ -7,49 +7,58 @@ import InterestForm from "./pages/InterestForm";
 
 function HomePage() {
   
+  // --- STATE MANAGEMENT ---
+  // Tracks the current tool mode: 'about', 'responder', 'apology', 'sentiment', or 'po'
   const [mode, setMode] = useState("about");
+  
+  // Basic Business/About Us states
   const [industry, setIndustry] = useState("");
   const [city, setCity] = useState("");
   const [years, setYears] = useState("");
   
+  // Social Media/Responder states
   const [businessType, setBusinessType] = useState("");
   const [tone, setTone] = useState("");
-  const [description, setDescription] = useState(""); // Used for Responder
+  const [description, setDescription] = useState(""); 
 
+  // Customer Resolution/Apology states
   const [issueType, setIssueType] = useState(""); 
-  const [apologyContext, setApologyContext] = useState(""); // Dedicated Apology State
+  const [apologyContext, setApologyContext] = useState(""); 
   
+  // Sentiment Analysis state
   const [rawComments, setRawComments] = useState("");
 
-  // --- NEW STATE FOR PURCHASE ORDER ---
+  // Purchase Order (PO) states
   const [partNumber, setPartNumber] = useState("");
   const [expectedPrice, setExpectedPrice] = useState("");
   const [partDescription, setPartDescription] = useState("");
   const [vendorName, setVendorName] = useState("");
   const [quantity, setQuantity] = useState("");
   const [customVendor, setCustomVendor] = useState("");
-  // -------------------------------------
 
-  const [output, setOutput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [copied, setCopied] = useState(false);
+  // UI Feedback states
+  const [output, setOutput] = useState(""); // Stores AI-generated text/results
+  const [loading, setLoading] = useState(false); // Controls loading spinner/button state
+  const [error, setError] = useState(""); // Stores validation or server error messages
+  const [copied, setCopied] = useState(false); // Tracks if the output was copied to clipboard
 
+  // Hook to access URL parameters (e.g., ?mode=po)
   const [searchParams] = useSearchParams();
 
-useEffect(() => {
-  const urlMode = searchParams.get("mode");
-  // Updated allowedModes to include 'po'
-  const allowedModes = ["about", "responder", "apology", "sentiment", "po"];
+  // EFFECT: Synchronizes the UI mode with the URL query parameter on initial mount
+  useEffect(() => {
+    const urlMode = searchParams.get("mode");
+    const allowedModes = ["about", "responder", "apology", "sentiment", "po"];
 
-  if (urlMode && allowedModes.includes(urlMode.toLowerCase())) {
-    setMode(urlMode.toLowerCase());
-  }
-}, []);
+    if (urlMode && allowedModes.includes(urlMode.toLowerCase())) {
+      setMode(urlMode.toLowerCase());
+    }
+  }, []);
 
-
+  // Ref used to anchor the smooth-scroll behavior for the main form
   const formRef = useRef(null);
 
+  // EFFECT: Updates the page title and meta description for SEO purposes
   useEffect(() => {
     document.title = "SnapCopy | AI Content Toolkit for Small Businesses";
     const metaDesc = document.querySelector('meta[name="description"]');
@@ -58,6 +67,7 @@ useEffect(() => {
     }
   }, []);
 
+  // Centralized theme colors for consistent branding across the app
   const colors = {
     deepBlue: "#860aa5",
     purple: "#390b64",
@@ -68,13 +78,15 @@ useEffect(() => {
     errorRed: "#e53e3e",
     successGreen: "#38a169",
     footerText: "#718096",
-    poGreen: "#2d6a4f" // New color for PO Tab
+    poGreen: "#2d6a4f" 
   };
 
+  // FUNCTION: Smoothly scrolls the viewport to the main input form area
   const scrollToForm = () => {
     formRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  // Object defining styles for the instruction boxes
   const instructionStyle = {
     fontSize: "13px",
     color: "#4a5568",
@@ -86,6 +98,7 @@ useEffect(() => {
     lineHeight: "1.5"
   };
 
+  // Base style for all input fields
   const inputStyle = {
     width: "100%",
     padding: "12px",
@@ -98,40 +111,41 @@ useEffect(() => {
     transition: "border-color 0.2s, box-shadow 0.2s",
   };
 
+  // FUNCTION: Generates dynamic input styles based on focus state
   const getInputStyle = (isFocused) => ({
     ...inputStyle,
     borderColor: isFocused ? colors.deepBlue : colors.lightGray,
     boxShadow: isFocused ? `0 0 0 3px ${colors.deepBlue}33` : "none",
   });
 
+  // FUNCTION: Handles switching between different tools and resets form inputs
   const handleModeSwitch = (newMode) => {
-  const allowedModes = ["about", "responder", "apology", "sentiment", "po"];
-  const finalMode = allowedModes.includes(newMode) ? newMode : "about";
+    const allowedModes = ["about", "responder", "apology", "sentiment", "po"];
+    const finalMode = allowedModes.includes(newMode) ? newMode : "about";
 
-  setIndustry(""); 
-  setCity(""); 
-  setYears("");
-  setBusinessType(""); 
-  setTone(""); 
-  setDescription("");
-  setIssueType(""); 
-  setApologyContext("");
-  setRawComments(""); 
-  // Reset PO Fields
-  setPartNumber("");
-  setExpectedPrice("");
-  setPartDescription("");
-  setVendorName("");
-  setQuantity("");
-  
-  setOutput(""); 
-  setError("");
-  setCopied(false); 
+    // Resetting all state variables to clear the form
+    setIndustry(""); 
+    setCity(""); 
+    setYears("");
+    setBusinessType(""); 
+    setTone(""); 
+    setDescription("");
+    setIssueType(""); 
+    setApologyContext("");
+    setRawComments(""); 
+    setPartNumber("");
+    setExpectedPrice("");
+    setPartDescription("");
+    setVendorName("");
+    setQuantity("");
+    setOutput(""); 
+    setError("");
+    setCopied(false); 
 
-  setMode(finalMode);
-};
+    setMode(finalMode);
+  };
 
-
+  // FUNCTION: Copies the AI-generated output to the user's clipboard
   const copyToClipboard = async () => {
     if (!output) return;
     try {
@@ -143,11 +157,12 @@ useEffect(() => {
     }
   };
 
+  // MAIN FUNCTION: Validates input, builds the payload, and calls the AI backend
   async function generate() {
     console.log("FRONTEND SENDING MODE:", mode);
     setOutput(""); setError(""); setCopied(false);
     
-    // 1. Validation Logic (Updated for PO)
+    // 1. Validation Logic: Ensures required fields are present for each mode
     if (mode === "about") {
         if (!industry.trim() || !city.trim() || !years.trim()) {
             setError("Please fill out all About Us fields"); return;
@@ -165,16 +180,15 @@ useEffect(() => {
             setError("Please paste content to analyze."); return;
         }
     } else if (mode === "po") {
-    // Check if vendor is selected OR custom vendor is typed in
-    const finalVendor = vendorName === "custom" ? customVendor : vendorName;
-    if (!partNumber.trim() || !expectedPrice.trim() || !finalVendor.trim()) {
-        setError("Please fill out Part #, Price, and Vendor for the PO."); return;
+        const finalVendor = vendorName === "custom" ? customVendor : vendorName;
+        if (!partNumber.trim() || !expectedPrice.trim() || !finalVendor.trim()) {
+            setError("Please fill out Part #, Price, and Vendor for the PO."); return;
+        }
     }
-}
     
     setLoading(true);
 
-    // 2. Payload Construction
+    // 2. Payload Construction: Maps relevant state variables to the request body
     let payload = { mode: mode.toLowerCase().trim() };
 
     if (mode === "about") {
@@ -186,11 +200,12 @@ useEffect(() => {
     } else if (mode === "sentiment") {
         payload = { ...payload, rawComments };
     } else if (mode === "po") {
-    const finalVendor = vendorName === "custom" ? customVendor : vendorName;
-    payload = { ...payload, partNumber, expectedPrice, partDescription, vendorName: finalVendor, quantity };
-}
+        const finalVendor = vendorName === "custom" ? customVendor : vendorName;
+        payload = { ...payload, partNumber, expectedPrice, partDescription, vendorName: finalVendor, quantity };
+    }
 
     try {
+      // 3. API Request to backend
       const response = await fetch("https://api.snapcopy.online/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -201,13 +216,13 @@ useEffect(() => {
       
       if (!response.ok) throw new Error(data.error || `Server error: ${response.status}`);
       
-      // 3. Mapping data keys (Updated for PO)
+      // 4. Data Extraction: Maps the JSON response key based on the current mode
       const result = 
         mode === "about" ? data.about : 
         mode === "responder" ? data.reply : 
         mode === "apology" ? data.apology : 
         mode === "sentiment" ? data.sentiment : 
-        data.po; // Backend should return PDF download link or PO text under 'po'
+        data.po; 
 
       setOutput(result);
     } catch (err) {
@@ -225,7 +240,7 @@ useEffect(() => {
       fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
     }}>
 
-      {/* --- HERO SECTION --- */}
+      {/* --- HERO SECTION: Branding and primary call to action --- */}
       <section aria-label="SnapCopy Hero" style={{ 
         width: "100%", maxWidth: 1000, textAlign: "center", 
         padding: "60px 20px", display: "flex", flexDirection: "column", alignItems: "center" 
@@ -258,7 +273,7 @@ useEffect(() => {
         </div>
       </section>
 
-      {/* --- EXPLANATION & EXAMPLE SECTION --- */}
+      {/* --- INFO SECTION: Marketing copy and capability list --- */}
       <section aria-label="About SnapCopy Toolkit" style={{ 
         width: "100%", maxWidth: 1000, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", 
         gap: "40px", padding: "40px 20px", marginBottom: "40px" 
@@ -289,7 +304,7 @@ useEffect(() => {
         </div>
       </section>
 
-      {/* --- WHO THIS IS FOR --- */}
+      {/* --- TARGET AUDIENCE SECTION --- */}
       <section aria-label="Target Audience" style={{ width: "100%", maxWidth: 1000, textAlign: "center", marginBottom: "60px" }}>
         <h2 style={{ color: colors.textDark, marginBottom: "20px" }}>Who This Is For</h2>
         <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "10px", marginBottom: "30px" }}>
@@ -301,7 +316,7 @@ useEffect(() => {
         </div>
       </section>
 
-      {/* --- MAIN APP SECTION --- */}
+      {/* --- MAIN INTERACTIVE TOOL AREA --- */}
       <div ref={formRef} style={{ width: "100%", maxWidth: 800 }}>
         <Link to="/interest" style={{ textDecoration: "none", marginBottom: "20px", display: "block" }}>
            <button 
@@ -314,16 +329,16 @@ useEffect(() => {
            </button>
         </Link>
 
-        {/* --- NAVIGATION TABS --- */}
+        {/* --- TOOL NAVIGATION: Tab bar for mode switching --- */}
         <nav style={{ display: "flex", gap: "10px", marginBottom: "25px", flexWrap: "wrap" }}>
           <button onClick={() => handleModeSwitch("about")} style={{ flex: 1, minWidth: "120px", padding: "12px", background: mode === "about" ? colors.deepBlue : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>About Us</button>
           <button onClick={() => handleModeSwitch("responder")} style={{ flex: 1, minWidth: "120px", padding: "12px", background: mode === "responder" ? colors.purple : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>Responder</button>
           <button onClick={() => handleModeSwitch("apology")} style={{ flex: 1, minWidth: "120px", padding: "12px", background: mode === "apology" ? colors.orange : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>Apology</button>
           <button onClick={() => handleModeSwitch("sentiment")} style={{ flex: 1, minWidth: "120px", padding: "12px", background: mode === "sentiment" ? colors.darkSlate : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>Sentiment</button>
-          {/* NEW PO TAB BUTTON */}
           <button onClick={() => handleModeSwitch("po")} style={{ flex: 1, minWidth: "120px", padding: "12px", background: mode === "po" ? colors.poGreen : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>PO Generator</button>
         </nav>
 
+        {/* --- FORM CONTAINER --- */}
         <div style={{ background: "white", padding: "40px", borderRadius: "20px", boxShadow: "0 20px 40px rgba(0,0,0,0.08)", marginBottom: "40px" }}>
           <header style={{ textAlign: "center", marginBottom: "30px" }}>
             <h2 style={{ fontSize: "36px", margin: 0, fontWeight: "800", background: mode === "po" ? colors.poGreen : `linear-gradient(to right, ${colors.deepBlue}, ${colors.purple})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
@@ -334,7 +349,7 @@ useEffect(() => {
             </p>
           </header>
 
-          {/* --- INSTRUCTIONS --- */}
+          {/* DYNAMIC INSTRUCTIONS: Changes based on selected 'mode' */}
           {mode === "about" && (
             <div style={instructionStyle}>
               <strong>Instructions:</strong> Enter your industry, city, and years of experience. SnapCopy will generate a professional "About Us" bio.
@@ -355,14 +370,13 @@ useEffect(() => {
               <strong>Instructions:</strong> Start at the top of the comments section, copy everything, and paste it here. SnapCopy will analyze the overall mood.
             </div>
           )}
-          {/* NEW PO INSTRUCTIONS */}
           {mode === "po" && (
             <div style={{ ...instructionStyle, borderLeftColor: colors.poGreen }}>
               <strong>Instructions:</strong> Enter the part details and vendor information. SnapCopy will generate a professional PDF Purchase Order for your records.
             </div>
           )}
 
-          {/* --- INPUT FIELDS --- */}
+          {/* DYNAMIC INPUTS: Renders input sets based on the active mode */}
           {mode === "about" && (
             <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
               <InputField label="Industry" value={industry} onChange={setIndustry} placeholder="HVAC, Roofing..." colors={colors} getInputStyle={getInputStyle} />
@@ -432,7 +446,6 @@ useEffect(() => {
             </div>
           )}
 
-          {/* --- NEW PO INPUT FIELDS --- */}
           {mode === "po" && (
             <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
               <div style={{ display: "flex", gap: "15px" }}>
@@ -450,7 +463,7 @@ useEffect(() => {
                   value={vendorName} 
                   onChange={(e) => {
                     setVendorName(e.target.value);
-                    if (e.target.value !== "custom") setCustomVendor(""); // Clear custom if switching back
+                    if (e.target.value !== "custom") setCustomVendor(""); 
                   }} 
                   style={inputStyle}
                 >
@@ -463,7 +476,6 @@ useEffect(() => {
                 </select>
               </div>
 
-              {/* CONDITIONAL CUSTOM VENDOR INPUT */}
                 {vendorName === "custom" && (
                   <div style={{ marginTop: "10px" }}>
                     <InputField 
@@ -491,12 +503,15 @@ useEffect(() => {
             </div>
           )}
 
+          {/* MAIN SUBMIT BUTTON */}
           <button onClick={generate} disabled={loading} style={{ width: "100%", padding: "15px", background: mode === "po" ? colors.poGreen : `linear-gradient(135deg, ${colors.deepBlue}, ${colors.purple})`, color: "white", border: "none", borderRadius: "10px", fontSize: "16px", fontWeight: "600", cursor: loading ? "not-allowed" : "pointer", marginTop: "20px" }}>
             {loading ? "Processing..." : mode === "po" ? "Generate PDF PO" : "Run Snap"}
           </button>
 
+          {/* ERROR DISPLAY */}
           {error && <div style={{ color: colors.errorRed, marginTop: "15px", textAlign: "center", fontSize: "14px", backgroundColor: "#fff5f5", padding: "10px", borderRadius: "8px" }}>{error}</div>}
 
+          {/* RESULT DISPLAY: Shows the AI output and a copy button */}
           {output && (
             <div style={{ marginTop: "30px", borderTop: `1px solid ${colors.lightGray}`, paddingTop: "20px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
@@ -511,6 +526,7 @@ useEffect(() => {
         </div>
       </div>
 
+      {/* --- FOOTER: Copyright and affiliate branding --- */}
       <footer style={{ marginTop: "auto", width: "100%", maxWidth: 500, display: "flex", flexDirection: "column", alignItems: "center", gap: "10px", padding: "20px 0", borderTop: `1px solid ${colors.lightGray}88` }}>
         <img src={airStadtLogo} alt="AirStadt Logo" style={{ height: "30px", width: "auto" }} />
         <p style={{ fontSize: "13px", color: colors.footerText, margin: 0 }}>&copy; {new Date().getFullYear()} AirStadt. All rights reserved.</p>
@@ -519,6 +535,7 @@ useEffect(() => {
   );
 }
 
+// HELPER COMPONENT: A reusable input field with label and focus-based styling
 function InputField({ label, value, onChange, placeholder, type = "text", colors, getInputStyle }) {
   const [focused, setFocused] = useState(false);
   return (
@@ -536,6 +553,7 @@ function InputField({ label, value, onChange, placeholder, type = "text", colors
   );
 }
 
+// ROOT COMPONENT: Sets up client-side routing for the application
 export default function App() {
   return (
     <Router>
