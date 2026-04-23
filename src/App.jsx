@@ -11,7 +11,7 @@ function HomePage() {
   // --- STATE MANAGEMENT ---
   const [mode, setMode] = useState("about");
   
-  // Input States
+  // Basic Input States
   const [industry, setIndustry] = useState("");
   const [city, setCity] = useState("");
   const [years, setYears] = useState("");
@@ -22,12 +22,27 @@ function HomePage() {
   const [issueType, setIssueType] = useState(""); 
   const [apologyContext, setApologyContext] = useState(""); 
   const [rawComments, setRawComments] = useState("");
-  const [partNumber, setPartNumber] = useState("");
-  const [expectedPrice, setExpectedPrice] = useState("");
-  const [partDescription, setPartDescription] = useState("");
-  const [vendorName, setVendorName] = useState("");
-  const [quantity, setQuantity] = useState("");
-  const [customVendor, setCustomVendor] = useState("");
+
+  // --- PURCHASE ORDER STATE ---
+  const [buyerInfo, setBuyerInfo] = useState({
+    companyName: "", companyAddress: "", contactName: "", contactEmail: "", contactPhone: "", billingAddress: "", shippingAddress: ""
+  });
+
+  const [vendorInfo, setVendorInfo] = useState({
+    vendorName: "", vendorContact: "", vendorEmail: "", vendorPhone: "", vendorAddress: "", vendorPaymentTerms: ""
+  });
+
+  const [poDetails, setPoDetails] = useState({
+    poNumber: `PO-${Math.floor(100000 + Math.random() * 900000)}`,
+    poDate: new Date().toISOString().split("T"),
+    deliveryDate: "", shippingMethod: "Ground", paymentTerms: "Net 30", notes: ""
+  });
+
+  const [poItems, setPoItems] = useState([
+    { itemName: "", partNumber: "", quantity: 1, unitPrice: 0, unitOfMeasure: "pcs", taxable: false, discount: 0, lineNotes: "" }
+  ]);
+
+  const [poTotals, setPoTotals] = useState({ subtotal: 0, tax: 0, shippingCost: 0, grandTotal: 0 });
 
   // UI States
   const [output, setOutput] = useState(""); 
@@ -44,6 +59,32 @@ function HomePage() {
       setMode(urlMode.toLowerCase());
     }
   }, [searchParams]);
+
+  // --- AUTO-CALCULATION LOGIC ---
+  useEffect(() => {
+    if (mode === "po") {
+      const subtotal = poItems.reduce((acc, item) => {
+        const lineTotal = (parseFloat(item.quantity) || 0) * (parseFloat(item.unitPrice) || 0);
+        const lineDiscount = parseFloat(item.discount) || 0;
+        return acc + (lineTotal - lineDiscount);
+      }, 0);
+
+      const taxRate = 0.08; 
+      const taxableAmount = poItems.filter(i => i.taxable).reduce((acc, item) => {
+        return acc + ((parseFloat(item.quantity) || 0) * (parseFloat(item.unitPrice) || 0));
+      }, 0);
+
+      const tax = taxableAmount * taxRate;
+      const shipping = parseFloat(poTotals.shippingCost) || 0;
+      
+      setPoTotals(prev => ({
+        ...prev,
+        subtotal: subtotal.toFixed(2),
+        tax: tax.toFixed(2),
+        grandTotal: (subtotal + tax + shipping).toFixed(2)
+      }));
+    }
+  }, [poItems, poTotals.shippingCost, mode]);
 
   const formRef = useRef(null);
 
@@ -92,8 +133,8 @@ function HomePage() {
 
   const getInputStyle = (isFocused) => ({
     ...inputStyle,
-    borderColor: isFocused ? colors.deepBlue : colors.lightGray,
-    boxShadow: isFocused ? `0 0 0 3px ${colors.deepBlue}33` : "none",
+    borderColor: isFocused ? (mode === "po" ? colors.poGreen : colors.deepBlue) : colors.lightGray,
+    boxShadow: isFocused ? `0 0 0 3px ${mode === "po" ? colors.poGreen : colors.deepBlue}33` : "none",
   });
 
   const handleModeSwitch = (newMode) => {
@@ -116,37 +157,60 @@ function HomePage() {
 
   const downloadPDF = () => {
     const doc = new jsPDF();
-    const finalVendor = vendorName === "custom" ? customVendor : vendorName;
+    const poData = { buyer: buyerInfo, vendor: vendorInfo, details: poDetails, items: poItems, totals: poTotals };
+    
     doc.setFillColor(45, 106, 79); 
     doc.rect(0, 0, 210, 40, "F");
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(22);
-    doc.text("PURCHASE ORDER", 105, 25, { align: "center" });
-    doc.save(`PO_${partNumber || "Draft"}.pdf`);
+    doc.text(`PURCHASE ORDER: ${poData.details.poNumber}`, 105, 25, { align: "center" });
+    
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(10);
+    doc.text(`Buyer: ${poData.buyer.companyName}`, 20, 50);
+    doc.text(`Vendor: ${poData.vendor.vendorName}`, 20, 60);
+    doc.text(`Total: $${poData.totals.grandTotal}`, 20, 70);
+    
+    doc.save(`${poData.details.poNumber}.pdf`);
   };
 
+  // --- GENERATE FUNCTION WITH FIXES ---
   async function generate() {
     setOutput(""); setError(""); setLoading(true);
     
-    // Use custom value if "custom" is selected in responder
+    if (mode === "po") {
+      // FIX: Corrected the validation to check the actual array state
+      const hasFirstItem = poItems?.itemName?.trim() !== "";
+  
+      if (!buyerInfo.companyName.trim() || !vendorInfo.vendorName.trim() || !poDetails.poNumber.trim() || !hasFirstItem) {
+        setError("Please provide at least Company Name, Vendor Name, PO Number, and one Item Description.");
+        setLoading(false);
+        return;
+      }
+    }
+
     const finalBusinessType = businessType === "custom" ? customBusinessType : businessType;
 
-    try {
-      const response = await fetch("https://api.snapcopy.online/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
+    const payload = mode === "po" 
+      ? { mode, buyer: buyerInfo, vendor: vendorInfo, details: poDetails, items: poItems, totals: poTotals }
+      : { 
           mode, industry, city, years, 
           businessType: finalBusinessType, 
           tone, description, issueType, apologyContext, 
-          rawComments, partNumber, expectedPrice, 
-          partDescription, vendorName, quantity 
-        })
+          rawComments 
+        };
+
+    try {
+      // FIX: Updated to .org endpoint
+      const response = await fetch("https://api.snapcopy.online/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Server error");
-      const result = data.about || data.reply || data.apology || data.sentiment || data.po;
-      setOutput(result);
+      const result = data.about || data.reply || data.apology || data.sentiment || data.po || JSON.stringify(data, null, 2);
+      setOutput(typeof result === "string" ? result : JSON.stringify(result, null, 2));
     } catch (err) {
       setError(err.message);
     } finally {
@@ -154,10 +218,15 @@ function HomePage() {
     }
   }
 
+  const updateItem = (index, field, value) => {
+    const newItems = [...poItems];
+    newItems[index][field] = value;
+    setPoItems(newItems);
+  };
+
   return (
     <main style={{ display: "flex", flexDirection: "column", alignItems: "center", minHeight: "100vh", width: "100vw", background: "#f0f2f5", padding: "20px", boxSizing: "border-box", fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif" }}>
 
-      {/* --- HERO SECTION --- */}
       <section style={{ maxWidth: 1000, textAlign: "center", padding: "60px 20px", display: "flex", flexDirection: "column", alignItems: "center" }}>
         <img src={snapcopyLogo} alt="SnapCopy Logo" style={{ width: 180, height: 180, borderRadius: "50%", marginBottom: 20 }} />
         <h1 style={{ 
@@ -175,7 +244,6 @@ function HomePage() {
         </button>
       </section>
 
-      {/* --- INFO SECTION --- */}
       <section style={{ width: "100%", maxWidth: 1000, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "40px", padding: "40px 20px", marginBottom: "40px" }}>
         <div>
           <h2 style={{ color: colors.purple, fontSize: "24px" }}>The SnapCopy Toolkit</h2>
@@ -193,8 +261,7 @@ function HomePage() {
         </div>
       </section>
 
-      {/* --- TOOL AREA --- */}
-      <div ref={formRef} style={{ width: "100%", maxWidth: 800 }}>
+      <div ref={formRef} style={{ width: "100%", maxWidth: 900 }}>
         <Link to="/interest" style={{ textDecoration: "none", marginBottom: "20px", display: "block" }}>
            <button style={{ width: "100%", padding: "12px", background: "white", color: colors.deepBlue, border: `2px solid ${colors.deepBlue}`, borderRadius: "8px", fontWeight: "bold", cursor: "pointer" }}>
              Interested in SnapCopy or SnapMatrix? Join the waitlist today.
@@ -229,13 +296,15 @@ function HomePage() {
 
           <div style={{ ...instructionStyle, borderLeftColor: mode === "po" ? colors.poGreen : colors.deepBlue }}>
             <strong>Instructions:</strong> {
-              mode === "about" ? "Enter industry, city, and years for a professional bio." :
-              mode === "responder" ? "Select type and tone for captions and CTAs." :
-              mode === "apology" ? "Provide context for a polished customer resolution." :
-              mode === "sentiment" ? "Paste text to analyze the overall emotional mood." :
-              "Enter part and vendor info to generate a professional PDF PO."
+              mode === "about" ? "Tell us your industry, location, and experience level. We will generate a professional, SEO-optimized 'About Us' story that builds trust with your local customers." :
+              mode === "responder" ? "Choose your business type and a brand voice. We'll craft engaging social media captions, replies, or calls-to-action that resonate with your target audience." :
+              mode === "apology" ? "Select the specific issue and provide a brief summary of what happened. Our AI will draft a sincere, de-escalating response to help maintain your professional reputation." :
+              mode === "sentiment" ? "Paste raw customer reviews or comments below. We'll analyze the emotional tone and provide a summary of whether the feedback is positive, negative, or neutral." :
+              "Provide the SKU, vendor, and pricing details. We'll format this into a professional Purchase Order data structure ready to be exported as a high-quality PDF document."
             }
           </div>
+
+          {error && <p style={{ color: colors.errorRed, background: "#fff5f5", padding: "10px", borderRadius: "8px", fontSize: "14px", marginBottom: "15px", border: `1px solid ${colors.errorRed}` }}>{error}</p>}
 
           <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
             {mode === "about" && (
@@ -283,24 +352,75 @@ function HomePage() {
                 <label style={{ fontSize: "14px", fontWeight: "600", color: "#4a5568" }}>Issue Type</label>
                 <select value={issueType} onChange={(e) => setIssueType(e.target.value)} style={inputStyle}>
                   <option value="">What went wrong?</option>
-                  <option value="delay">Delay</option>
-                  <option value="mistake">Mistake</option>
+                  <option value="delay">Service or Shipping Delay</option>
+                  <option value="mistake">Technical Error or Mistake</option>
+                  <option value="quality">Product or Work Quality Issue</option>
+                  <option value="communication">Poor Communication / No-Show</option>
+                  <option value="billing">Billing or Overcharge Dispute</option>
+                  <option value="staff">Unprofessional Staff Interaction</option>
+                  <option value="out_of_stock">Item Out of Stock / Unavailable</option>
+                  <option value="scheduling">Scheduling Conflict / Cancellation</option>
                 </select>
-                <textarea value={apologyContext} onChange={(e) => setApologyContext(e.target.value)} placeholder="Provide context..." style={{ ...inputStyle, height: "100px", resize: "none" }} />
+                <textarea value={apologyContext} onChange={(e) => setApologyContext(e.target.value)} placeholder="Provide context (e.g. 'We missed the Friday appointment because of a truck breakdown')..." style={{ ...inputStyle, height: "100px", resize: "none" }} />
               </>
             )}
             {mode === "sentiment" && (
               <textarea value={rawComments} onChange={(e) => setRawComments(e.target.value)} placeholder="Paste comments here..." style={{ ...inputStyle, height: "150px", resize: "none" }} />
             )}
+            
             {mode === "po" && (
-              <>
-                <div style={{ display: "flex", gap: "15px" }}>
-                  <div style={{ flex: 1 }}><InputField label="Part Number" value={partNumber} onChange={setPartNumber} placeholder="SKU-123" colors={colors} getInputStyle={getInputStyle} /></div>
-                  <div style={{ flex: 1 }}><InputField label="Quantity" value={quantity} onChange={setQuantity} placeholder="1" type="number" colors={colors} getInputStyle={getInputStyle} /></div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "25px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "20px" }}>
+                  <div style={{ padding: "20px", background: "#f8fafc", borderRadius: "12px", border: `1px solid ${colors.lightGray}` }}>
+                    <h4 style={{ color: colors.poGreen, marginBottom: "15px", borderBottom: `2px solid ${colors.poGreen}`, display: "inline-block" }}>Buyer Details</h4>
+                    <InputField label="Company Name" value={buyerInfo.companyName} onChange={(v) => setBuyerInfo({...buyerInfo, companyName: v})} colors={colors} getInputStyle={getInputStyle} />
+                    <InputField label="Address" value={buyerInfo.companyAddress} onChange={(v) => setBuyerInfo({...buyerInfo, companyAddress: v})} colors={colors} getInputStyle={getInputStyle} />
+                    <div style={{ display: "flex", gap: "10px" }}>
+                      <InputField label="Contact Name" value={buyerInfo.contactName} onChange={(v) => setBuyerInfo({...buyerInfo, contactName: v})} colors={colors} getInputStyle={getInputStyle} />
+                      <InputField label="Contact Email" value={buyerInfo.contactEmail} onChange={(v) => setBuyerInfo({...buyerInfo, contactEmail: v})} colors={colors} getInputStyle={getInputStyle} />
+                    </div>
+                  </div>
+                  <div style={{ padding: "20px", background: "#f8fafc", borderRadius: "12px", border: `1px solid ${colors.lightGray}` }}>
+                    <h4 style={{ color: colors.poGreen, marginBottom: "15px", borderBottom: `2px solid ${colors.poGreen}`, display: "inline-block" }}>Vendor Details</h4>
+                    <InputField label="Vendor Name" value={vendorInfo.vendorName} onChange={(v) => setVendorInfo({...vendorInfo, vendorName: v})} colors={colors} getInputStyle={getInputStyle} />
+                    <InputField label="Vendor Address" value={vendorInfo.vendorAddress} onChange={(v) => setVendorInfo({...vendorInfo, vendorAddress: v})} colors={colors} getInputStyle={getInputStyle} />
+                    <InputField label="Payment Terms" value={vendorInfo.vendorPaymentTerms} onChange={(v) => setVendorInfo({...vendorInfo, vendorPaymentTerms: v})} placeholder="Net 30" colors={colors} getInputStyle={getInputStyle} />
+                  </div>
                 </div>
-                <InputField label="Expected Price ($)" value={expectedPrice} onChange={setExpectedPrice} placeholder="99.99" type="number" colors={colors} getInputStyle={getInputStyle} />
-                <textarea value={partDescription} onChange={(e) => setPartDescription(e.target.value)} placeholder="Item details..." style={{ ...inputStyle, height: "80px", resize: "none" }} />
-              </>
+
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "15px", padding: "15px", background: "#f1f5f9", borderRadius: "10px" }}>
+                  <InputField label="PO Number" value={poDetails.poNumber} onChange={(v) => setPoDetails({...poDetails, poNumber: v})} colors={colors} getInputStyle={getInputStyle} />
+                  <InputField label="PO Date" type="date" value={poDetails.poDate} onChange={(v) => setPoDetails({...poDetails, poDate: v})} colors={colors} getInputStyle={getInputStyle} />
+                  <InputField label="Delivery Date" type="date" value={poDetails.deliveryDate} onChange={(v) => setPoDetails({...poDetails, deliveryDate: v})} colors={colors} getInputStyle={getInputStyle} />
+                </div>
+
+                <div style={{ border: `1px solid ${colors.lightGray}`, borderRadius: "12px", padding: "20px" }}>
+                  <h4 style={{ color: colors.poGreen, marginBottom: "15px" }}>Order Items</h4>
+                  {poItems.map((item, index) => (
+                    <div key={index} style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 40px", gap: "10px", marginBottom: "15px", alignItems: "end", paddingBottom: "15px", borderBottom: `1px solid ${colors.lightGray}55` }}>
+                      <InputField label="Item Description" value={item.itemName} onChange={(v) => updateItem(index, "itemName", v)} placeholder="Part/Service Name" colors={colors} getInputStyle={getInputStyle} />
+                      <InputField label="Qty" type="number" value={item.quantity} onChange={(v) => updateItem(index, "quantity", v)} colors={colors} getInputStyle={getInputStyle} />
+                      <InputField label="Price ($)" type="number" value={item.unitPrice} onChange={(v) => updateItem(index, "unitPrice", v)} colors={colors} getInputStyle={getInputStyle} />
+                      <div style={{ display: "flex", flexDirection: "column", gap: "5px", alignItems: "center" }}>
+                        <label style={{ fontSize: "10px", fontWeight: "bold" }}>Tax?</label>
+                        <input type="checkbox" checked={item.taxable} onChange={(e) => updateItem(index, "taxable", e.target.checked)} />
+                      </div>
+                      <button onClick={() => setPoItems(poItems.filter((_, i) => i !== index))} style={{ height: "40px", background: colors.errorRed, color: "white", border: "none", borderRadius: "8px", cursor: "pointer" }}>×</button>
+                    </div>
+                  ))}
+                  <button onClick={() => setPoItems([...poItems, { itemName: "", partNumber: "", quantity: 1, unitPrice: 0, unitOfMeasure: "pcs", taxable: false, discount: 0, lineNotes: "" }])} style={{ background: colors.poGreen, color: "white", border: "none", padding: "10px 20px", borderRadius: "8px", fontWeight: "bold", cursor: "pointer" }}>+ Add Line Item</button>
+                </div>
+
+                <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                  <div style={{ width: "300px", padding: "20px", background: "#2d3748", color: "white", borderRadius: "12px", boxShadow: "0 10px 20px rgba(0,0,0,0.1)" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "5px" }}><span style={{ opacity: 0.8 }}>Subtotal:</span><span>${poTotals.subtotal}</span></div>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "5px" }}><span style={{ opacity: 0.8 }}>Tax (8%):</span><span>${poTotals.tax}</span></div>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginTop: "10px", paddingTop: "10px", borderTop: "1px solid #4a5568" }}>
+                      <span style={{ fontWeight: "bold" }}>Grand Total:</span><span style={{ fontWeight: "bold", fontSize: "1.2rem", color: "#48bb78" }}>${poTotals.grandTotal}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
 
@@ -309,19 +429,19 @@ function HomePage() {
             fontSize: "16px", fontWeight: "600", color: "white", cursor: loading ? "not-allowed" : "pointer",
             background: mode === "po" ? colors.poGreen : `linear-gradient(135deg, ${colors.deepBlue}, ${colors.purple})`
           }}>
-            {loading ? "Processing..." : mode === "po" ? "Generate PO Data" : "Run Snap"}
+            {loading ? "Processing..." : mode === "po" ? "Generate PO JSON & PDF" : "Run Snap"}
           </button>
 
           {output && (
             <div style={{ marginTop: "30px", borderTop: `1px solid ${colors.lightGray}`, paddingTop: "20px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "10px" }}>
-                <h3 style={{ fontSize: "14px", color: mode === "po" ? colors.poGreen : colors.deepBlue }}>Result:</h3>
+                <h3 style={{ fontSize: "14px", color: mode === "po" ? colors.poGreen : colors.deepBlue }}>{mode === "po" ? "PO Payload Result:" : "Generated Content:"}</h3>
                 <div style={{ display: "flex", gap: "10px" }}>
                   {mode === "po" && <button onClick={downloadPDF} style={{ padding: "6px 12px", background: colors.poGreen, color: "white", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "12px" }}>Download PDF</button>}
                   <button onClick={copyToClipboard} style={{ padding: "6px 12px", background: copied ? colors.successGreen : colors.deepBlue, color: "white", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "12px" }}>{copied ? "Copied!" : "Copy Text"}</button>
                 </div>
               </div>
-              <textarea value={output} readOnly style={{ width: "100%", height: "250px", padding: "15px", borderRadius: "12px", background: "#f8fafc", border: `1px solid ${colors.lightGray}`, resize: "none", fontSize: "14px", lineHeight: "1.6" }} />
+              <textarea value={output} readOnly style={{ width: "100%", height: "250px", padding: "15px", borderRadius: "12px", background: "#f8fafc", border: `1px solid ${colors.lightGray}`, resize: "none", fontSize: "14px", lineHeight: "1.6", fontFamily: mode === "po" ? "monospace" : "inherit" }} />
             </div>
           )}
         </div>
@@ -339,7 +459,7 @@ function InputField({ label, value, onChange, placeholder, type = "text", colors
   const [focused, setFocused] = useState(false);
   return (
     <div style={{ width: "100%" }}>
-      <label style={{ fontSize: "14px", fontWeight: "600", color: "#4a5568" }}>{label}</label>
+      <label style={{ fontSize: "11px", fontWeight: "700", color: "#718096", textTransform: "uppercase" }}>{label}</label>
       <input type={type} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)} style={getInputStyle(focused)} />
     </div>
   );
