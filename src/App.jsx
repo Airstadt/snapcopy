@@ -35,14 +35,27 @@ function HomePage() {
   const [poDetails, setPoDetails] = useState({
     poNumber: `PO-${Math.floor(100000 + Math.random() * 900000)}`,
     poDate: new Date().toISOString().split("T"),
-    deliveryDate: "", shippingMethod: "Ground", paymentTerms: "Net 30", notes: ""
+    deliveryDate: "", 
+    shippingMethod: "Ground", 
+    shippingTerms: "", 
+    paymentTerms: "Net 30", 
+    notes: ""
   });
 
   const [poItems, setPoItems] = useState([
     { itemName: "", partNumber: "", quantity: 1, unitPrice: 0, unitOfMeasure: "pcs", taxable: false, discount: 0, lineNotes: "" }
   ]);
 
-  const [poTotals, setPoTotals] = useState({ subtotal: 0, tax: 0, shippingCost: 0, grandTotal: 0 });
+  const [poTotals, setPoTotals] = useState({ 
+    subtotal: 0, 
+    taxRate: 8, 
+    taxAmount: 0, 
+    discountRate: 0, 
+    discountAmount: 0, 
+    shippingCost: 0, 
+    otherCost: 0, 
+    grandTotal: 0 
+  });
 
   // UI States
   const [output, setOutput] = useState(""); 
@@ -63,28 +76,32 @@ function HomePage() {
   // --- AUTO-CALCULATION LOGIC ---
   useEffect(() => {
     if (mode === "po") {
-      const subtotal = poItems.reduce((acc, item) => {
-        const lineTotal = (parseFloat(item.quantity) || 0) * (parseFloat(item.unitPrice) || 0);
-        const lineDiscount = parseFloat(item.discount) || 0;
-        return acc + (lineTotal - lineDiscount);
-      }, 0);
-
-      const taxRate = 0.08; 
-      const taxableAmount = poItems.filter(i => i.taxable).reduce((acc, item) => {
+      const itemsSubtotal = poItems.reduce((acc, item) => {
         return acc + ((parseFloat(item.quantity) || 0) * (parseFloat(item.unitPrice) || 0));
       }, 0);
 
-      const tax = taxableAmount * taxRate;
+      const discPercent = parseFloat(poTotals.discountRate) || 0;
+      const calculatedDiscount = itemsSubtotal * (discPercent / 100);
+      const finalDiscount = parseFloat(poTotals.discountAmount) || calculatedDiscount;
+
+      const subtotalAfterDiscount = itemsSubtotal - finalDiscount;
+
+      const taxPercent = parseFloat(poTotals.taxRate) || 0;
+      const calculatedTax = subtotalAfterDiscount * (taxPercent / 100);
+      const finalTax = parseFloat(poTotals.taxAmount) || calculatedTax;
+
       const shipping = parseFloat(poTotals.shippingCost) || 0;
+      const other = parseFloat(poTotals.otherCost) || 0;
       
       setPoTotals(prev => ({
         ...prev,
-        subtotal: subtotal.toFixed(2),
-        tax: tax.toFixed(2),
-        grandTotal: (subtotal + tax + shipping).toFixed(2)
+        subtotal: itemsSubtotal.toFixed(2),
+        discountAmount: finalDiscount.toFixed(2),
+        taxAmount: finalTax.toFixed(2),
+        grandTotal: (subtotalAfterDiscount + finalTax + shipping + other).toFixed(2)
       }));
     }
-  }, [poItems, poTotals.shippingCost, mode]);
+  }, [poItems, poTotals.shippingCost, poTotals.taxRate, poTotals.taxAmount, poTotals.discountRate, poTotals.discountAmount, poTotals.otherCost, mode]);
 
   const formRef = useRef(null);
 
@@ -174,12 +191,10 @@ function HomePage() {
     doc.save(`${poData.details.poNumber}.pdf`);
   };
 
-  // --- GENERATE FUNCTION WITH FIXES ---
   async function generate() {
     setOutput(""); setError(""); setLoading(true);
     
     if (mode === "po") {
-      // FIX: Corrected the validation to check the actual array state
       const hasFirstItem = poItems?.itemName?.trim() !== "";
   
       if (!buyerInfo.companyName.trim() || !vendorInfo.vendorName.trim() || !poDetails.poNumber.trim() || !hasFirstItem) {
@@ -201,7 +216,6 @@ function HomePage() {
         };
 
     try {
-      // FIX: Updated to .org endpoint
       const response = await fetch("https://api.snapcopy.online/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -289,9 +303,6 @@ function HomePage() {
             }}>
               {mode === "about" ? "About Us Snap" : mode === "responder" ? "Responder Snap" : mode === "apology" ? "Apology Snap" : mode === "sentiment" ? "Sentiment Snap" : "Purchase Order Snap"}
             </h2>
-            <p style={{ fontSize: "12px", fontWeight: "bold", color: mode === "po" ? colors.poGreen : colors.deepBlue, textTransform: "uppercase", letterSpacing: "2px", marginTop: "5px" }}>
-              {mode === "sentiment" ? "AI Feedback Analysis" : mode === "po" ? "PDF Generation" : "AI Powered Content"}
-            </p>
           </header>
 
           <div style={{ ...instructionStyle, borderLeftColor: mode === "po" ? colors.poGreen : colors.deepBlue }}>
@@ -322,15 +333,10 @@ function HomePage() {
                   <option value="hvac">HVAC Contractor</option>
                   <option value="roofing">Roofing Specialist</option>
                   <option value="plumbing">Plumbing Services</option>
-                  <option value="landscaping">Landscaper / Lawn Care</option>
-                  <option value="electrical">Electrician</option>
-                  <option value="realtor">Realtor / Real Estate Agency</option>
-                  <option value="developer">Software Developer / Agency</option>
-                  <option value="cleaning">Cleaning Services</option>
-                  <option value="painting">Professional Painter</option>
-                  <option value="general_contractor">General Contractor</option>
-                  <option value="restoration">Restoration Services</option>
-                  <option value="automotive">Auto Repair Shop</option>
+                  <option value="electrical">Electrical Contractor</option>
+                  <option value="landscaping">Landscaping & Lawn Care</option>
+                  <option value="cleaning">Commercial/Residential Cleaning</option>
+                  <option value="painting">Professional Painting</option>
                   <option value="custom">-- Other / Custom --</option>
                 </select>
                 {businessType === "custom" && (
@@ -339,10 +345,10 @@ function HomePage() {
                 <label style={{ fontSize: "14px", fontWeight: "600", color: "#4a5568" }}>Tone</label>
                 <select value={tone} onChange={(e) => setTone(e.target.value)} style={inputStyle}>
                   <option value="">Select tone...</option>
-                  <option value="professional">Professional</option>
-                  <option value="friendly">Friendly / Relatable</option>
-                  <option value="urgent">Urgent / Sales-focused</option>
-                  <option value="humorous">Humorous / Witty</option>
+                  <option value="professional">Professional & Authoritative</option>
+                  <option value="friendly">Friendly & Relatable</option>
+                  <option value="enthusiastic">Enthusiastic & High-Energy</option>
+                  <option value="minimalist">Minimalist & Direct</option>
                 </select>
                 <InputField label="Short Description (Optional)" value={description} onChange={setDescription} placeholder="What is this post about?" colors={colors} getInputStyle={getInputStyle} />
               </>
@@ -353,15 +359,12 @@ function HomePage() {
                 <select value={issueType} onChange={(e) => setIssueType(e.target.value)} style={inputStyle}>
                   <option value="">What went wrong?</option>
                   <option value="delay">Service or Shipping Delay</option>
-                  <option value="mistake">Technical Error or Mistake</option>
-                  <option value="quality">Product or Work Quality Issue</option>
+                  <option value="quality">Workmanship / Quality Issue</option>
                   <option value="communication">Poor Communication / No-Show</option>
                   <option value="billing">Billing or Overcharge Dispute</option>
-                  <option value="staff">Unprofessional Staff Interaction</option>
-                  <option value="out_of_stock">Item Out of Stock / Unavailable</option>
-                  <option value="scheduling">Scheduling Conflict / Cancellation</option>
+                  <option value="behavior">Staff Behavior / Professionalism</option>
                 </select>
-                <textarea value={apologyContext} onChange={(e) => setApologyContext(e.target.value)} placeholder="Provide context (e.g. 'We missed the Friday appointment because of a truck breakdown')..." style={{ ...inputStyle, height: "100px", resize: "none" }} />
+                <textarea value={apologyContext} onChange={(e) => setApologyContext(e.target.value)} placeholder="Provide context (e.g. 'We missed the appointment because of a truck breakdown')..." style={{ ...inputStyle, height: "100px", resize: "none" }} />
               </>
             )}
             {mode === "sentiment" && (
@@ -392,6 +395,8 @@ function HomePage() {
                   <InputField label="PO Number" value={poDetails.poNumber} onChange={(v) => setPoDetails({...poDetails, poNumber: v})} colors={colors} getInputStyle={getInputStyle} />
                   <InputField label="PO Date" type="date" value={poDetails.poDate} onChange={(v) => setPoDetails({...poDetails, poDate: v})} colors={colors} getInputStyle={getInputStyle} />
                   <InputField label="Delivery Date" type="date" value={poDetails.deliveryDate} onChange={(v) => setPoDetails({...poDetails, deliveryDate: v})} colors={colors} getInputStyle={getInputStyle} />
+                  <InputField label="Shipping Method" value={poDetails.shippingMethod} onChange={(v) => setPoDetails({...poDetails, shippingMethod: v})} colors={colors} getInputStyle={getInputStyle} />
+                  <InputField label="Shipping Terms" value={poDetails.shippingTerms} onChange={(v) => setPoDetails({...poDetails, shippingTerms: v})} placeholder="FOB Destination" colors={colors} getInputStyle={getInputStyle} />
                 </div>
 
                 <div style={{ border: `1px solid ${colors.lightGray}`, borderRadius: "12px", padding: "20px" }}>
@@ -412,11 +417,20 @@ function HomePage() {
                 </div>
 
                 <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                  <div style={{ width: "300px", padding: "20px", background: "#2d3748", color: "white", borderRadius: "12px", boxShadow: "0 10px 20px rgba(0,0,0,0.1)" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "5px" }}><span style={{ opacity: 0.8 }}>Subtotal:</span><span>${poTotals.subtotal}</span></div>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "5px" }}><span style={{ opacity: 0.8 }}>Tax (8%):</span><span>${poTotals.tax}</span></div>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginTop: "10px", paddingTop: "10px", borderTop: "1px solid #4a5568" }}>
-                      <span style={{ fontWeight: "bold" }}>Grand Total:</span><span style={{ fontWeight: "bold", fontSize: "1.2rem", color: "#48bb78" }}>${poTotals.grandTotal}</span>
+                  <div style={{ width: "450px", padding: "20px", background: "#2d3748", color: "white", borderRadius: "12px", boxShadow: "0 10px 20px rgba(0,0,0,0.1)" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "15px" }}>
+                      <InputField label="Discount (%)" type="number" value={poTotals.discountRate} onChange={(v) => setPoTotals({...poTotals, discountRate: v})} colors={colors} getInputStyle={getInputStyle} />
+                      <InputField label="Discount ($)" type="number" value={poTotals.discountAmount} onChange={(v) => setPoTotals({...poTotals, discountAmount: v})} colors={colors} getInputStyle={getInputStyle} />
+                      <InputField label="Sales Tax (%)" type="number" value={poTotals.taxRate} onChange={(v) => setPoTotals({...poTotals, taxRate: v})} colors={colors} getInputStyle={getInputStyle} />
+                      <InputField label="Sales Tax ($)" type="number" value={poTotals.taxAmount} onChange={(v) => setPoTotals({...poTotals, taxAmount: v})} colors={colors} getInputStyle={getInputStyle} />
+                      <InputField label="Shipping & Handling ($)" type="number" value={poTotals.shippingCost} onChange={(v) => setPoTotals({...poTotals, shippingCost: v})} colors={colors} getInputStyle={getInputStyle} />
+                      <InputField label="Other Cost ($)" type="number" value={poTotals.otherCost} onChange={(v) => setPoTotals({...poTotals, otherCost: v})} colors={colors} getInputStyle={getInputStyle} />
+                    </div>
+                    <div style={{ borderTop: "1px solid #4a5568", paddingTop: "10px" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "5px" }}><span style={{ opacity: 0.8 }}>Subtotal:</span><span>${poTotals.subtotal}</span></div>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginTop: "10px", paddingTop: "10px", borderTop: "1px solid #4a5568" }}>
+                        <span style={{ fontWeight: "bold" }}>Grand Total:</span><span style={{ fontWeight: "bold", fontSize: "1.2rem", color: "#48bb78" }}>${poTotals.grandTotal}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -424,11 +438,7 @@ function HomePage() {
             )}
           </div>
 
-          <button onClick={generate} disabled={loading} style={{ 
-            width: "100%", padding: "15px", marginTop: "20px", border: "none", borderRadius: "10px", 
-            fontSize: "16px", fontWeight: "600", color: "white", cursor: loading ? "not-allowed" : "pointer",
-            background: mode === "po" ? colors.poGreen : `linear-gradient(135deg, ${colors.deepBlue}, ${colors.purple})`
-          }}>
+          <button onClick={generate} disabled={loading} style={{ width: "100%", padding: "15px", marginTop: "20px", border: "none", borderRadius: "10px", fontSize: "16px", fontWeight: "600", color: "white", cursor: loading ? "not-allowed" : "pointer", background: mode === "po" ? colors.poGreen : `linear-gradient(135deg, ${colors.deepBlue}, ${colors.purple})` }}>
             {loading ? "Processing..." : mode === "po" ? "Generate PO JSON & PDF" : "Run Snap"}
           </button>
 
