@@ -115,7 +115,8 @@ function HomePage() {
     errorRed: "#e53e3e",
     successGreen: "#38a169",
     footerText: "#718096",
-    poGreen: "#2d6a4f" 
+    poGreen: "#2d6a4f",
+    lockedGray: "#cbd5e0"
   };
 
   const scrollToForm = () => {
@@ -172,7 +173,6 @@ function HomePage() {
     const doc = new jsPDF();
     const poData = { buyer: buyerInfo, vendor: vendorInfo, details: poDetails, items: poItems, totals: poTotals };
     
-    // --- Header (Clean & Printer Friendly) ---
     doc.setFont("helvetica", "bold");
     doc.setFontSize(22);
     doc.setTextColor(0, 0, 0);
@@ -194,11 +194,9 @@ function HomePage() {
     doc.setTextColor(0, 0, 0);
     doc.text(poData.details.deliveryDate || "ASAP", 170, 32);
 
-    // --- Horizontal Rule ---
     doc.setDrawColor(200, 200, 200);
     doc.line(20, 40, 190, 40);
 
-    // --- Addresses Section (Increased Spacing) ---
     let addressY = 55;
     doc.setFontSize(10);
     doc.setFont("helvetica", "bold");
@@ -220,7 +218,6 @@ function HomePage() {
       `Payment Terms: ${poData.vendor.vendorPaymentTerms || poData.details.paymentTerms}`
     ], 110, addressY);
 
-    // --- Logistics Block (Professional Grid) ---
     let logisticsY = 95;
     doc.setDrawColor(230, 230, 230);
     doc.setFillColor(250, 250, 250);
@@ -237,7 +234,6 @@ function HomePage() {
     doc.text(poData.details.shippingTerms || "N/A", 80, logisticsY + 13);
     doc.text(poData.details.paymentTerms || "N/A", 140, logisticsY + 13);
 
-    // --- Items Table ---
     let tableY = 130;
     doc.setFont("helvetica", "bold");
     doc.setFillColor(240, 240, 240);
@@ -260,7 +256,6 @@ function HomePage() {
       tableY += 8;
     });
 
-    // --- Totals Section ---
     tableY += 10;
     const totalsX = 140;
     doc.setFontSize(10);
@@ -286,7 +281,6 @@ function HomePage() {
     doc.text("GRAND TOTAL:", totalsX, tableY + 2);
     doc.text(`$${poData.totals.grandTotal}`, 175, tableY + 2);
 
-    // --- Terms & Conditions (Bottom) ---
     const footerY = 250;
     doc.setFontSize(8);
     doc.setTextColor(120, 120, 120);
@@ -300,7 +294,6 @@ function HomePage() {
     ];
     doc.text(terms, 20, footerY + 5);
 
-    // --- Signature ---
     doc.setTextColor(0, 0, 0);
     doc.setFont("helvetica", "bold");
     doc.line(130, 275, 190, 275);
@@ -467,7 +460,7 @@ function HomePage() {
                   <option value="enthusiastic">Enthusiastic & High-Energy</option>
                   <option value="minimalist">Minimalist & Direct</option>
                 </select>
-                <InputField label="Short Description (Optional)" value={description} onChange={setSDescription} placeholder="What is this post about?" colors={colors} getInputStyle={getInputStyle} />
+                <InputField label="Short Description (Optional)" value={description} onChange={setDescription} placeholder="What is this post about?" colors={colors} getInputStyle={getInputStyle} />
               </>
             )}
             {mode === "apology" && (
@@ -563,9 +556,22 @@ function HomePage() {
             )}
           </div>
 
-          <button onClick={generate} disabled={loading} style={{ width: "100%", padding: "15px", marginTop: "20px", border: "none", borderRadius: "10px", fontSize: "16px", fontWeight: "600", color: "white", cursor: loading ? "not-allowed" : "pointer", background: mode === "po" ? colors.poGreen : `linear-gradient(135deg, ${colors.deepBlue}, ${colors.purple})` }}>
-            {loading ? "Processing..." : mode === "po" ? "Generate PO JSON & PDF" : "Run Snap"}
-          </button>
+          <div style={{ marginTop: "20px", display: "flex", flexDirection: "column", gap: "10px" }}>
+            <div style={{ display: "flex", gap: "10px" }}>
+              <button onClick={generate} disabled={loading} style={{ flex: 2, padding: "15px", border: "none", borderRadius: "10px", fontSize: "16px", fontWeight: "600", color: "white", cursor: loading ? "not-allowed" : "pointer", background: mode === "po" ? colors.poGreen : `linear-gradient(135deg, ${colors.deepBlue}, ${colors.purple})` }}>
+                {loading ? "Processing..." : mode === "po" ? "Generate PO JSON & PDF" : "Run Snap"}
+              </button>
+              
+              <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+                <button disabled style={{ width: "100%", height: "100%", padding: "15px", border: "none", borderRadius: "10px", fontSize: "16px", fontWeight: "600", color: "white", background: colors.lockedGray, cursor: "not-allowed" }}>
+                  Save to DB
+                </button>
+              </div>
+            </div>
+            <p style={{ fontSize: "12px", color: "#718096", textAlign: "right", margin: "0", fontStyle: "italic" }}>
+              * Save to DB functionality is exclusive to subscription users.
+            </p>
+          </div>
 
           {output && (
             <div style={{ marginTop: "30px", borderTop: `1px solid ${colors.lightGray}`, paddingTop: "20px" }}>
