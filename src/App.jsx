@@ -11,7 +11,6 @@ function HomePage() {
   // --- STATE MANAGEMENT ---
   const [mode, setMode] = useState("about");
   
-  // Basic Input States
   const [industry, setIndustry] = useState("");
   const [city, setCity] = useState("");
   const [years, setYears] = useState("");
@@ -23,7 +22,6 @@ function HomePage() {
   const [apologyContext, setApologyContext] = useState(""); 
   const [rawComments, setRawComments] = useState("");
 
-  // --- PURCHASE ORDER STATE ---
   const [buyerInfo, setBuyerInfo] = useState({
     companyName: "", companyAddress: "", contactName: "", contactEmail: "", contactPhone: "", billingAddress: "", shippingAddress: ""
   });
@@ -43,7 +41,7 @@ function HomePage() {
   });
 
   const [poItems, setPoItems] = useState([
-    { itemName: "", partNumber: "", quantity: 1, unitPrice: 0, unitOfMeasure: "pcs", taxable: false, discount: 0, lineNotes: "" }
+    { itemName: "", partNumber: "", quantity: 1, unitPrice: 0, unitOfMeasure: "pcs", taxable: false, discount: 0, lineNotes: "", whereUsed: "" }
   ]);
 
   const [poTotals, setPoTotals] = useState({ 
@@ -57,7 +55,6 @@ function HomePage() {
     grandTotal: 0 
   });
 
-  // UI States
   const [output, setOutput] = useState(""); 
   const [loading, setLoading] = useState(false); 
   const [error, setError] = useState(""); 
@@ -73,7 +70,6 @@ function HomePage() {
     }
   }, [searchParams]);
 
-  // --- AUTO-CALCULATION LOGIC ---
   useEffect(() => {
     if (mode === "po") {
       const itemsSubtotal = poItems.reduce((acc, item) => {
@@ -176,18 +172,140 @@ function HomePage() {
     const doc = new jsPDF();
     const poData = { buyer: buyerInfo, vendor: vendorInfo, details: poDetails, items: poItems, totals: poTotals };
     
-    doc.setFillColor(45, 106, 79); 
-    doc.rect(0, 0, 210, 40, "F");
-    doc.setTextColor(255, 255, 255);
+    // --- Header (Clean & Printer Friendly) ---
+    doc.setFont("helvetica", "bold");
     doc.setFontSize(22);
-    doc.text(`PURCHASE ORDER: ${poData.details.poNumber}`, 105, 25, { align: "center" });
-    
     doc.setTextColor(0, 0, 0);
-    doc.setFontSize(10);
-    doc.text(`Buyer: ${poData.buyer.companyName}`, 20, 50);
-    doc.text(`Vendor: ${poData.vendor.vendorName}`, 20, 60);
-    doc.text(`Total: $${poData.totals.grandTotal}`, 20, 70);
+    doc.text("PURCHASE ORDER", 20, 25);
     
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`PO NUMBER:`, 140, 20);
+    doc.setTextColor(0, 0, 0);
+    doc.text(poData.details.poNumber, 170, 20);
+    
+    doc.setTextColor(100, 100, 100);
+    doc.text(`DATE:`, 140, 26);
+    doc.setTextColor(0, 0, 0);
+    doc.text(poData.details.poDate, 170, 26);
+
+    doc.setTextColor(100, 100, 100);
+    doc.text(`DELIVERY:`, 140, 32);
+    doc.setTextColor(0, 0, 0);
+    doc.text(poData.details.deliveryDate || "ASAP", 170, 32);
+
+    // --- Horizontal Rule ---
+    doc.setDrawColor(200, 200, 200);
+    doc.line(20, 40, 190, 40);
+
+    // --- Addresses Section (Increased Spacing) ---
+    let addressY = 55;
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.text("BUYER", 20, addressY);
+    doc.text("VENDOR", 110, addressY);
+    
+    doc.setFont("helvetica", "normal");
+    addressY += 6;
+    doc.text([
+      poData.buyer.companyName || "N/A",
+      poData.buyer.companyAddress || "N/A",
+      `Attn: ${poData.buyer.contactName || "N/A"}`,
+      poData.buyer.contactEmail || ""
+    ], 20, addressY);
+
+    doc.text([
+      poData.vendor.vendorName || "N/A",
+      poData.vendor.vendorAddress || "N/A",
+      `Payment Terms: ${poData.vendor.vendorPaymentTerms || poData.details.paymentTerms}`
+    ], 110, addressY);
+
+    // --- Logistics Block (Professional Grid) ---
+    let logisticsY = 95;
+    doc.setDrawColor(230, 230, 230);
+    doc.setFillColor(250, 250, 250);
+    doc.rect(20, logisticsY, 170, 18, "F");
+    
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.text("SHIPPING METHOD", 25, logisticsY + 7);
+    doc.text("SHIPPING TERMS", 80, logisticsY + 7);
+    doc.text("PAYMENT TERMS", 140, logisticsY + 7);
+    
+    doc.setFont("helvetica", "normal");
+    doc.text(poData.details.shippingMethod || "N/A", 25, logisticsY + 13);
+    doc.text(poData.details.shippingTerms || "N/A", 80, logisticsY + 13);
+    doc.text(poData.details.paymentTerms || "N/A", 140, logisticsY + 13);
+
+    // --- Items Table ---
+    let tableY = 130;
+    doc.setFont("helvetica", "bold");
+    doc.setFillColor(240, 240, 240);
+    doc.rect(20, tableY, 170, 8, "F");
+    doc.text("DESCRIPTION", 25, tableY + 5);
+    doc.text("P/N", 100, tableY + 5);
+    doc.text("QTY", 130, tableY + 5);
+    doc.text("PRICE", 150, tableY + 5);
+    doc.text("TOTAL", 175, tableY + 5);
+
+    tableY += 13;
+    doc.setFont("helvetica", "normal");
+    poData.items.forEach((item) => {
+      const lineTotal = (parseFloat(item.quantity) || 0) * (parseFloat(item.unitPrice) || 0);
+      doc.text(item.itemName || "-", 25, tableY);
+      doc.text(item.partNumber || "-", 100, tableY);
+      doc.text(String(item.quantity), 130, tableY);
+      doc.text(`$${parseFloat(item.unitPrice).toFixed(2)}`, 150, tableY);
+      doc.text(`$${lineTotal.toFixed(2)}`, 175, tableY);
+      tableY += 8;
+    });
+
+    // --- Totals Section ---
+    tableY += 10;
+    const totalsX = 140;
+    doc.setFontSize(10);
+    doc.text(`Subtotal:`, totalsX, tableY);
+    doc.text(`$${poData.totals.subtotal}`, 175, tableY);
+    
+    tableY += 6;
+    doc.text(`Discount (${poData.totals.discountRate}%):`, totalsX, tableY);
+    doc.text(`-$${poData.totals.discountAmount}`, 175, tableY);
+    
+    tableY += 6;
+    doc.text(`Sales Tax (${poData.totals.taxRate}%):`, totalsX, tableY);
+    doc.text(`$${poData.totals.taxAmount}`, 175, tableY);
+    
+    tableY += 6;
+    doc.text(`Shipping:`, totalsX, tableY);
+    doc.text(`$${poData.totals.shippingCost}`, 175, tableY);
+
+    tableY += 10;
+    doc.setDrawColor(0, 0, 0);
+    doc.line(totalsX - 5, tableY - 5, 190, tableY - 5);
+    doc.setFont("helvetica", "bold");
+    doc.text("GRAND TOTAL:", totalsX, tableY + 2);
+    doc.text(`$${poData.totals.grandTotal}`, 175, tableY + 2);
+
+    // --- Terms & Conditions (Bottom) ---
+    const footerY = 250;
+    doc.setFontSize(8);
+    doc.setTextColor(120, 120, 120);
+    doc.text("TERMS AND CONDITIONS", 20, footerY);
+    doc.setFont("helvetica", "normal");
+    const terms = [
+      "1. Please send all invoices to the buyer's contact email listed above.",
+      "2. Notify us immediately if you are unable to ship as specified.",
+      "3. All items are subject to inspection and approval at the time of delivery.",
+      "4. This order is subject to the payment terms defined in the logistics section."
+    ];
+    doc.text(terms, 20, footerY + 5);
+
+    // --- Signature ---
+    doc.setTextColor(0, 0, 0);
+    doc.setFont("helvetica", "bold");
+    doc.line(130, 275, 190, 275);
+    doc.text("AUTHORIZED SIGNATURE", 130, 280);
+
     doc.save(`${poData.details.poNumber}.pdf`);
   };
 
@@ -196,7 +314,6 @@ function HomePage() {
     
     if (mode === "po") {
       const hasFirstItem = poItems?.itemName?.trim() !== "";
-  
       if (!buyerInfo.companyName.trim() || !vendorInfo.vendorName.trim() || !poDetails.poNumber.trim() || !hasFirstItem) {
         setError("Please provide at least Company Name, Vendor Name, PO Number, and one Item Description.");
         setLoading(false);
@@ -211,7 +328,7 @@ function HomePage() {
       : { 
           mode, industry, city, years, 
           businessType: finalBusinessType, 
-          tone, description, issueType, apologyContext, 
+          tone, description: description, issueType, apologyContext, 
           rawComments 
         };
 
@@ -350,7 +467,7 @@ function HomePage() {
                   <option value="enthusiastic">Enthusiastic & High-Energy</option>
                   <option value="minimalist">Minimalist & Direct</option>
                 </select>
-                <InputField label="Short Description (Optional)" value={description} onChange={setDescription} placeholder="What is this post about?" colors={colors} getInputStyle={getInputStyle} />
+                <InputField label="Short Description (Optional)" value={description} onChange={setSDescription} placeholder="What is this post about?" colors={colors} getInputStyle={getInputStyle} />
               </>
             )}
             {mode === "apology" && (
@@ -402,18 +519,26 @@ function HomePage() {
                 <div style={{ border: `1px solid ${colors.lightGray}`, borderRadius: "12px", padding: "20px" }}>
                   <h4 style={{ color: colors.poGreen, marginBottom: "15px" }}>Order Items</h4>
                   {poItems.map((item, index) => (
-                    <div key={index} style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 40px", gap: "10px", marginBottom: "15px", alignItems: "end", paddingBottom: "15px", borderBottom: `1px solid ${colors.lightGray}55` }}>
-                      <InputField label="Item Description" value={item.itemName} onChange={(v) => updateItem(index, "itemName", v)} placeholder="Part/Service Name" colors={colors} getInputStyle={getInputStyle} />
-                      <InputField label="Qty" type="number" value={item.quantity} onChange={(v) => updateItem(index, "quantity", v)} colors={colors} getInputStyle={getInputStyle} />
-                      <InputField label="Price ($)" type="number" value={item.unitPrice} onChange={(v) => updateItem(index, "unitPrice", v)} colors={colors} getInputStyle={getInputStyle} />
-                      <div style={{ display: "flex", flexDirection: "column", gap: "5px", alignItems: "center" }}>
-                        <label style={{ fontSize: "10px", fontWeight: "bold" }}>Tax?</label>
-                        <input type="checkbox" checked={item.taxable} onChange={(e) => updateItem(index, "taxable", e.target.checked)} />
+                    <div key={index} style={{ marginBottom: "20px", paddingBottom: "20px", borderBottom: `2px solid ${colors.lightGray}55` }}>
+                      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 0.6fr 0.8fr 0.6fr 40px", gap: "10px", alignItems: "end" }}>
+                        <InputField label="Item Description" value={item.itemName} onChange={(v) => updateItem(index, "itemName", v)} placeholder="Service or Product Name" colors={colors} getInputStyle={getInputStyle} />
+                        <InputField label="Part Number" value={item.partNumber} onChange={(v) => updateItem(index, "partNumber", v)} placeholder="SKU/ID" colors={colors} getInputStyle={getInputStyle} />
+                        <InputField label="Qty" type="number" value={item.quantity} onChange={(v) => updateItem(index, "quantity", v)} colors={colors} getInputStyle={getInputStyle} />
+                        <InputField label="Price ($)" type="number" value={item.unitPrice} onChange={(v) => updateItem(index, "unitPrice", v)} colors={colors} getInputStyle={getInputStyle} />
+                        <div style={{ display: "flex", flexDirection: "column", gap: "5px", alignItems: "center" }}>
+                          <label style={{ fontSize: "10px", fontWeight: "bold" }}>Tax?</label>
+                          <input type="checkbox" checked={item.taxable} onChange={(e) => updateItem(index, "taxable", e.target.checked)} />
+                        </div>
+                        <button onClick={() => setPoItems(poItems.filter((_, i) => i !== index))} style={{ height: "40px", background: colors.errorRed, color: "white", border: "none", borderRadius: "8px", cursor: "pointer" }}>×</button>
                       </div>
-                      <button onClick={() => setPoItems(poItems.filter((_, i) => i !== index))} style={{ height: "40px", background: colors.errorRed, color: "white", border: "none", borderRadius: "8px", cursor: "pointer" }}>×</button>
+
+                      <div style={{ marginTop: "12px", width: "100%", opacity: 0.5 }}>
+                        <label style={{ fontSize: "10px", fontWeight: "700", color: "#718096", textTransform: "uppercase" }}>Where Used (Subscribers Only) *</label>
+                        <input type="text" disabled placeholder="Track product/service usage and quantity per item (Will not be included in PDF)" style={{ ...inputStyle, cursor: "not-allowed", fontSize: "12px", backgroundColor: "#f1f5f9" }} />
+                      </div>
                     </div>
                   ))}
-                  <button onClick={() => setPoItems([...poItems, { itemName: "", partNumber: "", quantity: 1, unitPrice: 0, unitOfMeasure: "pcs", taxable: false, discount: 0, lineNotes: "" }])} style={{ background: colors.poGreen, color: "white", border: "none", padding: "10px 20px", borderRadius: "8px", fontWeight: "bold", cursor: "pointer" }}>+ Add Line Item</button>
+                  <button onClick={() => setPoItems([...poItems, { itemName: "", partNumber: "", quantity: 1, unitPrice: 0, unitOfMeasure: "pcs", taxable: false, discount: 0, lineNotes: "", whereUsed: "" }])} style={{ background: colors.poGreen, color: "white", border: "none", padding: "10px 20px", borderRadius: "8px", fontWeight: "bold", cursor: "pointer" }}>+ Add Line Item</button>
                 </div>
 
                 <div style={{ display: "flex", justifyContent: "flex-end" }}>
