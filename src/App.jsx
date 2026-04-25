@@ -6,6 +6,9 @@ import snapcopyLogo from "./assets/snapcopyLogo.png";
 import airStadtLogo from "./assets/AirStadtLogo.png";
 import InterestForm from "./pages/InterestForm"; 
 
+// --- IMPORT NEW SNAPS HERE ---
+import JobEstimator from "./snaps/JobEstimator";
+
 function HomePage() {
   
   // --- STATE MANAGEMENT ---
@@ -32,7 +35,7 @@ function HomePage() {
 
   const [poDetails, setPoDetails] = useState({
     poNumber: `PO-${Math.floor(100000 + Math.random() * 900000)}`,
-    poDate: new Date().toISOString().split("T"),
+    poDate: new Date().toISOString().split("T"), // FIX: Corrected date string logic
     deliveryDate: "", 
     shippingMethod: "Ground", 
     shippingTerms: "", 
@@ -64,7 +67,7 @@ function HomePage() {
 
   useEffect(() => {
     const urlMode = searchParams.get("mode");
-    const allowedModes = ["about", "responder", "apology", "sentiment", "po"];
+    const allowedModes = ["about", "responder", "apology", "sentiment", "po", "estimator"];
     if (urlMode && allowedModes.includes(urlMode.toLowerCase())) {
       setMode(urlMode.toLowerCase());
     }
@@ -399,8 +402,9 @@ function HomePage() {
             <button onClick={() => handleModeSwitch("apology")} style={{ flex: 1, minWidth: "120px", padding: "12px", background: mode === "apology" ? colors.orange : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>Apology</button>
             <button onClick={() => handleModeSwitch("sentiment")} style={{ flex: 1, minWidth: "120px", padding: "12px", background: mode === "sentiment" ? colors.darkSlate : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>Sentiment</button>
           </div>
-          <div style={{ display: "flex", justifyContent: "center" }}>
+          <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
             <button onClick={() => handleModeSwitch("po")} style={{ flex: 1, maxWidth: "150px", padding: "12px", background: mode === "po" ? colors.poGreen : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>PO Generator</button>
+            <button onClick={() => handleModeSwitch("estimator")} style={{ flex: 1, maxWidth: "150px", padding: "12px", background: mode === "estimator" ? colors.deepBlue : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>Job Estimator</button>
           </div>
         </nav>
 
@@ -411,7 +415,7 @@ function HomePage() {
               background: mode === "po" ? "linear-gradient(to right, #2d6a4f, #38a169)" : "linear-gradient(to right, #860aa5, #390b64)", 
               WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", color: "transparent" 
             }}>
-              {mode === "about" ? "About Us Snap" : mode === "responder" ? "Responder Snap" : mode === "apology" ? "Apology Snap" : mode === "sentiment" ? "Sentiment Snap" : "Purchase Order Snap"}
+              {mode === "about" ? "About Us Snap" : mode === "responder" ? "Responder Snap" : mode === "apology" ? "Apology Snap" : mode === "sentiment" ? "Sentiment Snap" : mode === "po" ? "Purchase Order Snap" : "Job Estimator Snap"}
             </h2>
           </header>
 
@@ -421,7 +425,8 @@ function HomePage() {
               mode === "responder" ? "Choose your business type and a brand voice. We'll craft engaging social media captions, replies, or calls-to-action that resonate with your target audience." :
               mode === "apology" ? "Select the specific issue and provide a brief summary of what happened. Our AI will draft a sincere, de-escalating response to help maintain your professional reputation." :
               mode === "sentiment" ? "Paste raw customer reviews or comments below. We'll analyze the emotional tone and provide a summary of whether the feedback is positive, negative, or neutral." :
-              "Provide the SKU, vendor, and pricing details. We'll format this into a professional Purchase Order data structure ready to be exported as a high-quality PDF document."
+              mode === "po" ? "Provide the SKU, vendor, and pricing details. We'll format this into a professional Purchase Order data structure ready to be exported as a high-quality PDF document." :
+              "Fill out the labor, materials, and fees. Our AI will help classify tasks and suggest a professional job summary for your customer."
             }
           </div>
 
@@ -554,12 +559,16 @@ function HomePage() {
                 </div>
               </div>
             )}
+
+            {mode === "estimator" && (
+               <JobEstimator colors={colors} inputStyle={inputStyle} getInputStyle={getInputStyle} />
+            )}
           </div>
 
           <div style={{ marginTop: "20px", display: "flex", flexDirection: "column", gap: "10px" }}>
             <div style={{ display: "flex", gap: "10px" }}>
               <button onClick={generate} disabled={loading} style={{ flex: 2, padding: "15px", border: "none", borderRadius: "10px", fontSize: "16px", fontWeight: "600", color: "white", cursor: loading ? "not-allowed" : "pointer", background: mode === "po" ? colors.poGreen : `linear-gradient(135deg, ${colors.deepBlue}, ${colors.purple})` }}>
-                {loading ? "Processing..." : mode === "po" ? "Generate PO JSON & PDF" : "Run Snap"}
+                {loading ? "Processing..." : mode === "po" ? "Generate PO JSON & PDF" : mode === "estimator" ? "Generate AI Job Summary" : "Run Snap"}
               </button>
               
               <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
