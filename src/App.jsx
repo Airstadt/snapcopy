@@ -8,6 +8,11 @@ import InterestForm from "./pages/InterestForm";
 
 // --- IMPORT NEW SNAPS HERE ---
 import JobEstimator from "./snaps/JobEstimator";
+import AboutUs from "./snaps/AboutUs";
+import Responder from "./snaps/Responder";
+import Apology from "./snaps/Apology";
+import Sentiment from "./snaps/Sentiment";
+import PoGenerator from "./snaps/PoGenerator";
 
 function HomePage() {
   
@@ -35,7 +40,7 @@ function HomePage() {
 
   const [poDetails, setPoDetails] = useState({
     poNumber: `PO-${Math.floor(100000 + Math.random() * 900000)}`,
-    poDate: new Date().toISOString().split("T"), // FIX: Corrected date string logic
+    poDate: new Date().toISOString().split("T"), 
     deliveryDate: "", 
     shippingMethod: "Ground", 
     shippingTerms: "", 
@@ -345,12 +350,6 @@ function HomePage() {
     }
   }
 
-  const updateItem = (index, field, value) => {
-    const newItems = [...poItems];
-    newItems[index][field] = value;
-    setPoItems(newItems);
-  };
-
   return (
     <main style={{ display: "flex", flexDirection: "column", alignItems: "center", minHeight: "100vh", width: "100vw", background: "#f0f2f5", padding: "20px", boxSizing: "border-box", fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif" }}>
 
@@ -359,11 +358,11 @@ function HomePage() {
         <h1 style={{ 
           fontSize: "48px", fontWeight: "800",
           background: "linear-gradient(to right, #860aa5, #390b64)", 
-          WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", color: "transparent"
+          WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", color: "transparent", lineHeight: "1.2",
         }}>
           The Complete AI Content Toolkit for Growing Businesses
         </h1>
-        <p style={{ color: "#4a5568", fontSize: "18px", marginTop: "10px", maxWidth: "700px", lineHeight: "1.6" }}>
+        <p style={{ color: "#4a5568", fontSize: "18px", marginTop: "14px", maxWidth: "700px", lineHeight: "1.6" }}>
           From professional "About Us" bios to social media management and sentiment analysis. SnapCopy is your all-in-one suite for high-impact content.
         </p>
         <button onClick={scrollToForm} style={{ padding: "16px 32px", background: colors.deepBlue, color: "white", border: "none", borderRadius: "50px", fontWeight: "bold", fontSize: "18px", cursor: "pointer", marginTop: "30px", boxShadow: "0 10px 20px rgba(134, 10, 165, 0.2)" }}>
@@ -415,7 +414,7 @@ function HomePage() {
               background: mode === "po" ? "linear-gradient(to right, #2d6a4f, #38a169)" : "linear-gradient(to right, #860aa5, #390b64)", 
               WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", color: "transparent" 
             }}>
-              {mode === "about" ? "About Us Snap" : mode === "responder" ? "Responder Snap" : mode === "apology" ? "Apology Snap" : mode === "sentiment" ? "Sentiment Snap" : mode === "po" ? "Purchase Order Snap" : "Job Estimator Snap"}
+      {mode === "about" ? "About Us Snap" : mode === "responder" ? "Responder Snap" : mode === "apology" ? "Apology Snap" : mode === "sentiment" ? "Sentiment Snap" : mode === "po" ? "Purchase Order Snap" : "Job Estimator Snap"}
             </h2>
           </header>
 
@@ -433,131 +432,65 @@ function HomePage() {
           {error && <p style={{ color: colors.errorRed, background: "#fff5f5", padding: "10px", borderRadius: "8px", fontSize: "14px", marginBottom: "15px", border: `1px solid ${colors.errorRed}` }}>{error}</p>}
 
           <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+            
             {mode === "about" && (
-              <>
-                <InputField label="Industry" value={industry} onChange={setIndustry} placeholder="HVAC, Roofing..." colors={colors} getInputStyle={getInputStyle} />
-                <InputField label="City" value={city} onChange={setCity} placeholder="Richmond, VA" colors={colors} getInputStyle={getInputStyle} />
-                <InputField label="Years of Experience" value={years} onChange={setYears} placeholder="10" type="number" colors={colors} getInputStyle={getInputStyle} />
-              </>
+              <AboutUs 
+                colors={colors} 
+                inputStyle={inputStyle} 
+                industry={industry} setIndustry={setIndustry}
+                city={city} setCity={setCity}
+                years={years} setYears={setYears}
+                businessType={businessType} setBusinessType={setBusinessType}
+                customBusinessType={customBusinessType} setCustomBusinessType={setCustomBusinessType}
+                description={description} setDescription={setDescription}
+              />
             )}
+            
             {mode === "responder" && (
-              <>
-                <label style={{ fontSize: "14px", fontWeight: "600", color: "#4a5568" }}>Business Type</label>
-                <select value={businessType} onChange={(e) => { setBusinessType(e.target.value); if (e.target.value !== "custom") setCustomBusinessType(""); }} style={inputStyle}>
-                  <option value="">Select type...</option>
-                  <option value="hvac">HVAC Contractor</option>
-                  <option value="roofing">Roofing Specialist</option>
-                  <option value="plumbing">Plumbing Services</option>
-                  <option value="electrical">Electrical Contractor</option>
-                  <option value="landscaping">Landscaping & Lawn Care</option>
-                  <option value="cleaning">Commercial/Residential Cleaning</option>
-                  <option value="painting">Professional Painting</option>
-                  <option value="custom">-- Other / Custom --</option>
-                </select>
-                {businessType === "custom" && (
-                  <InputField label="Enter Business Type" value={customBusinessType} onChange={setCustomBusinessType} placeholder="e.g. Pest Control, Solar Sales..." colors={colors} getInputStyle={getInputStyle} />
-                )}
-                <label style={{ fontSize: "14px", fontWeight: "600", color: "#4a5568" }}>Tone</label>
-                <select value={tone} onChange={(e) => setTone(e.target.value)} style={inputStyle}>
-                  <option value="">Select tone...</option>
-                  <option value="professional">Professional & Authoritative</option>
-                  <option value="friendly">Friendly & Relatable</option>
-                  <option value="enthusiastic">Enthusiastic & High-Energy</option>
-                  <option value="minimalist">Minimalist & Direct</option>
-                </select>
-                <InputField label="Short Description (Optional)" value={description} onChange={setDescription} placeholder="What is this post about?" colors={colors} getInputStyle={getInputStyle} />
-              </>
+              <Responder 
+                colors={colors} 
+                inputStyle={inputStyle} 
+                businessType={businessType} 
+                setBusinessType={setBusinessType}
+                customBusinessType={customBusinessType} 
+                setCustomBusinessType={setCustomBusinessType}
+                tone={tone} 
+                setTone={setTone} 
+                description={description} 
+                setDescription={setDescription} 
+          />
             )}
+            
             {mode === "apology" && (
-              <>
-                <label style={{ fontSize: "14px", fontWeight: "600", color: "#4a5568" }}>Issue Type</label>
-                <select value={issueType} onChange={(e) => setIssueType(e.target.value)} style={inputStyle}>
-                  <option value="">What went wrong?</option>
-                  <option value="delay">Service or Shipping Delay</option>
-                  <option value="quality">Workmanship / Quality Issue</option>
-                  <option value="communication">Poor Communication / No-Show</option>
-                  <option value="billing">Billing or Overcharge Dispute</option>
-                  <option value="behavior">Staff Behavior / Professionalism</option>
-                </select>
-                <textarea value={apologyContext} onChange={(e) => setApologyContext(e.target.value)} placeholder="Provide context (e.g. 'We missed the appointment because of a truck breakdown')..." style={{ ...inputStyle, height: "100px", resize: "none" }} />
-              </>
+              <Apology 
+                colors={colors}
+                inputStyle={inputStyle}
+                issueType={issueType}
+                setIssueType={setIssueType}
+                apologyContext={apologyContext}
+                setApologyContext={setApologyContext}
+              />
             )}
+
             {mode === "sentiment" && (
-              <textarea value={rawComments} onChange={(e) => setRawComments(e.target.value)} placeholder="Paste comments here..." style={{ ...inputStyle, height: "150px", resize: "none" }} />
+              <Sentiment 
+                inputStyle={inputStyle}
+                rawComments={rawComments}
+                setRawComments={setRawComments}
+              />
             )}
             
             {mode === "po" && (
-              <div style={{ display: "flex", flexDirection: "column", gap: "25px" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "20px" }}>
-                  <div style={{ padding: "20px", background: "#f8fafc", borderRadius: "12px", border: `1px solid ${colors.lightGray}` }}>
-                    <h4 style={{ color: colors.poGreen, marginBottom: "15px", borderBottom: `2px solid ${colors.poGreen}`, display: "inline-block" }}>Buyer Details</h4>
-                    <InputField label="Company Name" value={buyerInfo.companyName} onChange={(v) => setBuyerInfo({...buyerInfo, companyName: v})} colors={colors} getInputStyle={getInputStyle} />
-                    <InputField label="Address" value={buyerInfo.companyAddress} onChange={(v) => setBuyerInfo({...buyerInfo, companyAddress: v})} colors={colors} getInputStyle={getInputStyle} />
-                    <div style={{ display: "flex", gap: "10px" }}>
-                      <InputField label="Contact Name" value={buyerInfo.contactName} onChange={(v) => setBuyerInfo({...buyerInfo, contactName: v})} colors={colors} getInputStyle={getInputStyle} />
-                      <InputField label="Contact Email" value={buyerInfo.contactEmail} onChange={(v) => setBuyerInfo({...buyerInfo, contactEmail: v})} colors={colors} getInputStyle={getInputStyle} />
-                    </div>
-                  </div>
-                  <div style={{ padding: "20px", background: "#f8fafc", borderRadius: "12px", border: `1px solid ${colors.lightGray}` }}>
-                    <h4 style={{ color: colors.poGreen, marginBottom: "15px", borderBottom: `2px solid ${colors.poGreen}`, display: "inline-block" }}>Vendor Details</h4>
-                    <InputField label="Vendor Name" value={vendorInfo.vendorName} onChange={(v) => setVendorInfo({...vendorInfo, vendorName: v})} colors={colors} getInputStyle={getInputStyle} />
-                    <InputField label="Vendor Address" value={vendorInfo.vendorAddress} onChange={(v) => setVendorInfo({...vendorInfo, vendorAddress: v})} colors={colors} getInputStyle={getInputStyle} />
-                    <InputField label="Payment Terms" value={vendorInfo.vendorPaymentTerms} onChange={(v) => setVendorInfo({...vendorInfo, vendorPaymentTerms: v})} placeholder="Net 30" colors={colors} getInputStyle={getInputStyle} />
-                  </div>
-                </div>
-
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "15px", padding: "15px", background: "#f1f5f9", borderRadius: "10px" }}>
-                  <InputField label="PO Number" value={poDetails.poNumber} onChange={(v) => setPoDetails({...poDetails, poNumber: v})} colors={colors} getInputStyle={getInputStyle} />
-                  <InputField label="PO Date" type="date" value={poDetails.poDate} onChange={(v) => setPoDetails({...poDetails, poDate: v})} colors={colors} getInputStyle={getInputStyle} />
-                  <InputField label="Delivery Date" type="date" value={poDetails.deliveryDate} onChange={(v) => setPoDetails({...poDetails, deliveryDate: v})} colors={colors} getInputStyle={getInputStyle} />
-                  <InputField label="Shipping Method" value={poDetails.shippingMethod} onChange={(v) => setPoDetails({...poDetails, shippingMethod: v})} colors={colors} getInputStyle={getInputStyle} />
-                  <InputField label="Shipping Terms" value={poDetails.shippingTerms} onChange={(v) => setPoDetails({...poDetails, shippingTerms: v})} placeholder="FOB Destination" colors={colors} getInputStyle={getInputStyle} />
-                </div>
-
-                <div style={{ border: `1px solid ${colors.lightGray}`, borderRadius: "12px", padding: "20px" }}>
-                  <h4 style={{ color: colors.poGreen, marginBottom: "15px" }}>Order Items</h4>
-                  {poItems.map((item, index) => (
-                    <div key={index} style={{ marginBottom: "20px", paddingBottom: "20px", borderBottom: `2px solid ${colors.lightGray}55` }}>
-                      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 0.6fr 0.8fr 0.6fr 40px", gap: "10px", alignItems: "end" }}>
-                        <InputField label="Item Description" value={item.itemName} onChange={(v) => updateItem(index, "itemName", v)} placeholder="Service or Product Name" colors={colors} getInputStyle={getInputStyle} />
-                        <InputField label="Part Number" value={item.partNumber} onChange={(v) => updateItem(index, "partNumber", v)} placeholder="SKU/ID" colors={colors} getInputStyle={getInputStyle} />
-                        <InputField label="Qty" type="number" value={item.quantity} onChange={(v) => updateItem(index, "quantity", v)} colors={colors} getInputStyle={getInputStyle} />
-                        <InputField label="Price ($)" type="number" value={item.unitPrice} onChange={(v) => updateItem(index, "unitPrice", v)} colors={colors} getInputStyle={getInputStyle} />
-                        <div style={{ display: "flex", flexDirection: "column", gap: "5px", alignItems: "center" }}>
-                          <label style={{ fontSize: "10px", fontWeight: "bold" }}>Tax?</label>
-                          <input type="checkbox" checked={item.taxable} onChange={(e) => updateItem(index, "taxable", e.target.checked)} />
-                        </div>
-                        <button onClick={() => setPoItems(poItems.filter((_, i) => i !== index))} style={{ height: "40px", background: colors.errorRed, color: "white", border: "none", borderRadius: "8px", cursor: "pointer" }}>×</button>
-                      </div>
-
-                      <div style={{ marginTop: "12px", width: "100%", opacity: 0.5 }}>
-                        <label style={{ fontSize: "10px", fontWeight: "700", color: "#718096", textTransform: "uppercase" }}>Where Used (Subscribers Only) *</label>
-                        <input type="text" disabled placeholder="Track product/service usage and quantity per item (Will not be included in PDF)" style={{ ...inputStyle, cursor: "not-allowed", fontSize: "12px", backgroundColor: "#f1f5f9" }} />
-                      </div>
-                    </div>
-                  ))}
-                  <button onClick={() => setPoItems([...poItems, { itemName: "", partNumber: "", quantity: 1, unitPrice: 0, unitOfMeasure: "pcs", taxable: false, discount: 0, lineNotes: "", whereUsed: "" }])} style={{ background: colors.poGreen, color: "white", border: "none", padding: "10px 20px", borderRadius: "8px", fontWeight: "bold", cursor: "pointer" }}>+ Add Line Item</button>
-                </div>
-
-                <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                  <div style={{ width: "450px", padding: "20px", background: "#2d3748", color: "white", borderRadius: "12px", boxShadow: "0 10px 20px rgba(0,0,0,0.1)" }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "15px" }}>
-                      <InputField label="Discount (%)" type="number" value={poTotals.discountRate} onChange={(v) => setPoTotals({...poTotals, discountRate: v})} colors={colors} getInputStyle={getInputStyle} />
-                      <InputField label="Discount ($)" type="number" value={poTotals.discountAmount} onChange={(v) => setPoTotals({...poTotals, discountAmount: v})} colors={colors} getInputStyle={getInputStyle} />
-                      <InputField label="Sales Tax (%)" type="number" value={poTotals.taxRate} onChange={(v) => setPoTotals({...poTotals, taxRate: v})} colors={colors} getInputStyle={getInputStyle} />
-                      <InputField label="Sales Tax ($)" type="number" value={poTotals.taxAmount} onChange={(v) => setPoTotals({...poTotals, taxAmount: v})} colors={colors} getInputStyle={getInputStyle} />
-                      <InputField label="Shipping & Handling ($)" type="number" value={poTotals.shippingCost} onChange={(v) => setPoTotals({...poTotals, shippingCost: v})} colors={colors} getInputStyle={getInputStyle} />
-                      <InputField label="Other Cost ($)" type="number" value={poTotals.otherCost} onChange={(v) => setPoTotals({...poTotals, otherCost: v})} colors={colors} getInputStyle={getInputStyle} />
-                    </div>
-                    <div style={{ borderTop: "1px solid #4a5568", paddingTop: "10px" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "5px" }}><span style={{ opacity: 0.8 }}>Subtotal:</span><span>${poTotals.subtotal}</span></div>
-                      <div style={{ display: "flex", justifyContent: "space-between", marginTop: "10px", paddingTop: "10px", borderTop: "1px solid #4a5568" }}>
-                        <span style={{ fontWeight: "bold" }}>Grand Total:</span><span style={{ fontWeight: "bold", fontSize: "1.2rem", color: "#48bb78" }}>${poTotals.grandTotal}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <PoGenerator
+                colors={colors}
+                inputStyle={inputStyle}
+                getInputStyle={getInputStyle}
+                buyerInfo={buyerInfo} setBuyerInfo={setBuyerInfo}
+                vendorInfo={vendorInfo} setVendorInfo={setVendorInfo}
+                poDetails={poDetails} setPoDetails={setPoDetails}
+                poItems={poItems} setPoItems={setPoItems}
+                poTotals={poTotals} setPoTotals={setPoTotals}
+              />
             )}
 
             {mode === "estimator" && (
@@ -602,16 +535,6 @@ function HomePage() {
         <p style={{ fontSize: "13px", color: colors.footerText }}>&copy; {new Date().getFullYear()} AirStadt. All rights reserved.</p>
       </footer>
     </main>
-  );
-}
-
-function InputField({ label, value, onChange, placeholder, type = "text", colors, getInputStyle }) {
-  const [focused, setFocused] = useState(false);
-  return (
-    <div style={{ width: "100%" }}>
-      <label style={{ fontSize: "11px", fontWeight: "700", color: "#718096", textTransform: "uppercase" }}>{label}</label>
-      <input type={type} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)} style={getInputStyle(focused)} />
-    </div>
   );
 }
 
