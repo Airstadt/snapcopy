@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 
 export default function Contracts({
   colors,
@@ -26,26 +26,15 @@ export default function Contracts({
         onChange={(e) => setContractType(e.target.value)}
         style={inputStyle}
       >
-        <option value="">Select type...</option>
+        <option value="">Select contract type...</option>
         <option value="Service Agreement">Service Agreement</option>
-        <option value="Independent Contractor Agreement">Independent Contractor Agreement</option>
         <option value="Maintenance Contract">Maintenance Contract</option>
-        <option value="Partnership Agreement">Partnership Agreement</option>
-        <option value="NDA">Non‑Disclosure Agreement (NDA)</option>
-        <option value="custom">Other (Specify below)</option>
+        <option value="Subcontractor Agreement">Subcontractor Agreement</option>
+        <option value="Change Order Agreement">Change Order Agreement</option>
+        <option value="Non Disclosure Agreement">Non Disclosure Agreement</option>
       </select>
 
-      {contractType === "custom" && (
-        <input
-          type="text"
-          placeholder="Enter custom contract type..."
-          value={contractType}
-          onChange={(e) => setContractType(e.target.value)}
-          style={inputStyle}
-        />
-      )}
-
-      <label style={{ fontSize: "14px", fontWeight: "600", color: "#4a5568" }}>
+      <label style={{ fontSize: "14px", fontWeight: "600", color: "#4a5568", marginTop: "10px" }}>
         Party A (Your Business)
       </label>
       <input
@@ -99,3 +88,4 @@ export default function Contracts({
     </>
   );
 }
+
