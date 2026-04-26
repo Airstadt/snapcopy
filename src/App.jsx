@@ -391,7 +391,7 @@ function HomePage() {
         <h1 style={{ 
           fontSize: "48px", fontWeight: "800",
           background: "linear-gradient(to right, #860aa5, #390b64)", 
-          WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", color: "transparent", lineHeight: "1.2",
+          WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", color: "transparent", lineHeight: "1.4",
         }}>
           The Complete AI Content Toolkit for Growing Businesses
         </h1>
@@ -411,12 +411,15 @@ function HomePage() {
         <div style={{ background: "white", padding: "25px", borderRadius: "15px", boxShadow: "0 10px 30px rgba(0,0,0,0.05)", border: `1px solid ${colors.lightGray}` }}>
           <h3 style={{ fontSize: "14px", color: colors.deepBlue, textTransform: "uppercase", marginBottom: "15px" }}>Current Capabilities</h3>
           <ul style={{ color: "#4a5568", fontSize: "15px", paddingLeft: "20px", lineHeight: "2" }}>
-            <li><b>About Us:</b> SEO-ready business bios.</li>
-            <li><b>Responder:</b> Engaging social media captions.</li>
-            <li><b>Apology:</b> Polished customer resolution writing.</li>
-            <li><b>Sentiment:</b> Deep emotional feedback analysis.</li>
-            <li><b style={{ color: colors.poGreen }}>PO Generator:</b> Instant PDF Purchase Orders.</li>
+              <li><b>About Us:</b> SEO-ready business bios.</li>
+              <li><b>Responder:</b> Engaging social media captions.</li>
+              <li><b>Apology:</b> Polished customer resolution writing.</li>
+              <li><b>Sentiment:</b> Deep emotional feedback analysis.</li>
+              <li><b>Contracts & Agreements:</b> Service agreements, NDAs, subcontractor contracts, and more.</li>
+              <li><b>Policies & Compliance:</b> Refund, Warranty, Privacy, and Terms of Service policies.</li>
+              <li><b style={{ color: colors.poGreen }}>PO Generator:</b> Instant PDF Purchase Orders.</li>
           </ul>
+
         </div>
       </section>
 
