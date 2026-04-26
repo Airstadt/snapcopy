@@ -13,6 +13,7 @@ import Responder from "./snaps/Responder";
 import Apology from "./snaps/Apology";
 import Sentiment from "./snaps/Sentiment";
 import PoGenerator from "./snaps/PoGenerator";
+import Contracts from "./snaps/Contracts";
 
 function HomePage() {
   
@@ -30,6 +31,14 @@ function HomePage() {
   const [apologyContext, setApologyContext] = useState(""); 
   const [rawComments, setRawComments] = useState("");
 
+
+  const [contractType, setContractType] = useState("");
+  const [partyA, setPartyA] = useState("");
+  const [partyB, setPartyB] = useState("");
+  const [scope, setScope] = useState("");
+  const [terms, setTerms] = useState("");
+
+  const [specialClauses, setSpecialClauses] = useState("");
   const [buyerInfo, setBuyerInfo] = useState({
     companyName: "", companyAddress: "", contactName: "", contactEmail: "", contactPhone: "", billingAddress: "", shippingAddress: ""
   });
@@ -324,14 +333,33 @@ function HomePage() {
 
     const finalBusinessType = businessType === "custom" ? customBusinessType : businessType;
 
-    const payload = mode === "po" 
-      ? { mode, buyer: buyerInfo, vendor: vendorInfo, details: poDetails, items: poItems, totals: poTotals }
-      : { 
-          mode, industry, city, years, 
-          businessType: finalBusinessType, 
-          tone, description: description, issueType, apologyContext, 
-          rawComments 
-        };
+    const payload =
+  mode === "po"
+    ? { mode, buyer: buyerInfo, vendor: vendorInfo, details: poDetails, items: poItems, totals: poTotals }
+    : mode === "contracts"
+    ? {
+        mode,
+        contractType,
+        partyA,
+        partyB,
+        scope,
+        terms,
+        specialClauses
+      }
+    : {
+        mode,
+        industry,
+        city,
+        years,
+        businessType,
+        customBusinessType,
+        tone,
+        description,
+        issueType,
+        apologyContext,
+        rawComments
+      };
+
 
     try {
       const response = await fetch("https://api.snapcopy.online/generate", {
@@ -400,6 +428,7 @@ function HomePage() {
             <button onClick={() => handleModeSwitch("responder")} style={{ flex: 1, minWidth: "120px", padding: "12px", background: mode === "responder" ? colors.purple : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>Responder</button>
             <button onClick={() => handleModeSwitch("apology")} style={{ flex: 1, minWidth: "120px", padding: "12px", background: mode === "apology" ? colors.orange : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>Apology</button>
             <button onClick={() => handleModeSwitch("sentiment")} style={{ flex: 1, minWidth: "120px", padding: "12px", background: mode === "sentiment" ? colors.darkSlate : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>Sentiment</button>
+            <button onClick={() => handleModeSwitch("contracts")} style={{flex: 1, minWidth: "120px", padding: "12px", background: mode === "contracts" ? colors.deepBlue : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>Contracts</button>
           </div>
           <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
             <button onClick={() => handleModeSwitch("po")} style={{ flex: 1, maxWidth: "150px", padding: "12px", background: mode === "po" ? colors.poGreen : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>PO Generator</button>
@@ -479,6 +508,26 @@ function HomePage() {
                 setRawComments={setRawComments}
               />
             )}
+
+            {mode === "contracts" && (
+            <Contracts
+              colors={colors}
+              inputStyle={inputStyle}
+              contractType={contractType}
+              setContractType={setContractType}
+              partyA={partyA}
+              setPartyA={setPartyA}
+              partyB={partyB}
+              setPartyB={setPartyB}
+              scope={scope}
+              setScope={setScope}
+              terms={terms}
+              setTerms={setTerms}
+              specialClauses={specialClauses}
+              setSpecialClauses={setSpecialClauses}
+            />
+  )}
+
             
             {mode === "po" && (
               <PoGenerator
@@ -492,6 +541,7 @@ function HomePage() {
                 poTotals={poTotals} setPoTotals={setPoTotals}
               />
             )}
+            
 
             {mode === "estimator" && (
                <JobEstimator colors={colors} inputStyle={inputStyle} getInputStyle={getInputStyle} />
