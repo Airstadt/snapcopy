@@ -6,12 +6,21 @@ import snapcopyLogo from "./assets/snapcopyLogo.png";
 import airStadtLogo from "./assets/AirStadtLogo.png";
 import InterestForm from "./pages/InterestForm"; 
 
+// --- IMPORT NEW SNAPS HERE ---
+import JobEstimator from "./snaps/JobEstimator";
+import AboutUs from "./snaps/AboutUs";
+import Responder from "./snaps/Responder";
+import Apology from "./snaps/Apology";
+import Sentiment from "./snaps/Sentiment";
+import PoGenerator from "./snaps/PoGenerator";
+import Contracts from "./snaps/Contracts";
+import PoliciesCompliance from "./snaps/Policies";
+
 function HomePage() {
   
   // --- STATE MANAGEMENT ---
   const [mode, setMode] = useState("about");
   
-  // Basic Input States
   const [industry, setIndustry] = useState("");
   const [city, setCity] = useState("");
   const [years, setYears] = useState("");
@@ -23,7 +32,18 @@ function HomePage() {
   const [apologyContext, setApologyContext] = useState(""); 
   const [rawComments, setRawComments] = useState("");
 
-  // --- PURCHASE ORDER STATE ---
+
+  const [contractType, setContractType] = useState("");
+  const [partyA, setPartyA] = useState("");
+  const [partyB, setPartyB] = useState("");
+  const [scope, setScope] = useState("");
+  const [terms, setTerms] = useState("");
+
+  const [policyType, setPolicyType] = useState("");
+  const [businessName, setBusinessName] = useState("");
+  const [details, setDetails] = useState("");
+
+  const [specialClauses, setSpecialClauses] = useState("");
   const [buyerInfo, setBuyerInfo] = useState({
     companyName: "", companyAddress: "", contactName: "", contactEmail: "", contactPhone: "", billingAddress: "", shippingAddress: ""
   });
@@ -34,7 +54,7 @@ function HomePage() {
 
   const [poDetails, setPoDetails] = useState({
     poNumber: `PO-${Math.floor(100000 + Math.random() * 900000)}`,
-    poDate: new Date().toISOString().split("T"),
+    poDate: new Date().toISOString().split("T"), 
     deliveryDate: "", 
     shippingMethod: "Ground", 
     shippingTerms: "", 
@@ -43,7 +63,7 @@ function HomePage() {
   });
 
   const [poItems, setPoItems] = useState([
-    { itemName: "", partNumber: "", quantity: 1, unitPrice: 0, unitOfMeasure: "pcs", taxable: false, discount: 0, lineNotes: "" }
+    { itemName: "", partNumber: "", quantity: 1, unitPrice: 0, unitOfMeasure: "pcs", taxable: false, discount: 0, lineNotes: "", whereUsed: "" }
   ]);
 
   const [poTotals, setPoTotals] = useState({ 
@@ -57,7 +77,6 @@ function HomePage() {
     grandTotal: 0 
   });
 
-  // UI States
   const [output, setOutput] = useState(""); 
   const [loading, setLoading] = useState(false); 
   const [error, setError] = useState(""); 
@@ -67,13 +86,12 @@ function HomePage() {
 
   useEffect(() => {
     const urlMode = searchParams.get("mode");
-    const allowedModes = ["about", "responder", "apology", "sentiment", "po"];
+    const allowedModes = ["about", "responder", "apology", "sentiment", "po", "estimator"];
     if (urlMode && allowedModes.includes(urlMode.toLowerCase())) {
       setMode(urlMode.toLowerCase());
     }
   }, [searchParams]);
 
-  // --- AUTO-CALCULATION LOGIC ---
   useEffect(() => {
     if (mode === "po") {
       const itemsSubtotal = poItems.reduce((acc, item) => {
@@ -119,7 +137,8 @@ function HomePage() {
     errorRed: "#e53e3e",
     successGreen: "#38a169",
     footerText: "#718096",
-    poGreen: "#2d6a4f" 
+    poGreen: "#2d6a4f",
+    lockedGray: "#cbd5e0"
   };
 
   const scrollToForm = () => {
@@ -176,18 +195,132 @@ function HomePage() {
     const doc = new jsPDF();
     const poData = { buyer: buyerInfo, vendor: vendorInfo, details: poDetails, items: poItems, totals: poTotals };
     
-    doc.setFillColor(45, 106, 79); 
-    doc.rect(0, 0, 210, 40, "F");
-    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
     doc.setFontSize(22);
-    doc.text(`PURCHASE ORDER: ${poData.details.poNumber}`, 105, 25, { align: "center" });
-    
     doc.setTextColor(0, 0, 0);
-    doc.setFontSize(10);
-    doc.text(`Buyer: ${poData.buyer.companyName}`, 20, 50);
-    doc.text(`Vendor: ${poData.vendor.vendorName}`, 20, 60);
-    doc.text(`Total: $${poData.totals.grandTotal}`, 20, 70);
+    doc.text("PURCHASE ORDER", 20, 25);
     
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`PO NUMBER:`, 140, 20);
+    doc.setTextColor(0, 0, 0);
+    doc.text(poData.details.poNumber, 170, 20);
+    
+    doc.setTextColor(100, 100, 100);
+    doc.text(`DATE:`, 140, 26);
+    doc.setTextColor(0, 0, 0);
+    doc.text(poData.details.poDate, 170, 26);
+
+    doc.setTextColor(100, 100, 100);
+    doc.text(`DELIVERY:`, 140, 32);
+    doc.setTextColor(0, 0, 0);
+    doc.text(poData.details.deliveryDate || "ASAP", 170, 32);
+
+    doc.setDrawColor(200, 200, 200);
+    doc.line(20, 40, 190, 40);
+
+    let addressY = 55;
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.text("BUYER", 20, addressY);
+    doc.text("VENDOR", 110, addressY);
+    
+    doc.setFont("helvetica", "normal");
+    addressY += 6;
+    doc.text([
+      poData.buyer.companyName || "N/A",
+      poData.buyer.companyAddress || "N/A",
+      `Attn: ${poData.buyer.contactName || "N/A"}`,
+      poData.buyer.contactEmail || ""
+    ], 20, addressY);
+
+    doc.text([
+      poData.vendor.vendorName || "N/A",
+      poData.vendor.vendorAddress || "N/A",
+      `Payment Terms: ${poData.vendor.vendorPaymentTerms || poData.details.paymentTerms}`
+    ], 110, addressY);
+
+    let logisticsY = 95;
+    doc.setDrawColor(230, 230, 230);
+    doc.setFillColor(250, 250, 250);
+    doc.rect(20, logisticsY, 170, 18, "F");
+    
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.text("SHIPPING METHOD", 25, logisticsY + 7);
+    doc.text("SHIPPING TERMS", 80, logisticsY + 7);
+    doc.text("PAYMENT TERMS", 140, logisticsY + 7);
+    
+    doc.setFont("helvetica", "normal");
+    doc.text(poData.details.shippingMethod || "N/A", 25, logisticsY + 13);
+    doc.text(poData.details.shippingTerms || "N/A", 80, logisticsY + 13);
+    doc.text(poData.details.paymentTerms || "N/A", 140, logisticsY + 13);
+
+    let tableY = 130;
+    doc.setFont("helvetica", "bold");
+    doc.setFillColor(240, 240, 240);
+    doc.rect(20, tableY, 170, 8, "F");
+    doc.text("DESCRIPTION", 25, tableY + 5);
+    doc.text("P/N", 100, tableY + 5);
+    doc.text("QTY", 130, tableY + 5);
+    doc.text("PRICE", 150, tableY + 5);
+    doc.text("TOTAL", 175, tableY + 5);
+
+    tableY += 13;
+    doc.setFont("helvetica", "normal");
+    poData.items.forEach((item) => {
+      const lineTotal = (parseFloat(item.quantity) || 0) * (parseFloat(item.unitPrice) || 0);
+      doc.text(item.itemName || "-", 25, tableY);
+      doc.text(item.partNumber || "-", 100, tableY);
+      doc.text(String(item.quantity), 130, tableY);
+      doc.text(`$${parseFloat(item.unitPrice).toFixed(2)}`, 150, tableY);
+      doc.text(`$${lineTotal.toFixed(2)}`, 175, tableY);
+      tableY += 8;
+    });
+
+    tableY += 10;
+    const totalsX = 140;
+    doc.setFontSize(10);
+    doc.text(`Subtotal:`, totalsX, tableY);
+    doc.text(`$${poData.totals.subtotal}`, 175, tableY);
+    
+    tableY += 6;
+    doc.text(`Discount (${poData.totals.discountRate}%):`, totalsX, tableY);
+    doc.text(`-$${poData.totals.discountAmount}`, 175, tableY);
+    
+    tableY += 6;
+    doc.text(`Sales Tax (${poData.totals.taxRate}%):`, totalsX, tableY);
+    doc.text(`$${poData.totals.taxAmount}`, 175, tableY);
+    
+    tableY += 6;
+    doc.text(`Shipping:`, totalsX, tableY);
+    doc.text(`$${poData.totals.shippingCost}`, 175, tableY);
+
+    tableY += 10;
+    doc.setDrawColor(0, 0, 0);
+    doc.line(totalsX - 5, tableY - 5, 190, tableY - 5);
+    doc.setFont("helvetica", "bold");
+    doc.text("GRAND TOTAL:", totalsX, tableY + 2);
+    doc.text(`$${poData.totals.grandTotal}`, 175, tableY + 2);
+
+    const footerY = 250;
+    doc.setFontSize(8);
+    doc.setTextColor(120, 120, 120);
+    doc.text("TERMS AND CONDITIONS", 20, footerY);
+    doc.setFont("helvetica", "normal");
+    const terms = [
+      "1. Please send all invoices to the buyer's contact email listed above.",
+      "2. Notify us immediately if you are unable to ship as specified.",
+      "3. All items are subject to inspection and approval at the time of delivery.",
+      "4. This order is subject to the payment terms defined in the logistics section."
+    ];
+    doc.text(terms, 20, footerY + 5);
+
+    doc.setTextColor(0, 0, 0);
+    doc.setFont("helvetica", "bold");
+    doc.line(130, 275, 190, 275);
+    doc.text("AUTHORIZED SIGNATURE", 130, 280);
+
     doc.save(`${poData.details.poNumber}.pdf`);
   };
 
@@ -196,7 +329,6 @@ function HomePage() {
     
     if (mode === "po") {
       const hasFirstItem = poItems?.itemName?.trim() !== "";
-  
       if (!buyerInfo.companyName.trim() || !vendorInfo.vendorName.trim() || !poDetails.poNumber.trim() || !hasFirstItem) {
         setError("Please provide at least Company Name, Vendor Name, PO Number, and one Item Description.");
         setLoading(false);
@@ -206,14 +338,33 @@ function HomePage() {
 
     const finalBusinessType = businessType === "custom" ? customBusinessType : businessType;
 
-    const payload = mode === "po" 
-      ? { mode, buyer: buyerInfo, vendor: vendorInfo, details: poDetails, items: poItems, totals: poTotals }
-      : { 
-          mode, industry, city, years, 
-          businessType: finalBusinessType, 
-          tone, description, issueType, apologyContext, 
-          rawComments 
-        };
+    const payload =
+  mode === "po"
+    ? { mode, buyer: buyerInfo, vendor: vendorInfo, details: poDetails, items: poItems, totals: poTotals }
+    : mode === "contracts"
+    ? {
+        mode,
+        contractType,
+        partyA,
+        partyB,
+        scope,
+        terms,
+        specialClauses
+      }
+    : {
+        mode,
+        industry,
+        city,
+        years,
+        businessType,
+        customBusinessType,
+        tone,
+        description,
+        issueType,
+        apologyContext,
+        rawComments
+      };
+
 
     try {
       const response = await fetch("https://api.snapcopy.online/generate", {
@@ -232,12 +383,6 @@ function HomePage() {
     }
   }
 
-  const updateItem = (index, field, value) => {
-    const newItems = [...poItems];
-    newItems[index][field] = value;
-    setPoItems(newItems);
-  };
-
   return (
     <main style={{ display: "flex", flexDirection: "column", alignItems: "center", minHeight: "100vh", width: "100vw", background: "#f0f2f5", padding: "20px", boxSizing: "border-box", fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif" }}>
 
@@ -246,11 +391,11 @@ function HomePage() {
         <h1 style={{ 
           fontSize: "48px", fontWeight: "800",
           background: "linear-gradient(to right, #860aa5, #390b64)", 
-          WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", color: "transparent"
+          WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", color: "transparent", lineHeight: "1.2",
         }}>
           The Complete AI Content Toolkit for Growing Businesses
         </h1>
-        <p style={{ color: "#4a5568", fontSize: "18px", marginTop: "10px", maxWidth: "700px", lineHeight: "1.6" }}>
+        <p style={{ color: "#4a5568", fontSize: "18px", marginTop: "14px", maxWidth: "700px", lineHeight: "1.6" }}>
           From professional "About Us" bios to social media management and sentiment analysis. SnapCopy is your all-in-one suite for high-impact content.
         </p>
         <button onClick={scrollToForm} style={{ padding: "16px 32px", background: colors.deepBlue, color: "white", border: "none", borderRadius: "50px", fontWeight: "bold", fontSize: "18px", cursor: "pointer", marginTop: "30px", boxShadow: "0 10px 20px rgba(134, 10, 165, 0.2)" }}>
@@ -288,10 +433,20 @@ function HomePage() {
             <button onClick={() => handleModeSwitch("responder")} style={{ flex: 1, minWidth: "120px", padding: "12px", background: mode === "responder" ? colors.purple : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>Responder</button>
             <button onClick={() => handleModeSwitch("apology")} style={{ flex: 1, minWidth: "120px", padding: "12px", background: mode === "apology" ? colors.orange : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>Apology</button>
             <button onClick={() => handleModeSwitch("sentiment")} style={{ flex: 1, minWidth: "120px", padding: "12px", background: mode === "sentiment" ? colors.darkSlate : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>Sentiment</button>
+            <button onClick={() => handleModeSwitch("contracts")} style={{flex: 1, minWidth: "120px", padding: "12px", background: mode === "contracts" ? colors.deepBlue : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>Contracts</button>
           </div>
-          <div style={{ display: "flex", justifyContent: "center" }}>
+          <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
             <button onClick={() => handleModeSwitch("po")} style={{ flex: 1, maxWidth: "150px", padding: "12px", background: mode === "po" ? colors.poGreen : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>PO Generator</button>
-          </div>
+            <button onClick={() => handleModeSwitch("estimator")} style={{ flex: 1, maxWidth: "150px", padding: "12px", background: mode === "estimator" ? colors.deepBlue : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>Job Estimator</button>
+            <button onClick={() => handleModeSwitch("estimator")} style={{ flex: 1, maxWidth: "150px", padding: "12px", background: mode === "estimator" ? colors.deepBlue : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>Job Estimator</button>
+            <button onClick={() => handleModeSwitch("policies")}style={{flex: 1, maxWidth: "150px", padding: "12px", background: mode === "policies" ? colors.deepBlue : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer"}} >Policies</button>
+</div>
+          
+            
+
+
+
+
         </nav>
 
         <div style={{ background: "white", padding: "40px", borderRadius: "20px", boxShadow: "0 20px 40px rgba(0,0,0,0.08)", marginBottom: "40px" }}>
@@ -301,7 +456,7 @@ function HomePage() {
               background: mode === "po" ? "linear-gradient(to right, #2d6a4f, #38a169)" : "linear-gradient(to right, #860aa5, #390b64)", 
               WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", color: "transparent" 
             }}>
-              {mode === "about" ? "About Us Snap" : mode === "responder" ? "Responder Snap" : mode === "apology" ? "Apology Snap" : mode === "sentiment" ? "Sentiment Snap" : "Purchase Order Snap"}
+      {mode === "about" ? "About Us Snap" : mode === "responder" ? "Responder Snap" : mode === "apology" ? "Apology Snap" : mode === "sentiment" ? "Sentiment Snap" : mode === "po" ? "Purchase Order Snap" : "Job Estimator Snap"}
             </h2>
           </header>
 
@@ -311,136 +466,117 @@ function HomePage() {
               mode === "responder" ? "Choose your business type and a brand voice. We'll craft engaging social media captions, replies, or calls-to-action that resonate with your target audience." :
               mode === "apology" ? "Select the specific issue and provide a brief summary of what happened. Our AI will draft a sincere, de-escalating response to help maintain your professional reputation." :
               mode === "sentiment" ? "Paste raw customer reviews or comments below. We'll analyze the emotional tone and provide a summary of whether the feedback is positive, negative, or neutral." :
-              "Provide the SKU, vendor, and pricing details. We'll format this into a professional Purchase Order data structure ready to be exported as a high-quality PDF document."
+              mode === "po" ? "Provide the SKU, vendor, and pricing details. We'll format this into a professional Purchase Order data structure ready to be exported as a high-quality PDF document." :
+              "Fill out the labor, materials, and fees. Our AI will help classify tasks and suggest a professional job summary for your customer."
             }
           </div>
 
           {error && <p style={{ color: colors.errorRed, background: "#fff5f5", padding: "10px", borderRadius: "8px", fontSize: "14px", marginBottom: "15px", border: `1px solid ${colors.errorRed}` }}>{error}</p>}
 
           <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+            
             {mode === "about" && (
-              <>
-                <InputField label="Industry" value={industry} onChange={setIndustry} placeholder="HVAC, Roofing..." colors={colors} getInputStyle={getInputStyle} />
-                <InputField label="City" value={city} onChange={setCity} placeholder="Richmond, VA" colors={colors} getInputStyle={getInputStyle} />
-                <InputField label="Years of Experience" value={years} onChange={setYears} placeholder="10" type="number" colors={colors} getInputStyle={getInputStyle} />
-              </>
-            )}
-            {mode === "responder" && (
-              <>
-                <label style={{ fontSize: "14px", fontWeight: "600", color: "#4a5568" }}>Business Type</label>
-                <select value={businessType} onChange={(e) => { setBusinessType(e.target.value); if (e.target.value !== "custom") setCustomBusinessType(""); }} style={inputStyle}>
-                  <option value="">Select type...</option>
-                  <option value="hvac">HVAC Contractor</option>
-                  <option value="roofing">Roofing Specialist</option>
-                  <option value="plumbing">Plumbing Services</option>
-                  <option value="electrical">Electrical Contractor</option>
-                  <option value="landscaping">Landscaping & Lawn Care</option>
-                  <option value="cleaning">Commercial/Residential Cleaning</option>
-                  <option value="painting">Professional Painting</option>
-                  <option value="custom">-- Other / Custom --</option>
-                </select>
-                {businessType === "custom" && (
-                  <InputField label="Enter Business Type" value={customBusinessType} onChange={setCustomBusinessType} placeholder="e.g. Pest Control, Solar Sales..." colors={colors} getInputStyle={getInputStyle} />
-                )}
-                <label style={{ fontSize: "14px", fontWeight: "600", color: "#4a5568" }}>Tone</label>
-                <select value={tone} onChange={(e) => setTone(e.target.value)} style={inputStyle}>
-                  <option value="">Select tone...</option>
-                  <option value="professional">Professional & Authoritative</option>
-                  <option value="friendly">Friendly & Relatable</option>
-                  <option value="enthusiastic">Enthusiastic & High-Energy</option>
-                  <option value="minimalist">Minimalist & Direct</option>
-                </select>
-                <InputField label="Short Description (Optional)" value={description} onChange={setDescription} placeholder="What is this post about?" colors={colors} getInputStyle={getInputStyle} />
-              </>
-            )}
-            {mode === "apology" && (
-              <>
-                <label style={{ fontSize: "14px", fontWeight: "600", color: "#4a5568" }}>Issue Type</label>
-                <select value={issueType} onChange={(e) => setIssueType(e.target.value)} style={inputStyle}>
-                  <option value="">What went wrong?</option>
-                  <option value="delay">Service or Shipping Delay</option>
-                  <option value="quality">Workmanship / Quality Issue</option>
-                  <option value="communication">Poor Communication / No-Show</option>
-                  <option value="billing">Billing or Overcharge Dispute</option>
-                  <option value="behavior">Staff Behavior / Professionalism</option>
-                </select>
-                <textarea value={apologyContext} onChange={(e) => setApologyContext(e.target.value)} placeholder="Provide context (e.g. 'We missed the appointment because of a truck breakdown')..." style={{ ...inputStyle, height: "100px", resize: "none" }} />
-              </>
-            )}
-            {mode === "sentiment" && (
-              <textarea value={rawComments} onChange={(e) => setRawComments(e.target.value)} placeholder="Paste comments here..." style={{ ...inputStyle, height: "150px", resize: "none" }} />
+              <AboutUs 
+                colors={colors} 
+                inputStyle={inputStyle} 
+                industry={industry} setIndustry={setIndustry}
+                city={city} setCity={setCity}
+                years={years} setYears={setYears}
+                businessType={businessType} setBusinessType={setBusinessType}
+                customBusinessType={customBusinessType} setCustomBusinessType={setCustomBusinessType}
+                description={description} setDescription={setDescription}
+              />
             )}
             
+            {mode === "responder" && (
+              <Responder 
+                colors={colors} 
+                inputStyle={inputStyle} 
+                businessType={businessType} 
+                setBusinessType={setBusinessType}
+                customBusinessType={customBusinessType} 
+                setCustomBusinessType={setCustomBusinessType}
+                tone={tone} 
+                setTone={setTone} 
+                description={description} 
+                setDescription={setDescription} 
+          />
+            )}
+            
+            {mode === "apology" && (
+              <Apology 
+                colors={colors}
+                inputStyle={inputStyle}
+                issueType={issueType}
+                setIssueType={setIssueType}
+                apologyContext={apologyContext}
+                setApologyContext={setApologyContext}
+              />
+            )}
+
+            {mode === "sentiment" && (
+              <Sentiment 
+                inputStyle={inputStyle}
+                rawComments={rawComments}
+                setRawComments={setRawComments}
+              />
+            )}
+
+            {mode === "contracts" && (
+            <Contracts
+              colors={colors}
+              inputStyle={inputStyle}
+              contractType={contractType}
+              setContractType={setContractType}
+              partyA={partyA}
+              setPartyA={setPartyA}
+              partyB={partyB}
+              setPartyB={setPartyB}
+              scope={scope}
+              setScope={setScope}
+              terms={terms}
+              setTerms={setTerms}
+              specialClauses={specialClauses}
+              setSpecialClauses={setSpecialClauses}
+            />
+  )}
+
+            
             {mode === "po" && (
-              <div style={{ display: "flex", flexDirection: "column", gap: "25px" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "20px" }}>
-                  <div style={{ padding: "20px", background: "#f8fafc", borderRadius: "12px", border: `1px solid ${colors.lightGray}` }}>
-                    <h4 style={{ color: colors.poGreen, marginBottom: "15px", borderBottom: `2px solid ${colors.poGreen}`, display: "inline-block" }}>Buyer Details</h4>
-                    <InputField label="Company Name" value={buyerInfo.companyName} onChange={(v) => setBuyerInfo({...buyerInfo, companyName: v})} colors={colors} getInputStyle={getInputStyle} />
-                    <InputField label="Address" value={buyerInfo.companyAddress} onChange={(v) => setBuyerInfo({...buyerInfo, companyAddress: v})} colors={colors} getInputStyle={getInputStyle} />
-                    <div style={{ display: "flex", gap: "10px" }}>
-                      <InputField label="Contact Name" value={buyerInfo.contactName} onChange={(v) => setBuyerInfo({...buyerInfo, contactName: v})} colors={colors} getInputStyle={getInputStyle} />
-                      <InputField label="Contact Email" value={buyerInfo.contactEmail} onChange={(v) => setBuyerInfo({...buyerInfo, contactEmail: v})} colors={colors} getInputStyle={getInputStyle} />
-                    </div>
-                  </div>
-                  <div style={{ padding: "20px", background: "#f8fafc", borderRadius: "12px", border: `1px solid ${colors.lightGray}` }}>
-                    <h4 style={{ color: colors.poGreen, marginBottom: "15px", borderBottom: `2px solid ${colors.poGreen}`, display: "inline-block" }}>Vendor Details</h4>
-                    <InputField label="Vendor Name" value={vendorInfo.vendorName} onChange={(v) => setVendorInfo({...vendorInfo, vendorName: v})} colors={colors} getInputStyle={getInputStyle} />
-                    <InputField label="Vendor Address" value={vendorInfo.vendorAddress} onChange={(v) => setVendorInfo({...vendorInfo, vendorAddress: v})} colors={colors} getInputStyle={getInputStyle} />
-                    <InputField label="Payment Terms" value={vendorInfo.vendorPaymentTerms} onChange={(v) => setVendorInfo({...vendorInfo, vendorPaymentTerms: v})} placeholder="Net 30" colors={colors} getInputStyle={getInputStyle} />
-                  </div>
-                </div>
+              <PoGenerator
+                colors={colors}
+                inputStyle={inputStyle}
+                getInputStyle={getInputStyle}
+                buyerInfo={buyerInfo} setBuyerInfo={setBuyerInfo}
+                vendorInfo={vendorInfo} setVendorInfo={setVendorInfo}
+                poDetails={poDetails} setPoDetails={setPoDetails}
+                poItems={poItems} setPoItems={setPoItems}
+                poTotals={poTotals} setPoTotals={setPoTotals}
+              />
+            )}
+            
 
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "15px", padding: "15px", background: "#f1f5f9", borderRadius: "10px" }}>
-                  <InputField label="PO Number" value={poDetails.poNumber} onChange={(v) => setPoDetails({...poDetails, poNumber: v})} colors={colors} getInputStyle={getInputStyle} />
-                  <InputField label="PO Date" type="date" value={poDetails.poDate} onChange={(v) => setPoDetails({...poDetails, poDate: v})} colors={colors} getInputStyle={getInputStyle} />
-                  <InputField label="Delivery Date" type="date" value={poDetails.deliveryDate} onChange={(v) => setPoDetails({...poDetails, deliveryDate: v})} colors={colors} getInputStyle={getInputStyle} />
-                  <InputField label="Shipping Method" value={poDetails.shippingMethod} onChange={(v) => setPoDetails({...poDetails, shippingMethod: v})} colors={colors} getInputStyle={getInputStyle} />
-                  <InputField label="Shipping Terms" value={poDetails.shippingTerms} onChange={(v) => setPoDetails({...poDetails, shippingTerms: v})} placeholder="FOB Destination" colors={colors} getInputStyle={getInputStyle} />
-                </div>
-
-                <div style={{ border: `1px solid ${colors.lightGray}`, borderRadius: "12px", padding: "20px" }}>
-                  <h4 style={{ color: colors.poGreen, marginBottom: "15px" }}>Order Items</h4>
-                  {poItems.map((item, index) => (
-                    <div key={index} style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 40px", gap: "10px", marginBottom: "15px", alignItems: "end", paddingBottom: "15px", borderBottom: `1px solid ${colors.lightGray}55` }}>
-                      <InputField label="Item Description" value={item.itemName} onChange={(v) => updateItem(index, "itemName", v)} placeholder="Part/Service Name" colors={colors} getInputStyle={getInputStyle} />
-                      <InputField label="Qty" type="number" value={item.quantity} onChange={(v) => updateItem(index, "quantity", v)} colors={colors} getInputStyle={getInputStyle} />
-                      <InputField label="Price ($)" type="number" value={item.unitPrice} onChange={(v) => updateItem(index, "unitPrice", v)} colors={colors} getInputStyle={getInputStyle} />
-                      <div style={{ display: "flex", flexDirection: "column", gap: "5px", alignItems: "center" }}>
-                        <label style={{ fontSize: "10px", fontWeight: "bold" }}>Tax?</label>
-                        <input type="checkbox" checked={item.taxable} onChange={(e) => updateItem(index, "taxable", e.target.checked)} />
-                      </div>
-                      <button onClick={() => setPoItems(poItems.filter((_, i) => i !== index))} style={{ height: "40px", background: colors.errorRed, color: "white", border: "none", borderRadius: "8px", cursor: "pointer" }}>×</button>
-                    </div>
-                  ))}
-                  <button onClick={() => setPoItems([...poItems, { itemName: "", partNumber: "", quantity: 1, unitPrice: 0, unitOfMeasure: "pcs", taxable: false, discount: 0, lineNotes: "" }])} style={{ background: colors.poGreen, color: "white", border: "none", padding: "10px 20px", borderRadius: "8px", fontWeight: "bold", cursor: "pointer" }}>+ Add Line Item</button>
-                </div>
-
-                <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                  <div style={{ width: "450px", padding: "20px", background: "#2d3748", color: "white", borderRadius: "12px", boxShadow: "0 10px 20px rgba(0,0,0,0.1)" }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "15px" }}>
-                      <InputField label="Discount (%)" type="number" value={poTotals.discountRate} onChange={(v) => setPoTotals({...poTotals, discountRate: v})} colors={colors} getInputStyle={getInputStyle} />
-                      <InputField label="Discount ($)" type="number" value={poTotals.discountAmount} onChange={(v) => setPoTotals({...poTotals, discountAmount: v})} colors={colors} getInputStyle={getInputStyle} />
-                      <InputField label="Sales Tax (%)" type="number" value={poTotals.taxRate} onChange={(v) => setPoTotals({...poTotals, taxRate: v})} colors={colors} getInputStyle={getInputStyle} />
-                      <InputField label="Sales Tax ($)" type="number" value={poTotals.taxAmount} onChange={(v) => setPoTotals({...poTotals, taxAmount: v})} colors={colors} getInputStyle={getInputStyle} />
-                      <InputField label="Shipping & Handling ($)" type="number" value={poTotals.shippingCost} onChange={(v) => setPoTotals({...poTotals, shippingCost: v})} colors={colors} getInputStyle={getInputStyle} />
-                      <InputField label="Other Cost ($)" type="number" value={poTotals.otherCost} onChange={(v) => setPoTotals({...poTotals, otherCost: v})} colors={colors} getInputStyle={getInputStyle} />
-                    </div>
-                    <div style={{ borderTop: "1px solid #4a5568", paddingTop: "10px" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "5px" }}><span style={{ opacity: 0.8 }}>Subtotal:</span><span>${poTotals.subtotal}</span></div>
-                      <div style={{ display: "flex", justifyContent: "space-between", marginTop: "10px", paddingTop: "10px", borderTop: "1px solid #4a5568" }}>
-                        <span style={{ fontWeight: "bold" }}>Grand Total:</span><span style={{ fontWeight: "bold", fontSize: "1.2rem", color: "#48bb78" }}>${poTotals.grandTotal}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            {mode === "estimator" && (
+               <JobEstimator colors={colors} inputStyle={inputStyle} getInputStyle={getInputStyle} />
             )}
           </div>
 
-          <button onClick={generate} disabled={loading} style={{ width: "100%", padding: "15px", marginTop: "20px", border: "none", borderRadius: "10px", fontSize: "16px", fontWeight: "600", color: "white", cursor: loading ? "not-allowed" : "pointer", background: mode === "po" ? colors.poGreen : `linear-gradient(135deg, ${colors.deepBlue}, ${colors.purple})` }}>
-            {loading ? "Processing..." : mode === "po" ? "Generate PO JSON & PDF" : "Run Snap"}
-          </button>
+          <div style={{ marginTop: "20px", display: "flex", flexDirection: "column", gap: "10px" }}>
+            <div style={{ display: "flex", gap: "10px" }}>
+              <button onClick={generate} disabled={loading} style={{ flex: 2, padding: "15px", border: "none", borderRadius: "10px", fontSize: "16px", fontWeight: "600", color: "white", cursor: loading ? "not-allowed" : "pointer", background: mode === "po" ? colors.poGreen : `linear-gradient(135deg, ${colors.deepBlue}, ${colors.purple})` }}>
+                {loading ? "Processing..." : mode === "po" ? "Generate PO JSON & PDF" : mode === "estimator" ? "Generate AI Job Summary" : "Run Snap"}
+              </button>
+              
+              <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+                <button disabled style={{ width: "100%", height: "100%", padding: "15px", border: "none", borderRadius: "10px", fontSize: "16px", fontWeight: "600", color: "white", background: colors.lockedGray, cursor: "not-allowed" }}>
+                  Save to DB
+                </button>
+              </div>
+            </div>
+            <p style={{ fontSize: "12px", color: "#718096", textAlign: "right", margin: "0", fontStyle: "italic" }}>
+              * Save to DB functionality is exclusive to subscription users.
+            </p>
+          </div>
 
           {output && (
             <div style={{ marginTop: "30px", borderTop: `1px solid ${colors.lightGray}`, paddingTop: "20px" }}>
@@ -462,16 +598,6 @@ function HomePage() {
         <p style={{ fontSize: "13px", color: colors.footerText }}>&copy; {new Date().getFullYear()} AirStadt. All rights reserved.</p>
       </footer>
     </main>
-  );
-}
-
-function InputField({ label, value, onChange, placeholder, type = "text", colors, getInputStyle }) {
-  const [focused, setFocused] = useState(false);
-  return (
-    <div style={{ width: "100%" }}>
-      <label style={{ fontSize: "11px", fontWeight: "700", color: "#718096", textTransform: "uppercase" }}>{label}</label>
-      <input type={type} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)} style={getInputStyle(focused)} />
-    </div>
   );
 }
 
