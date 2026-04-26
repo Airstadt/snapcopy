@@ -438,7 +438,6 @@ function HomePage() {
           <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
             <button onClick={() => handleModeSwitch("po")} style={{ flex: 1, maxWidth: "150px", padding: "12px", background: mode === "po" ? colors.poGreen : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>PO Generator</button>
             <button onClick={() => handleModeSwitch("estimator")} style={{ flex: 1, maxWidth: "150px", padding: "12px", background: mode === "estimator" ? colors.deepBlue : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>Job Estimator</button>
-            <button onClick={() => handleModeSwitch("estimator")} style={{ flex: 1, maxWidth: "150px", padding: "12px", background: mode === "estimator" ? colors.deepBlue : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>Job Estimator</button>
             <button onClick={() => handleModeSwitch("policies")}style={{flex: 1, maxWidth: "150px", padding: "12px", background: mode === "policies" ? colors.deepBlue : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer"}} >Policies</button>
 </div>
           
