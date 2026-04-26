@@ -14,6 +14,7 @@ import Apology from "./snaps/Apology";
 import Sentiment from "./snaps/Sentiment";
 import PoGenerator from "./snaps/PoGenerator";
 import Contracts from "./snaps/Contracts";
+import PoliciesCompliance from "./snaps/Policies";
 
 function HomePage() {
   
@@ -37,6 +38,10 @@ function HomePage() {
   const [partyB, setPartyB] = useState("");
   const [scope, setScope] = useState("");
   const [terms, setTerms] = useState("");
+
+  const [policyType, setPolicyType] = useState("");
+  const [businessName, setBusinessName] = useState("");
+  const [details, setDetails] = useState("");
 
   const [specialClauses, setSpecialClauses] = useState("");
   const [buyerInfo, setBuyerInfo] = useState({
@@ -433,7 +438,15 @@ function HomePage() {
           <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
             <button onClick={() => handleModeSwitch("po")} style={{ flex: 1, maxWidth: "150px", padding: "12px", background: mode === "po" ? colors.poGreen : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>PO Generator</button>
             <button onClick={() => handleModeSwitch("estimator")} style={{ flex: 1, maxWidth: "150px", padding: "12px", background: mode === "estimator" ? colors.deepBlue : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>Job Estimator</button>
-          </div>
+            <button onClick={() => handleModeSwitch("estimator")} style={{ flex: 1, maxWidth: "150px", padding: "12px", background: mode === "estimator" ? colors.deepBlue : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>Job Estimator</button>
+            <button onClick={() => handleModeSwitch("policies")}style={{flex: 1, maxWidth: "150px", padding: "12px", background: mode === "policies" ? colors.deepBlue : "#bda4c9", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer"}} >Policies</button>
+</div>
+          
+            
+
+
+
+
         </nav>
 
         <div style={{ background: "white", padding: "40px", borderRadius: "20px", boxShadow: "0 20px 40px rgba(0,0,0,0.08)", marginBottom: "40px" }}>
