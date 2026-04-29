@@ -63,8 +63,9 @@ const [tasks, setTasks] = useState([
   { desc: "", type: "Hourly", rate: 0, qty: 1, taxable: false }
 ]);
 
+// Inside App.jsx - Materials Initial State
 const [materials, setMaterials] = useState([
-  { desc: "", qty: 1, cost: 0, taxable: true }
+  { desc: "", qty: 1, cost: 0, uom: "pcs", taxable: true } 
 ]);
 
 const [fees, setFees] = useState([
@@ -111,7 +112,7 @@ const removeMaterial = (index) => {
 const addMaterial = () => {
   setMaterials([
     ...materials,
-    { desc: "", qty: 1, cost: 0, taxable: true }
+    { desc: "", qty: 1, cost: 0, uom: "pcs", taxable: true }
   ]);
 };
 
@@ -194,6 +195,35 @@ const handleDownload = () => {
   
   yPos += 20;
 
+  if (output) { // 'output' is the state variable holding your AI Overview
+  yPos += 10;
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(colors.deepBlue);
+  doc.text("Project Overview", margin, yPos);
+  
+  yPos += 7;
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(60); // Dark grey for body text
+
+  // Split the AI text so it wraps within the page margins
+  const maxWidth = 170; 
+  const wrappedOverview = doc.splitTextToSize(output, maxWidth);
+  
+  doc.text(wrappedOverview, margin, yPos);
+  
+  // Dynamically move yPos down based on the length of the overview
+  yPos += (wrappedOverview.length * 5) + 10;
+}
+
+// 2. Check for Page Overflow
+// If the overview was long, we might need a new page for the tables
+if (yPos > 250) {
+  doc.addPage();
+  yPos = 20;
+}
+
   // 3. Labor/Tasks Table
   doc.setFillColor(240, 240, 240);
   doc.rect(margin, yPos, 170, 8, "F");
@@ -227,14 +257,19 @@ const handleDownload = () => {
     doc.setFont("helvetica", "normal");
 
     materials.forEach((m) => {
-      if (!m.desc) return;
-      const lineTotal = (parseFloat(m.qty || 0) * parseFloat(m.cost || 0)).toFixed(2);
-      doc.text(m.desc, margin + 2, yPos);
-      doc.text(m.qty.toString(), margin + 110, yPos);
-      doc.text(`$${m.cost}`, margin + 130, yPos);
-      doc.text(`$${lineTotal}`, margin + 155, yPos);
-      yPos += 8;
-    });
+  if (!m.desc) return;
+  const lineTotal = (parseFloat(m.qty || 0) * parseFloat(m.cost || 0)).toFixed(2);
+  
+  doc.text(m.desc, margin + 2, yPos);
+  
+  // Combines Qty and Unit (e.g., "10 lbs")
+  const qtyWithUnit = `${m.qty} ${m.uom || ""}`;
+  doc.text(qtyWithUnit, margin + 110, yPos);
+  
+  doc.text(`$${parseFloat(m.cost).toFixed(2)}`, margin + 130, yPos);
+  doc.text(`$${lineTotal}`, margin + 155, yPos);
+  yPos += 8;
+});
   }
 
   // 5. Fees & Calculations
@@ -992,7 +1027,7 @@ const handleDownload = () => {
         >
           <header style={{ textAlign: "center", marginBottom: "30px" }}>
             <h2 key={mode} style={{ 
-              fontSize: "36px", margin: 0, fontWeight: "800", display: "inline-block",
+              fontSize: "28px", margin: 0, fontWeight: "800", display: "inline-block",
               background: mode === "po" ? "linear-gradient(to right, #2d6a4f, #38a169)" : "linear-gradient(to right, #860aa5, #390b64)", 
               WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", color: "transparent" 
             }}>

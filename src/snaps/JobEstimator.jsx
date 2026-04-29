@@ -131,69 +131,85 @@ export default function JobEstimator({
       {/* 3. MATERIALS */}
       <div style={{ border: `1px solid ${colors.lightGray}`, padding: "15px", borderRadius: "10px" }}>
         <h4 style={{ fontSize: "14px", color: colors.deepBlue, marginBottom: "10px" }}>Materials</h4>
-        {materials.map((mat, i) => (
-          <div 
-            key={i} 
-            style={{ display: "grid", gridTemplateColumns: "2fr 0.8fr 1fr 40px", gap: "10px", marginBottom: "10px" }}
-          >
-            <input 
-              type="text" 
-              placeholder="Material item" 
-              style={inputStyle} 
-              value={mat.desc} 
-              onChange={e => updateMaterial(i, "desc", e.target.value)} 
-            />
-            <input 
-              type="number" 
-              placeholder="Qty" 
-              style={inputStyle} 
-              value={mat.qty} 
-              onChange={e => updateMaterial(i, "qty", e.target.value)} 
-            />
-            <input 
-              type="number" 
-              placeholder="Cost" 
-              style={inputStyle} 
-              value={mat.cost} 
-              onChange={e => updateMaterial(i, "cost", e.target.value)} 
-            />
-            <button 
-              onClick={() => removeMaterial(i)} 
-              style={{ background: colors.errorRed, color: "white", border: "none", borderRadius: "5px", cursor: "pointer" }}
-            >
-              ×
-            </button>
-          </div>
-        ))}
-        <button 
-          onClick={addMaterial} 
-          style={{ background: colors.deepBlue, color: "white", border: "none", padding: "5px 15px", borderRadius: "5px", fontSize: "12px", cursor: "pointer" }}
-        >
-          + Add Material
-        </button>
-      </div>
 
-      {/* 4. FEES & ADJUSTMENTS */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px" }}>
-        {fees.map((fee, i) => (
-          <div key={i} style={{ display: "flex", gap: "10px" }}>
-            <input 
-              type="text" 
-              placeholder="Fee Type" 
-              style={inputStyle} 
-              value={fee.type} 
-              onChange={e => updateFee(i, "type", e.target.value)} 
-            />
-            <input 
-              type="number" 
-              placeholder="Amount" 
-              style={inputStyle} 
-              value={fee.amount} 
-              onChange={e => updateFee(i, "amount", e.target.value)} 
-            />
-          </div>
-        ))}
-      </div>
+
+        {materials.map((mat, i) => (
+  <div key={i} style={{ marginBottom: "15px", borderBottom: "1px solid #eee", pb: "10px" }}>
+    <div 
+      style={{ 
+        display: "grid", 
+        gridTemplateColumns: "2fr 1fr 0.8fr 1fr 40px", 
+        gap: "10px" 
+      }}
+    >
+      {/* Description */}
+      <input 
+        type="text" 
+        placeholder="Material item" 
+        style={inputStyle} 
+        value={mat.desc} 
+        onChange={e => updateMaterial(i, "desc", e.target.value)} 
+      />
+
+      {/* UOM Dropdown */}
+      <select 
+        style={inputStyle} 
+        value={["pcs", "lbs", "ft", "sqft", "gal", "hr"].includes(mat.uom) ? mat.uom : "Custom..."}
+        onChange={e => {
+          const val = e.target.value;
+          // If they pick Custom, we clear the value so they can type
+          updateMaterial(i, "uom", val === "Custom..." ? "" : val);
+        }}
+      >
+        <option value="pcs">pcs (Pieces)</option>
+        <option value="lbs">lbs (Pounds)</option>
+        <option value="ft">ft (Linear Feet)</option>
+        <option value="sqft">sqft (Square Feet)</option>
+        <option value="gal">gal (Gallons)</option>
+        <option value="bx">bx (Hours)</option>
+        <option value="Custom...">Custom...</option>
+      </select>
+
+      {/* Quantity */}
+      <input 
+        type="number" 
+        placeholder="Qty" 
+        style={inputStyle} 
+        value={mat.qty} 
+        onChange={e => updateMaterial(i, "qty", e.target.value)} 
+      />
+
+      {/* Unit Cost */}
+      <input 
+        type="number" 
+        placeholder="Cost" 
+        style={inputStyle} 
+        value={mat.cost} 
+        onChange={e => updateMaterial(i, "cost", e.target.value)} 
+      />
+
+      {/* Remove Button */}
+      <button 
+        onClick={() => removeMaterial(i)} 
+        style={{ background: colors.errorRed, color: "white", border: "none", borderRadius: "5px", cursor: "pointer" }}
+      >
+        ×
+      </button>
+    </div>
+
+    {/* Custom Input: Only shows if the value isn't in our standard list */}
+    {!["pcs", "lbs", "ft", "sqft", "gal", "hr"].includes(mat.uom) && (
+      <input 
+        type="text" 
+        placeholder="Enter custom unit (e.g. bags, boxes, rolls)" 
+        style={{ ...inputStyle, marginTop: "8px", fontSize: "13px", borderColor: colors.deepBlue }} 
+        value={mat.uom} 
+        onChange={e => updateMaterial(i, "uom", e.target.value)} 
+      />
+    )}
+  </div>
+))}
+</div>
 
       {/* 5. TOTALS & PDF DOWNLOAD */}
       <div style={{ background: colors.lightGray, padding: "20px", borderRadius: "10px", marginTop: "10px" }}>
