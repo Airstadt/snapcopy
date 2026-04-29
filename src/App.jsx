@@ -149,22 +149,79 @@ const calculateTotal = () => {
 
 
 // 4. DOWNLOAD HANDLER (connects to your generate() function)
+//---------estimator pdf generation logic---------
+
 const handleDownload = () => {
-  const total = calculateTotal();
+  const doc = new jsPDF();
+  const margin = 20;
+  let yPos = 20;
 
-  const estimateData = {
-    header,
-    tasks,
-    materials,
-    fees,
-    financials,
-    total
-  };
+  // Header & Title
+  doc.setFontSize(22);
+  doc.setTextColor(colors.deepBlue);
+  doc.text("JOB ESTIMATE", margin, yPos);
+  
+  doc.setFontSize(10);
+  doc.setTextColor(100);
+  doc.text(`Date: ${new Date().toLocaleDateString()}`, 150, yPos);
+  
+  yPos += 15;
+  doc.setDrawColor(colors.deepBlue);
+  doc.line(margin, yPos, 190, yPos);
+  yPos += 15;
 
-  // If you're using your existing generate() function:
-  generate("jobEstimator", estimateData);
+  // Project Info
+  doc.setFontSize(12);
+  doc.setTextColor(0);
+  doc.setFont("helvetica", "bold");
+  doc.text("Project:", margin, yPos);
+  doc.setFont("helvetica", "normal");
+  doc.text(header.jobTitle || "Untitled Project", margin + 20, yPos);
+  
+  yPos += 10;
+  doc.setFont("helvetica", "bold");
+  doc.text("Customer:", margin, yPos);
+  doc.setFont("helvetica", "normal");
+  doc.text(header.customerName || "N/A", margin + 25, yPos);
+  
+  yPos += 20;
+
+  // Items Table Header
+  doc.setFillColor(240, 240, 240);
+  doc.rect(margin, yPos, 170, 8, "F");
+  doc.setFont("helvetica", "bold");
+  doc.text("Description", margin + 2, yPos + 6);
+  doc.text("Qty", margin + 110, yPos + 6);
+  doc.text("Rate", margin + 130, yPos + 6);
+  doc.text("Total", margin + 155, yPos + 6);
+  
+  yPos += 15;
+  doc.setFont("helvetica", "normal");
+
+  // List Tasks
+  tasks.forEach((task) => {
+    const lineTotal = (parseFloat(task.qty || 0) * parseFloat(task.rate || 0)).toFixed(2);
+    doc.text(task.desc || "Service", margin + 2, yPos);
+    doc.text(task.qty.toString(), margin + 110, yPos);
+    doc.text(`$${task.rate}`, margin + 130, yPos);
+    doc.text(`$${lineTotal}`, margin + 155, yPos);
+    yPos += 8;
+  });
+
+  // Totals
+  yPos += 10;
+  doc.setDrawColor(200);
+  doc.line(130, yPos, 190, yPos);
+  yPos += 10;
+  
+  doc.setFont("helvetica", "bold");
+  doc.text("Estimated Total:", 130, yPos);
+  doc.text(`$${calculateTotal()}`, 165, yPos);
+
+  // Save File
+  doc.save(`Estimate_${header.customerName || "Client"}.pdf`);
 };
-
+//-----------------------------end of estimator pdf generation logic-----------------------------
 
 
 
@@ -454,7 +511,7 @@ const handleDownload = () => {
         data.po ||
         data.contract ||
         data.policy ||
-        data.estimate || // <--- Extract the clean text from the "estimate" key
+        data.estimate ||
         JSON.stringify(data, null, 2);
 
       setOutput(
