@@ -9,7 +9,7 @@ import airStadtLogo from "./assets/AirStadtLogo.png";
 import InterestForm from "./pages/InterestForm";
 
 // --- IMPORT SNAPS ---
-import JobEstimator from "./snaps/JobEstimator";
+import JobEstimator from "./snaps/jobEstimator";
 import AboutUs from "./snaps/AboutUs";
 import Responder from "./snaps/Responder";
 import Apology from "./snaps/Apology";
@@ -44,6 +44,131 @@ function HomePage() {
   const [policyType, setPolicyType] = useState("");
   const [businessName, setBusinessName] = useState("");
   const [details, setDetails] = useState("");
+
+// --- JOB ESTIMATOR LOGIC (App.jsx) ---
+
+// 1. STATE
+const [header, setHeader] = useState({
+  jobTitle: "",
+  customerName: "",
+  contactInfo: "",
+  location: "",
+  description: "",
+  category: "",
+  status: "Estimate",
+  dueDate: ""
+});
+
+const [tasks, setTasks] = useState([
+  { desc: "", type: "Hourly", rate: 0, qty: 1, taxable: false }
+]);
+
+const [materials, setMaterials] = useState([
+  { desc: "", qty: 1, cost: 0, taxable: true }
+]);
+
+const [fees, setFees] = useState([
+  { type: "Travel Fee", amount: 0 }
+]);
+
+const [financials, setFinancials] = useState({
+  deposit: 0,
+  discount: 0,
+  taxRate: 8,
+  terms: "Due on Receipt"
+});
+
+
+// 2. UPDATE HELPERS
+const updateTask = (index, field, value) => {
+  const updated = [...tasks];
+  updated[index][field] = value;
+  setTasks(updated);
+};
+
+const removeTask = (index) => {
+  setTasks(tasks.filter((_, i) => i !== index));
+};
+
+const addTask = () => {
+  setTasks([
+    ...tasks,
+    { desc: "", type: "Hourly", rate: 0, qty: 1, taxable: false }
+  ]);
+};
+
+
+const updateMaterial = (index, field, value) => {
+  const updated = [...materials];
+  updated[index][field] = value;
+  setMaterials(updated);
+};
+
+const removeMaterial = (index) => {
+  setMaterials(materials.filter((_, i) => i !== index));
+};
+
+const addMaterial = () => {
+  setMaterials([
+    ...materials,
+    { desc: "", qty: 1, cost: 0, taxable: true }
+  ]);
+};
+
+
+const updateFee = (index, field, value) => {
+  const updated = [...fees];
+  updated[index][field] = value;
+  setFees(updated);
+};
+
+
+// 3. TOTAL CALCULATION
+const calculateTotal = () => {
+  const labor = tasks.reduce(
+    (sum, t) => sum + (parseFloat(t.rate || 0) * parseFloat(t.qty || 0)),
+    0
+  );
+
+  const mats = materials.reduce(
+    (sum, m) => sum + (parseFloat(m.cost || 0) * parseFloat(m.qty || 0)),
+    0
+  );
+
+  const addOns = fees.reduce(
+    (sum, f) => sum + parseFloat(f.amount || 0),
+    0
+  );
+
+  const subtotal = labor + mats + addOns;
+  const afterDiscount = subtotal - parseFloat(financials.discount || 0);
+  const tax = afterDiscount * (parseFloat(financials.taxRate || 0) / 100);
+
+  return (afterDiscount + tax).toFixed(2);
+};
+
+
+// 4. DOWNLOAD HANDLER (connects to your generate() function)
+const handleDownload = () => {
+  const total = calculateTotal();
+
+  const estimateData = {
+    header,
+    tasks,
+    materials,
+    fees,
+    financials,
+    total
+  };
+
+  // If you're using your existing generate() function:
+  generate("jobEstimator", estimateData);
+};
+
+
+
+
+
 
   const [buyerInfo, setBuyerInfo] = useState({
     companyName: "",
@@ -283,21 +408,32 @@ function HomePage() {
             mode,
             policyType,
             businessName,
-            details
+            details,
           }
-        : {
-            mode,
-            industry,
-            city,
-            years,
-            businessType,
-            customBusinessType,
-            tone,
-            description,
-            issueType,
-            apologyContext,
-            rawComments
-          };
+        : mode === "estimator"
+      ? {
+          mode,
+          header,      // Sent as an object containing jobTitle, customerName, etc.
+          tasks,       // Sent as an array of task objects
+          materials,   // Sent as an array of material objects
+          fees,
+          financials,
+          total: calculateTotal(), // Invokes your total calculation helper
+        }
+      : {
+          // Default/Legacy modes (About Us, Responder, etc.)
+          mode,
+          industry,
+          city,
+          years,
+          businessType,
+          customBusinessType,
+          tone,
+          description,
+          issueType,
+          apologyContext,
+          rawComments,
+        };
 
     try {
       const response = await fetch("https://api.snapcopy.online/generate", {
@@ -318,6 +454,7 @@ function HomePage() {
         data.po ||
         data.contract ||
         data.policy ||
+        data.estimate || // <--- Extract the clean text from the "estimate" key
         JSON.stringify(data, null, 2);
 
       setOutput(
@@ -633,7 +770,7 @@ function HomePage() {
                 minWidth: "120px",
                 padding: "12px",
                 background:
-                  mode === "estimator" ? colors.deepBlue : "#bda4c9",
+                mode === "estimator" ? colors.deepBlue : "#bda4c9",
                 color: "white",
                 border: "none",
                 borderRadius: "8px",
@@ -793,7 +930,27 @@ function HomePage() {
           )}
 
           {mode === "estimator" && colors && (
-            <JobEstimator inputStyle={inputStyle} colors={colors} />
+            <JobEstimator
+                    colors={colors}
+                    inputStyle={inputStyle}
+                    getInputStyle={getInputStyle}
+                    header={header}
+                    setHeader={setHeader}
+                    tasks={tasks}
+                    updateTask={updateTask}
+                    removeTask={removeTask}
+                    addTask={addTask}
+                    materials={materials}
+                    updateMaterial={updateMaterial}
+                    removeMaterial={removeMaterial}
+                    addMaterial={addMaterial}
+                    fees={fees}
+                    updateFee={updateFee}
+                    financials={financials}
+                    setFinancials={setFinancials}
+                    calculateTotal={calculateTotal}
+                    onDownload={handleDownload}
+              />
           )}
 
           {mode === "contracts" && (
