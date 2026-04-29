@@ -156,7 +156,7 @@ const handleDownload = () => {
   const margin = 20;
   let yPos = 20;
 
-  // Header & Title
+  // 1. Header & Title
   doc.setFontSize(22);
   doc.setTextColor(colors.deepBlue);
   doc.text("JOB ESTIMATE", margin, yPos);
@@ -170,7 +170,7 @@ const handleDownload = () => {
   doc.line(margin, yPos, 190, yPos);
   yPos += 15;
 
-  // Project Info
+  // 2. Project Info
   doc.setFontSize(12);
   doc.setTextColor(0);
   doc.setFont("helvetica", "bold");
@@ -183,14 +183,22 @@ const handleDownload = () => {
   doc.text("Customer:", margin, yPos);
   doc.setFont("helvetica", "normal");
   doc.text(header.customerName || "N/A", margin + 25, yPos);
+
+  if (header.location) {
+    yPos += 10;
+    doc.setFont("helvetica", "bold");
+    doc.text("Location:", margin, yPos);
+    doc.setFont("helvetica", "normal");
+    doc.text(header.location, margin + 25, yPos);
+  }
   
   yPos += 20;
 
-  // Items Table Header
+  // 3. Labor/Tasks Table
   doc.setFillColor(240, 240, 240);
   doc.rect(margin, yPos, 170, 8, "F");
   doc.setFont("helvetica", "bold");
-  doc.text("Description", margin + 2, yPos + 6);
+  doc.text("Services & Labor", margin + 2, yPos + 6);
   doc.text("Qty", margin + 110, yPos + 6);
   doc.text("Rate", margin + 130, yPos + 6);
   doc.text("Total", margin + 155, yPos + 6);
@@ -198,27 +206,122 @@ const handleDownload = () => {
   yPos += 15;
   doc.setFont("helvetica", "normal");
 
-  // List Tasks
   tasks.forEach((task) => {
+    if (!task.desc) return;
     const lineTotal = (parseFloat(task.qty || 0) * parseFloat(task.rate || 0)).toFixed(2);
-    doc.text(task.desc || "Service", margin + 2, yPos);
+    doc.text(task.desc, margin + 2, yPos);
     doc.text(task.qty.toString(), margin + 110, yPos);
     doc.text(`$${task.rate}`, margin + 130, yPos);
     doc.text(`$${lineTotal}`, margin + 155, yPos);
     yPos += 8;
   });
 
-  // Totals
+  // 4. Materials Table (New)
+  if (materials.some(m => m.desc)) {
+    yPos += 10;
+    doc.setFillColor(240, 240, 240);
+    doc.rect(margin, yPos, 170, 8, "F");
+    doc.setFont("helvetica", "bold");
+    doc.text("Materials", margin + 2, yPos + 6);
+    yPos += 15;
+    doc.setFont("helvetica", "normal");
+
+    materials.forEach((m) => {
+      if (!m.desc) return;
+      const lineTotal = (parseFloat(m.qty || 0) * parseFloat(m.cost || 0)).toFixed(2);
+      doc.text(m.desc, margin + 2, yPos);
+      doc.text(m.qty.toString(), margin + 110, yPos);
+      doc.text(`$${m.cost}`, margin + 130, yPos);
+      doc.text(`$${lineTotal}`, margin + 155, yPos);
+      yPos += 8;
+    });
+  }
+
+  // 5. Fees & Calculations
   yPos += 10;
   doc.setDrawColor(200);
-  doc.line(130, yPos, 190, yPos);
+  doc.line(120, yPos, 190, yPos);
   yPos += 10;
-  
+
+  const rowHeight = 7;
+  const labelX = 120;
+  const valueX = 165;
+
+  // Add Fees to breakdown
+  fees.forEach(f => {
+    if (parseFloat(f.amount) > 0) {
+      doc.setFont("helvetica", "normal");
+      doc.text(`${f.type}:`, labelX, yPos);
+      doc.text(`$${parseFloat(f.amount).toFixed(2)}`, valueX, yPos);
+      yPos += rowHeight;
+    }
+  });
+
+  if (parseFloat(financials.discount) > 0) {
+    doc.text("Discount:", labelX, yPos);
+    doc.text(`-$${financials.discount}`, valueX, yPos);
+    yPos += rowHeight;
+  }
+
+  // Final Total
+  yPos += 10;
+  doc.setDrawColor(230);
+  doc.line(margin, yPos, 190, yPos); // Divider line
+  yPos += 10;
+
+  doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
-  doc.text("Estimated Total:", 130, yPos);
-  doc.text(`$${calculateTotal()}`, 165, yPos);
+  doc.setTextColor(colors.darkSlate);
+  doc.text("Terms & Conditions", margin, yPos);
+  
+  yPos += 8;
+  doc.setFontSize(8);
+  doc.setTextColor(100);
+  doc.setFont("helvetica", "normal"); // Set to normal for the entire block
+
+  const maxWidth = 170;
+
+  // Clean text array without special characters or bolding mid-line
+  const cleanTerms = [
+    "1. Scope of Work: This estimate is based solely on the information provided at the time of inspection. Only the items and services specifically listed in the estimate are included. Any additional work, hidden conditions, or changes requested by the customer will require a written change order and may result in additional charges.",
+    "2. Exclusions: Unless explicitly stated, this estimate does not include: permits, engineering, design work, disposal fees, specialty materials, unforeseen structural issues, code upgrades, or repairs required due to pre-existing damage or unsafe conditions.",
+    "3. Payment Terms: Payment is due according to the schedule listed in the estimate. A deposit may be required before work begins. Final payment is due immediately upon completion of the work. Late payments may incur additional fees.",
+    "4. Change Orders: Any deviation from the original scope — including customer-requested changes, additional repairs, or unforeseen conditions — must be approved in writing. Change orders will be billed at the current labor and material rates.",
+    "5. Delays: The business is not responsible for delays caused by weather, supply shortages, back-ordered materials, customer scheduling issues, or circumstances beyond our control. Such delays do not void this agreement.",
+    "6. Warranty: Workmanship is warranted for 30 days unless otherwise stated. Warranty does not cover misuse, neglect, normal wear and tear, or issues caused by pre-existing conditions.",
+    "7. Liability: The business is not liable for incidental, consequential, or indirect damages. Liability is limited to the total amount paid for the services.",
+    "8. Cancellation: If the customer cancels after materials have been purchased or work has begun, the customer is responsible for all costs incurred up to the cancellation date.",
+    "9. Ownership: All materials remain the property of the business until paid in full.",
+    "10. Customer Responsibilities: The customer agrees to provide clear access to the work area, remove personal items, secure pets, and ensure utilities are available.",
+    "11. Governing Law: This agreement is governed by the laws of the state in which the work is performed."
+  ];
+
+  cleanTerms.forEach((term) => {
+    // Check for page overflow
+    if (yPos > 275) {
+      doc.addPage();
+      yPos = 20;
+    }
+
+    // Wrap the full text block
+    const wrappedText = doc.splitTextToSize(term, maxWidth);
+    
+    // Draw the text
+    doc.text(wrappedText, margin, yPos);
+    
+    // Move yPos down based on number of lines + small gap between items
+    yPos += (wrappedText.length * 4) + 4;
+  });
+
+  // SIGNATURE AREA
+  yPos += 10;
+  doc.setFont("helvetica", "bold");
+  doc.text("Signature: ___________________________", margin, yPos);
+  doc.text("Date: ________________", 130, yPos);
 
   // Save File
+
+  
   doc.save(`Estimate_${header.customerName || "Client"}.pdf`);
 };
 //-----------------------------end of estimator pdf generation logic-----------------------------
