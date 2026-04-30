@@ -147,9 +147,54 @@ const calculateTotal = () => {
 
   return (afterDiscount + tax).toFixed(2);
 };
+//--------------------policies pdf download handler (App.jsx)------------------------------//
+const handlePoliciesDownload = () => {
+  if (!output) return;
+
+  const doc = new jsPDF();
+  const margin = 20;
+  const maxWidth = 170;
+  let yPos = 20;
+
+  // 1. Header
+  doc.setFontSize(22);
+  doc.setTextColor(colors.orange); // Using the orange theme color for Policies
+  doc.text(policyType.toUpperCase() || "BUSINESS POLICY", margin, yPos);
+  
+  yPos += 10;
+  doc.setFontSize(10);
+  doc.setTextColor(100);
+  doc.text(`Official Document for: ${businessName || "N/A"}`, margin, yPos);
+  doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 140, yPos);
+  
+  yPos += 10;
+  doc.setDrawColor(colors.orange);
+  doc.line(margin, yPos, 190, yPos);
+  yPos += 15;
+
+  // 2. Content
+  doc.setFontSize(11);
+  doc.setTextColor(0);
+  doc.setFont("helvetica", "normal");
+
+  const lines = doc.splitTextToSize(output, maxWidth);
+  lines.forEach((line) => {
+    if (yPos > 280) {
+      doc.addPage();
+      yPos = 20;
+    }
+    doc.text(line, margin, yPos);
+    yPos += 6; 
+  });
+
+  // Save with a clean filename
+  const fileName = `${businessName.replace(/\s+/g, '_')}_${policyType.replace(/\s+/g, '_')}.pdf`;
+  doc.save(fileName);
+};
+//---------------------------------------end of policies pdf download handler-----------------------------------//
 
 
-//------contract pdf download----///
+//--------------------------------------------contract pdf download--------------------------------------------///
 // --- Contracts PDF Download Handler ---
 const handleContractDownload = () => {
   const doc = new jsPDF();
@@ -1298,6 +1343,8 @@ if (yPos > 250) {
             />
           )}
 
+          
+
           {mode === "estimator" && colors && (
             <JobEstimator
                     colors={colors}
@@ -1344,55 +1391,18 @@ if (yPos > 250) {
           )}
 
           {mode === "policies" && (
-            <div className="snap-container">
-              <label style={{ fontSize: "14px", fontWeight: "600", color: colors.policyLabel }}>Policy Type</label>
-              <select 
-                style={inputStyle} 
-                value={policyType} 
-                onChange={(e) => setPolicyType(e.target.value)}
-              >
-                <option value="">Select Policy Type</option>
-                <option value="Refund Policy">Refund Policy</option>
-                <option value="Warranty Policy">Warranty Policy</option>
-                <option value="Privacy Policy">Privacy Policy</option>
-                <option value="Terms of Service">Terms of Service</option>
-              </select>
-
-              <label style={{ fontSize: "14px", fontWeight: "600", color: colors.policyLabel, marginTop: "10px", display: "block" }}>Business Name</label>
-              <input
-                style={inputStyle}
-                value={businessName}
-                onChange={(e) => setBusinessName(e.target.value)}
-                placeholder="Your business or website name"
+              <PoliciesCompliance
+                policyType={policyType}
+                setPolicyType={setPolicyType}
+                businessName={businessName}
+                setBusinessName={setBusinessName}
+                details={details}
+                setDetails={setDetails}
+                colors={colors}
+                inputStyle={inputStyle}
+                onDownload={handlePoliciesDownload} 
               />
-
-              <label style={{ fontSize: "14px", fontWeight: "600", color: colors.policyLabel, marginTop: "10px", display: "block" }}>Key Details</label>
-              <textarea
-                style={{ ...inputStyle, height: "120px", resize: "none" }}
-                value={details}
-                onChange={(e) => setDetails(e.target.value)}
-                placeholder="Add important details, rules, exclusions, or requirements"
-              />
-
-              <button 
-                onClick={generate}
-                style={{
-                  width: "100%",
-                  padding: "16px",
-                  marginTop: "25px",
-                  background: colors.orange,
-                  color: "white",
-                  border: "none",
-                  borderRadius: "10px",
-                  fontSize: "18px",
-                  fontWeight: "bold",
-                  cursor: "pointer"
-                }}
-              >
-                Generate Policy
-              </button>
-            </div>
-          )}
+            )}
 
           {/* SHARED GENERATE BUTTON */}
           {mode !== "policies" && (
