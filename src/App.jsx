@@ -148,7 +148,84 @@ const calculateTotal = () => {
   return (afterDiscount + tax).toFixed(2);
 };
 
-//----poGenerator pdf download handler (App.jsx)----//
+
+//------contract pdf download----///
+// --- Contracts PDF Download Handler ---
+const handleContractDownload = () => {
+  const doc = new jsPDF();
+  const margin = 20;
+  const maxWidth = 170;
+  let yPos = 20;
+
+  // 1. Header
+  doc.setFontSize(20);
+  doc.setTextColor(colors.purple);
+  doc.text(contractType.toUpperCase() || "LEGAL AGREEMENT", margin, yPos);
+  
+  yPos += 10;
+  doc.setFontSize(10);
+  doc.setTextColor(100);
+  doc.text(`Generated on: ${new Date().toLocaleDateString()}`, margin, yPos);
+  
+  yPos += 10;
+  doc.setDrawColor(colors.purple);
+  doc.line(margin, yPos, 190, yPos);
+  yPos += 15;
+
+  // 2. Parties Involved
+  doc.setFontSize(12);
+  doc.setTextColor(0);
+  doc.setFont("helvetica", "bold");
+  doc.text("BETWEEN:", margin, yPos);
+  yPos += 7;
+  doc.setFont("helvetica", "normal");
+  doc.text(`Party A: ${partyA || "N/A"}`, margin, yPos);
+  yPos += 6;
+  doc.text(`Party B: ${partyB || "N/A"}`, margin, yPos);
+  
+  yPos += 15;
+
+  // 3. AI Generated Content (The Contract Body)
+  if (output) {
+    doc.setFont("helvetica", "bold");
+    doc.text("AGREEMENT TERMS:", margin, yPos);
+    yPos += 8;
+    
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
+    
+    // Split text to ensure it wraps and doesn't trim horizontally
+    const wrappedContract = doc.splitTextToSize(output, maxWidth);
+    
+    wrappedContract.forEach((line) => {
+      // Check for vertical page overflow
+      if (yPos > 280) {
+        doc.addPage();
+        yPos = 20;
+      }
+      doc.text(line, margin, yPos);
+      yPos += 6; // Line spacing
+    });
+  }
+
+  // 4. Signature Blocks (placed at the end of the text)
+  yPos += 20;
+  if (yPos > 250) { doc.addPage(); yPos = 20; }
+
+  doc.setFont("helvetica", "bold");
+  doc.text("Signatures:", margin, yPos);
+  yPos += 15;
+  doc.text("__________________________", margin, yPos);
+  doc.text("__________________________", 110, yPos);
+  yPos += 5;
+  doc.setFontSize(9);
+  doc.text(`For: ${partyA || "Party A"}`, margin, yPos);
+  doc.text(`For: ${partyB || "Party B"}`, 110, yPos);
+
+  doc.save(`${contractType.replace(/\s+/g, '_')}_Agreement.pdf`);
+};
+//------=======================================================end of contract pdf download handler-----------------------------------//
+//----==------------------------------------------------------poGenerator pdf download handler (App.jsx)------------------------------//
 const handlePoDownload = () => {
   const doc = new jsPDF();
   const margin = 20;
@@ -1261,6 +1338,8 @@ if (yPos > 250) {
               setTerms={setTerms}
               specialClauses={specialClauses}
               setSpecialClauses={setSpecialClauses}
+              onDownload={handleContractDownload} 
+              outputExists={!!output} // This checks if the 'output' state has text
             />
           )}
 

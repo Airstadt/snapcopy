@@ -14,7 +14,9 @@ export default function Contracts({
   terms,
   setTerms,
   specialClauses,
-  setSpecialClauses
+  setSpecialClauses,
+  onDownload,    // 1. Add this prop
+  outputExists   // 2. Add this prop
 }) {
   return (
     <>
@@ -75,7 +77,7 @@ export default function Contracts({
         placeholder="List important terms such as payment schedule, deadlines, responsibilities..."
         style={{ ...inputStyle, height: "120px", resize: "none" }}
       />
-
+      
       <label style={{ fontSize: "14px", fontWeight: "600", color: "#4a5568" }}>
         Special Clauses (Optional)
       </label>
@@ -85,7 +87,36 @@ export default function Contracts({
         placeholder="Confidentiality, liability limits, cancellation rules, warranties, etc."
         style={{ ...inputStyle, height: "120px", resize: "none" }}
       />
+      
+
+      {outputExists && (
+        <button
+          onClick={onDownload}
+          style={{
+            width: "100%",
+            padding: "14px",
+            marginTop: "20px",
+            background: "white",
+            color: colors.purple,
+            border: `2px solid ${colors.purple}`,
+            borderRadius: "10px",
+            fontWeight: "bold",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "10px",
+            transition: "all 0.2s"
+          }}
+          onMouseOver={(e) => e.target.style.background = "#f5f3ff"}
+          onMouseOut={(e) => e.target.style.background = "white"}
+        >
+          <span style={{ fontSize: "1.2rem" }}>📄</span> Download Contract (PDF)
+        </button>
+      )}
+      
     </>
+    
   );
 }
 
