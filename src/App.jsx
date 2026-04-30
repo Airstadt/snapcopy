@@ -148,6 +148,102 @@ const calculateTotal = () => {
   return (afterDiscount + tax).toFixed(2);
 };
 
+//----poGenerator pdf download handler (App.jsx)----//
+const handlePoDownload = () => {
+  const doc = new jsPDF();
+  const margin = 20;
+  let yPos = 20;
+
+  // 1. Header
+  doc.setFontSize(22);
+  doc.setTextColor(colors.poGreen);
+  doc.text("PURCHASE ORDER", margin, yPos);
+  
+  doc.setFontSize(10);
+  doc.setTextColor(100);
+  doc.text(`PO #: ${poDetails.poNumber}`, 150, yPos);
+  doc.text(`Date: ${poDetails.poDate}`, 150, yPos + 5);
+  
+  yPos += 15;
+  doc.setDrawColor(colors.poGreen);
+  doc.line(margin, yPos, 190, yPos);
+  yPos += 15;
+
+  // 2. Buyer & Vendor Columns
+  doc.setFontSize(10);
+  doc.setTextColor(0);
+  doc.setFont("helvetica", "bold");
+  doc.text("FROM (Buyer):", margin, yPos);
+  doc.text("TO (Vendor):", 110, yPos);
+  
+  yPos += 7;
+  doc.setFont("helvetica", "normal");
+  doc.text(buyerInfo.companyName || "N/A", margin, yPos);
+  doc.text(vendorInfo.vendorName || "N/A", 110, yPos);
+  
+  yPos += 5;
+  doc.text(buyerInfo.companyAddress || "", margin, yPos);
+  doc.text(vendorInfo.vendorAddress || "", 110, yPos);
+  
+  yPos += 15;
+
+  // 3. Items Table Header
+  doc.setFillColor(240, 240, 240);
+  doc.rect(margin, yPos, 170, 8, "F");
+  doc.setFont("helvetica", "bold");
+  doc.text("Item / Description", margin + 2, yPos + 6);
+  doc.text("Qty", margin + 100, yPos + 6);
+  doc.text("Price", margin + 125, yPos + 6);
+  doc.text("Total", margin + 155, yPos + 6);
+  
+  yPos += 15;
+  doc.setFont("helvetica", "normal");
+
+  // 4. Map Items
+  poItems.forEach((item) => {
+    if (!item.itemName) return;
+    const lineTotal = (parseFloat(item.quantity || 0) * parseFloat(item.unitPrice || 0)).toFixed(2);
+    
+    doc.text(item.itemName, margin + 2, yPos);
+    doc.text(item.quantity.toString(), margin + 100, yPos);
+    doc.text(`$${item.unitPrice}`, margin + 125, yPos);
+    doc.text(`$${lineTotal}`, margin + 155, yPos);
+    yPos += 8;
+    
+    if (yPos > 270) { doc.addPage(); yPos = 20; }
+  });
+
+  // 5. Totals Area
+  yPos += 10;
+  doc.setDrawColor(200);
+  doc.line(120, yPos, 190, yPos);
+  yPos += 10;
+
+  const labelX = 120;
+  const valueX = 165;
+
+  doc.text("Subtotal:", labelX, yPos);
+  doc.text(`$${poTotals.subtotal}`, valueX, yPos);
+  
+  yPos += 7;
+  doc.text(`Tax (${poTotals.taxRate}%):`, labelX, yPos);
+  doc.text(`$${poTotals.taxAmount}`, valueX, yPos);
+
+  if (parseFloat(poTotals.shippingCost) > 0) {
+    yPos += 7;
+    doc.text("Shipping:", labelX, yPos);
+    doc.text(`$${poTotals.shippingCost}`, valueX, yPos);
+  }
+
+  yPos += 10;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(12);
+  doc.text("Grand Total:", labelX, yPos);
+  doc.text(`$${poTotals.grandTotal}`, valueX, yPos);
+
+  doc.save(`${poDetails.poNumber}_${vendorInfo.vendorName}.pdf`);
+};
+//----end of poGenerator pdf download handler----//
 
 // 4. DOWNLOAD HANDLER (connects to your generate() function)
 //---------estimator pdf generation logic---------
@@ -1121,6 +1217,7 @@ if (yPos > 250) {
               colors={colors}
               inputStyle={inputStyle}
               getInputStyle={getInputStyle}
+              onDownload={handlePoDownload} 
             />
           )}
 

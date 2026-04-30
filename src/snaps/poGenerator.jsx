@@ -8,7 +8,8 @@ export default function PoGenerator({
   vendorInfo, setVendorInfo,
   poDetails, setPoDetails,
   poItems, setPoItems,
-  poTotals, setPoTotals
+  poTotals, setPoTotals,
+  onDownload // 1. ADD THIS PROP
 }) {
 
   const updateItem = (index, field, value) => {
@@ -79,8 +80,34 @@ export default function PoGenerator({
         <button onClick={() => setPoItems([...poItems, { itemName: "", partNumber: "", quantity: 1, unitPrice: 0, unitOfMeasure: "pcs", taxable: false, discount: 0, lineNotes: "", whereUsed: "" }])} style={{ background: colors.poGreen, color: "white", border: "none", padding: "10px 20px", borderRadius: "8px", fontWeight: "bold", cursor: "pointer" }}>+ Add Line Item</button>
       </div>
 
+      <button 
+          onClick={onDownload}
+          style={{
+            padding: "12px 24px",
+            background: "white",
+            color: colors.poGreen,
+            border: `2px solid ${colors.poGreen}`,
+            borderRadius: "10px",
+            fontWeight: "bold",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "flex-end",
+            gap: "8px",
+            marginTop: "10px",
+            marginBottom: "0px",
+            maxWidth: "fit-content",
+            transition: "all 0.2s"
+          }}
+          onMouseOver={(e) => e.target.style.background = "#f0fff4"}
+          onMouseOut={(e) => e.target.style.background = "white"}
+        >
+          <span style={{ fontSize: "1.2rem" }}></span> Download PO (PDF)
+        </button>
+
       <div style={{ display: "flex", justifyContent: "flex-end" }}>
+        
         <div style={{ width: "450px", padding: "20px", background: "#2d3748", color: "white", borderRadius: "12px", boxShadow: "0 10px 20px rgba(0,0,0,0.1)" }}>
+          
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "15px" }}>
             <InputField label="Discount (%)" type="number" value={poTotals.discountRate} onChange={(v) => setPoTotals({...poTotals, discountRate: v})} colors={colors} getInputStyle={getInputStyle} />
             <InputField label="Discount ($)" type="number" value={poTotals.discountAmount} onChange={(v) => setPoTotals({...poTotals, discountAmount: v})} colors={colors} getInputStyle={getInputStyle} />
@@ -89,11 +116,15 @@ export default function PoGenerator({
             <InputField label="Shipping & Handling ($)" type="number" value={poTotals.shippingCost} onChange={(v) => setPoTotals({...poTotals, shippingCost: v})} colors={colors} getInputStyle={getInputStyle} />
             <InputField label="Other Cost ($)" type="number" value={poTotals.otherCost} onChange={(v) => setPoTotals({...poTotals, otherCost: v})} colors={colors} getInputStyle={getInputStyle} />
           </div>
+          
+          
 
           <div style={{ borderTop: "1px solid #4a5568", paddingTop: "10px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "5px" }}>
               <span style={{ opacity: 0.8 }}>Subtotal:</span><span>${poTotals.subtotal}</span>
             </div>
+
+            
 
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: "10px", paddingTop: "10px", borderTop: "1px solid #4a5568" }}>
               <span style={{ fontWeight: "bold" }}>Grand Total:</span>
