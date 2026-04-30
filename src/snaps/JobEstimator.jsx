@@ -1,5 +1,10 @@
 import React from "react";
 
+/**
+ * JobEstimator Component
+ * Updated to integrate with the shared action bar in App.jsx.
+ * All internal fields, logic, and custom unit-of-measure functionality are preserved.
+ */
 export default function JobEstimator({
   colors,
   inputStyle,
@@ -25,11 +30,12 @@ export default function JobEstimator({
   setFinancials,
 
   calculateTotal,
-  onDownload
+  // onDownload is now handled by the parent App.jsx shared button
 }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-      {/* 1. HEADER DETAILS */}
+      
+      {/* 1. HEADER DETAILS - Preserving all fields */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px" }}>
         <div>
           <label style={{ fontSize: "10px", fontWeight: "bold" }}>Job Title / Project</label>
@@ -75,7 +81,7 @@ export default function JobEstimator({
         </div>
       </div>
 
-      {/* 2. LABOR / TASKS */}
+      {/* 2. LABOR / TASKS - Full logic retained */}
       <div style={{ border: `1px solid ${colors.lightGray}`, padding: "15px", borderRadius: "10px" }}>
         <h4 style={{ fontSize: "14px", color: colors.deepBlue, marginBottom: "10px" }}>Labor & Tasks</h4>
         {tasks.map((task, i) => (
@@ -128,90 +134,88 @@ export default function JobEstimator({
         </button>
       </div>
 
-      {/* 3. MATERIALS */}
+      {/* 3. MATERIALS - Custom UOM Logic preserved */}
       <div style={{ border: `1px solid ${colors.lightGray}`, padding: "15px", borderRadius: "10px" }}>
         <h4 style={{ fontSize: "14px", color: colors.deepBlue, marginBottom: "10px" }}>Materials</h4>
-
-
         {materials.map((mat, i) => (
-  <div key={i} style={{ marginBottom: "15px", borderBottom: "1px solid #eee", pb: "10px" }}>
-    <div 
-      style={{ 
-        display: "grid", 
-        gridTemplateColumns: "2fr 1fr 0.8fr 1fr 40px", 
-        gap: "10px" 
-      }}
-    >
-      {/* Description */}
-      <input 
-        type="text" 
-        placeholder="Material item" 
-        style={inputStyle} 
-        value={mat.desc} 
-        onChange={e => updateMaterial(i, "desc", e.target.value)} 
-      />
+          <div key={i} style={{ marginBottom: "15px", borderBottom: "1px solid #eee", pb: "10px" }}>
+            <div 
+              style={{ 
+                display: "grid", 
+                gridTemplateColumns: "2fr 1fr 0.8fr 1fr 40px", 
+                gap: "10px" 
+              }}
+            >
+              <input 
+                type="text" 
+                placeholder="Material item" 
+                style={inputStyle} 
+                value={mat.desc} 
+                onChange={e => updateMaterial(i, "desc", e.target.value)} 
+              />
 
-      {/* UOM Dropdown */}
-      <select 
-        style={inputStyle} 
-        value={["pcs", "lbs", "ft", "sqft", "gal", "hr"].includes(mat.uom) ? mat.uom : "Custom..."}
-        onChange={e => {
-          const val = e.target.value;
-          // If they pick Custom, we clear the value so they can type
-          updateMaterial(i, "uom", val === "Custom..." ? "" : val);
-        }}
-      >
-        <option value="pcs">pcs (Pieces)</option>
-        <option value="lbs">lbs (Pounds)</option>
-        <option value="ft">ft (Linear Feet)</option>
-        <option value="sqft">sqft (Square Feet)</option>
-        <option value="gal">gal (Gallons)</option>
-        <option value="bx">bx (Hours)</option>
-        <option value="Custom...">Custom...</option>
-      </select>
+              <select 
+                style={inputStyle} 
+                value={["pcs", "lbs", "ft", "sqft", "gal", "hr"].includes(mat.uom) ? mat.uom : "Custom..."}
+                onChange={e => {
+                  const val = e.target.value;
+                  updateMaterial(i, "uom", val === "Custom..." ? "" : val);
+                }}
+              >
+                <option value="pcs">pcs (Pieces)</option>
+                <option value="lbs">lbs (Pounds)</option>
+                <option value="ft">ft (Linear Feet)</option>
+                <option value="sqft">sqft (Square Feet)</option>
+                <option value="gal">gal (Gallons)</option>
+                <option value="hr">hr (Hours)</option>
+                <option value="Custom...">Custom...</option>
+              </select>
 
-      {/* Quantity */}
-      <input 
-        type="number" 
-        placeholder="Qty" 
-        style={inputStyle} 
-        value={mat.qty} 
-        onChange={e => updateMaterial(i, "qty", e.target.value)} 
-      />
+              <input 
+                type="number" 
+                placeholder="Qty" 
+                style={inputStyle} 
+                value={mat.qty} 
+                onChange={e => updateMaterial(i, "qty", e.target.value)} 
+              />
 
-      {/* Unit Cost */}
-      <input 
-        type="number" 
-        placeholder="Cost" 
-        style={inputStyle} 
-        value={mat.cost} 
-        onChange={e => updateMaterial(i, "cost", e.target.value)} 
-      />
+              <input 
+                type="number" 
+                placeholder="Cost" 
+                style={inputStyle} 
+                value={mat.cost} 
+                onChange={e => updateMaterial(i, "cost", e.target.value)} 
+              />
 
-      {/* Remove Button */}
-      <button 
-        onClick={() => removeMaterial(i)} 
-        style={{ background: colors.errorRed, color: "white", border: "none", borderRadius: "5px", cursor: "pointer" }}
-      >
-        ×
-      </button>
-    </div>
+              <button 
+                onClick={() => removeMaterial(i)} 
+                style={{ background: colors.errorRed, color: "white", border: "none", borderRadius: "5px", cursor: "pointer" }}
+              >
+                ×
+              </button>
+            </div>
 
-    {/* Custom Input: Only shows if the value isn't in our standard list */}
-    {!["pcs", "lbs", "ft", "sqft", "gal", "hr"].includes(mat.uom) && (
-      <input 
-        type="text" 
-        placeholder="Enter custom unit (e.g. bags, boxes, rolls)" 
-        style={{ ...inputStyle, marginTop: "8px", fontSize: "13px", borderColor: colors.deepBlue }} 
-        value={mat.uom} 
-        onChange={e => updateMaterial(i, "uom", e.target.value)} 
-      />
-    )}
-  </div>
-))}
-</div>
+            {/* Custom Input: Appears if value isn't standard */}
+            {!["pcs", "lbs", "ft", "sqft", "gal", "hr"].includes(mat.uom) && (
+              <input 
+                type="text" 
+                placeholder="Enter custom unit (e.g. bags, boxes, rolls)" 
+                style={{ ...inputStyle, marginTop: "8px", fontSize: "13px", borderColor: colors.deepBlue }} 
+                value={mat.uom} 
+                onChange={e => updateMaterial(i, "uom", e.target.value)} 
+              />
+            )}
+          </div>
+        ))}
+        <button 
+          onClick={addMaterial} 
+          style={{ background: colors.deepBlue, color: "white", border: "none", padding: "5px 15px", borderRadius: "5px", fontSize: "12px", cursor: "pointer" }}
+        >
+          + Add Material
+        </button>
+      </div>
 
-      {/* 5. TOTALS & PDF DOWNLOAD */}
+      {/* 4. TOTALS SECTION */}
       <div style={{ background: colors.lightGray, padding: "20px", borderRadius: "10px", marginTop: "10px" }}>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "15px", marginBottom: "15px" }}>
           <div>
@@ -247,24 +251,16 @@ export default function JobEstimator({
           </div>
         </div>
         
+        {/* FOOTER: Total Display only */}
         <div 
-          style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: `1px solid rgba(0,0,0,0.1)`, paddingTop: "15px" }}
+          style={{ 
+            display: "flex", 
+            justifyContent: "flex-end", 
+            alignItems: "center", 
+            borderTop: `1px solid rgba(0,0,0,0.1)`, 
+            paddingTop: "15px" 
+          }}
         >
-          <button 
-            onClick={onDownload}
-            style={{ 
-              background: colors.deepBlue, 
-              color: "white", 
-              border: "none", 
-              padding: "12px 25px", 
-              borderRadius: "8px", 
-              fontWeight: "bold", 
-              cursor: "pointer",
-              boxShadow: "0 4px 6px rgba(0,0,0,0.1)"
-            }}
-          >
-            Download Estimate PDF
-          </button>
           <div style={{ textAlign: "right" }}>
             <span style={{ fontSize: "14px", fontWeight: "bold", color: colors.textDark }}>Estimated Total: </span>
             <span style={{ fontSize: "24px", fontWeight: "900", color: colors.deepBlue }}>

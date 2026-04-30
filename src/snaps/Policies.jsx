@@ -1,6 +1,11 @@
 // src/snaps/Policies.jsx
 import React from "react";
 
+/**
+ * Policies Component
+ * Focuses purely on data input fields. 
+ * Action buttons are now handled by the parent App.jsx for UI consistency.
+ */
 export default function Policies({
   policyType,
   setPolicyType,
@@ -9,13 +14,12 @@ export default function Policies({
   details,
   setDetails,
   colors,
-  inputStyle,
-  onDownload // Add this prop
+  inputStyle
 }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
       
-      {/* Policy Type Selection */}
+      {/* 1. Policy Type Selection */}
       <div>
         <label style={{ fontWeight: "600", color: colors.textDark }}>Policy Type</label>
         <select
@@ -31,7 +35,7 @@ export default function Policies({
         </select>
       </div>
 
-      {/* Business Name Input */}
+      {/* 2. Business Name Input */}
       <div>
         <label style={{ fontWeight: "600", color: colors.textDark }}>Business Name</label>
         <input
@@ -42,7 +46,7 @@ export default function Policies({
         />
       </div>
 
-      {/* Key Details Textarea */}
+      {/* 3. Key Details Textarea */}
       <div>
         <label style={{ fontWeight: "600", color: colors.textDark }}>Key Details</label>
         <textarea
@@ -53,41 +57,11 @@ export default function Policies({
         />
       </div>
 
-      {/* --- NEW DOWNLOAD BUTTON (Placed Above Generate) --- */}
-      <button
-        onClick={onDownload}
-        style={{
-          width: "100%",
-          padding: "14px",
-          marginTop: "10px",
-          background: "white",
-          color: colors.orange,
-          border: `2px solid ${colors.orange}`,
-          borderRadius: "10px",
-          fontWeight: "600",
-          cursor: "pointer",
-          fontSize: "16px"
-        }}
-      >
-        Download PDF
-      </button>
-
-      {/* Generate Button */}
-      <button
-        onClick={() => window.generateSnap()}
-        style={{
-          padding: "16px",
-          background: colors.orange,
-          color: "white",
-          border: "none",
-          borderRadius: "10px",
-          fontWeight: "bold",
-          cursor: "pointer",
-          fontSize: "18px"
-        }}
-      >
-        Generate Policy
-      </button>
+      {/* 
+          NOTE: Generate, Download, and Save buttons have been removed from here.
+          They are now rendered by the Shared Action Buttons section in App.jsx 
+          to ensure a uniform look across all Snaps.[cite: 3, 5]
+      */}
     </div>
   );
 }

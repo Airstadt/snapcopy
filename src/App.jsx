@@ -1273,7 +1273,11 @@ if (yPos > 250) {
             }
           </div>
 
-          {/* RENDER SNAPS - DEFENSIVE RENDER WRAPPERS APPLIED */}
+          {/* ==========================================
+              1. RENDER SNAPS - TOOL-SPECIFIC INPUTS
+          ========================================== */}
+          
+          {/* About Us Snap */}
           {mode === "about" && (
             <AboutUs
               industry={industry}
@@ -1292,6 +1296,7 @@ if (yPos > 250) {
             />
           )}
 
+          {/* Responder Snap */}
           {mode === "responder" && (
             <Responder
               businessType={businessType}
@@ -1306,6 +1311,7 @@ if (yPos > 250) {
             />
           )}
 
+          {/* Apology Snap */}
           {mode === "apology" && (
             <Apology
               issueType={issueType}
@@ -1316,6 +1322,7 @@ if (yPos > 250) {
             />
           )}
 
+          {/* Sentiment Snap */}
           {mode === "sentiment" && (
             <Sentiment
               rawComments={rawComments}
@@ -1324,6 +1331,7 @@ if (yPos > 250) {
             />
           )}
 
+          {/* Purchase Order Snap */}
           {mode === "po" && poItems && poDetails && (
             <PoGenerator
               buyerInfo={buyerInfo}
@@ -1343,32 +1351,32 @@ if (yPos > 250) {
             />
           )}
 
-          
-
+          {/* Job Estimator Snap */}
           {mode === "estimator" && colors && (
             <JobEstimator
-                    colors={colors}
-                    inputStyle={inputStyle}
-                    getInputStyle={getInputStyle}
-                    header={header}
-                    setHeader={setHeader}
-                    tasks={tasks}
-                    updateTask={updateTask}
-                    removeTask={removeTask}
-                    addTask={addTask}
-                    materials={materials}
-                    updateMaterial={updateMaterial}
-                    removeMaterial={removeMaterial}
-                    addMaterial={addMaterial}
-                    fees={fees}
-                    updateFee={updateFee}
-                    financials={financials}
-                    setFinancials={setFinancials}
-                    calculateTotal={calculateTotal}
-                    onDownload={handleDownload}
-              />
+              colors={colors}
+              inputStyle={inputStyle}
+              getInputStyle={getInputStyle}
+              header={header}
+              setHeader={setHeader}
+              tasks={tasks}
+              updateTask={updateTask}
+              removeTask={removeTask}
+              addTask={addTask}
+              materials={materials}
+              updateMaterial={updateMaterial}
+              removeMaterial={removeMaterial}
+              addMaterial={addMaterial}
+              fees={fees}
+              updateFee={updateFee}
+              financials={financials}
+              setFinancials={setFinancials}
+              calculateTotal={calculateTotal}
+              onDownload={handleDownload}
+            />
           )}
 
+          {/* Contracts Snap */}
           {mode === "contracts" && (
             <Contracts
               colors={colors}
@@ -1386,34 +1394,45 @@ if (yPos > 250) {
               specialClauses={specialClauses}
               setSpecialClauses={setSpecialClauses}
               onDownload={handleContractDownload} 
-              outputExists={!!output} // This checks if the 'output' state has text
+              outputExists={!!output} 
             />
           )}
 
+          {/* Policies & Compliance Snap */}
           {mode === "policies" && (
-              <PoliciesCompliance
-                policyType={policyType}
-                setPolicyType={setPolicyType}
-                businessName={businessName}
-                setBusinessName={setBusinessName}
-                details={details}
-                setDetails={setDetails}
-                colors={colors}
-                inputStyle={inputStyle}
-                onDownload={handlePoliciesDownload} 
-              />
-            )}
+            <PoliciesCompliance
+              policyType={policyType}
+              setPolicyType={setPolicyType}
+              businessName={businessName}
+              setBusinessName={setBusinessName}
+              details={details}
+              setDetails={setDetails}
+              colors={colors}
+              inputStyle={inputStyle}
+              onDownload={handlePoliciesDownload} 
+            />
+          )}
 
-          {/* SHARED GENERATE BUTTON */}
-          {mode !== "policies" && (
+          {/* ==========================================
+              2. SHARED ACTION BUTTONS (GENERATE/DOWNLOAD/SAVE)
+          ========================================== */}
+          
+          <div style={{ 
+            display: "flex", 
+            gap: "12px", 
+            marginTop: "25px", 
+            width: "100%",
+            marginBottom: "20px",
+            alignItems: "stretch" 
+          }}>
+            {/* GENERATE BUTTON: Logic adapts text/color based on tool */}
             <button
               onClick={generate}
               disabled={loading}
               style={{
-                width: "100%",
+                flex: 2,
                 padding: "16px",
-                marginTop: "25px",
-                background: mode === "po" ? colors.poGreen : colors.deepBlue,
+                background: mode === "po" ? colors.poGreen : mode === "policies" ? colors.orange : colors.deepBlue,
                 color: "white",
                 border: "none",
                 borderRadius: "10px",
@@ -1424,11 +1443,64 @@ if (yPos > 250) {
                 transition: "all 0.2s"
               }}
             >
-              {loading ? "Snapping..." : `Generate ${mode === "po" ? "PO Data" : "Snap"}`}
+              {loading ? "Snapping..." : `Generate ${mode === "po" ? "PO Data" : mode === "policies" ? "Policy" : "Snap"}`}
             </button>
-          )}
 
-          {/* OUTPUT AREA */}
+            {/* DOWNLOAD BUTTON: Appears after AI generation is complete */}
+            {output && (
+              <button
+                onClick={() => {
+                  if (mode === "po") handlePoDownload();
+                  else if (mode === "contracts") handleContractDownload();
+                  else if (mode === "estimator") handleDownload();
+                  else if (mode === "policies") handlePoliciesDownload();
+                  else handleDownload();
+                }}
+                style={{
+                  flex: 1,
+                  padding: "16px",
+                  background: "white",
+                  color: mode === "po" ? colors.poGreen : mode === "policies" ? colors.orange : colors.deepBlue,
+                  border: `2px solid ${mode === "po" ? colors.poGreen : mode === "policies" ? colors.orange : colors.deepBlue}`,
+                  borderRadius: "10px",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                  transition: "all 0.2s"
+                }}
+              >
+                Download PDF
+              </button>
+            )}
+
+            {/* SAVE BUTTON: Placeholder with Subscriber subtext */}
+            <button 
+              disabled
+              style={{
+                flex: 1,
+                padding: "12px 8px",
+                background: "#f1f5f9", 
+                color: "#94a3b8",      
+                border: "1px solid #cbd5e1",
+                borderRadius: "10px",
+                cursor: "not-allowed",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "2px"
+              }}
+            >
+              <span style={{ fontWeight: "bold", fontSize: "16px" }}>Save</span>
+              <span style={{ fontSize: "10px", fontWeight: "normal", opacity: 0.8 }}>
+                Subscribers save to DB
+              </span>
+            </button>
+          </div>
+
+          {/* ==========================================
+              3. OUTPUT AREA (ERROR & AI RESULT)
+          ========================================== */}
+          
           {error && (
             <div style={{ color: colors.errorRed, marginTop: "20px", fontWeight: "bold" }}>
               {error}
@@ -1471,7 +1543,7 @@ if (yPos > 250) {
               </div>
             </div>
           )}
-        </div>
+        </div> {/* End of main white container card */}
 
         {/* FOOTER */}
         <footer style={{ textAlign: "center", padding: "40px 0", borderTop: `1px solid ${colors.lightGray}` }}>

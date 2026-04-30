@@ -80,29 +80,11 @@ export default function PoGenerator({
         <button onClick={() => setPoItems([...poItems, { itemName: "", partNumber: "", quantity: 1, unitPrice: 0, unitOfMeasure: "pcs", taxable: false, discount: 0, lineNotes: "", whereUsed: "" }])} style={{ background: colors.poGreen, color: "white", border: "none", padding: "10px 20px", borderRadius: "8px", fontWeight: "bold", cursor: "pointer" }}>+ Add Line Item</button>
       </div>
 
-      <button 
-          onClick={onDownload}
-          style={{
-            padding: "12px 24px",
-            background: "white",
-            color: colors.poGreen,
-            border: `2px solid ${colors.poGreen}`,
-            borderRadius: "10px",
-            fontWeight: "bold",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "flex-end",
-            gap: "8px",
-            marginTop: "10px",
-            marginBottom: "0px",
-            maxWidth: "fit-content",
-            transition: "all 0.2s"
-          }}
-          onMouseOver={(e) => e.target.style.background = "#f0fff4"}
-          onMouseOut={(e) => e.target.style.background = "white"}
-        >
-          <span style={{ fontSize: "1.2rem" }}></span> Download PO (PDF)
-        </button>
+      
+
+
+       
+
 
       <div style={{ display: "flex", justifyContent: "flex-end" }}>
         
@@ -137,6 +119,7 @@ export default function PoGenerator({
     </div>
   );
 }
+
 
 function InputField({ label, value, onChange, placeholder, type = "text", colors, getInputStyle }) {
   const [focused, setFocused] = useState(false);
