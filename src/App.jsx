@@ -17,6 +17,7 @@ import Sentiment from "./snaps/Sentiment";
 import PoGenerator from "./snaps/PoGenerator";
 import Contracts from "./snaps/Contracts";
 import PoliciesCompliance from "./snaps/Policies.jsx";
+import "jspdf-autotable";
 
 function HomePage() {
   // --- STATE MANAGEMENT ---
@@ -147,6 +148,8 @@ const calculateTotal = () => {
 
   return (afterDiscount + tax).toFixed(2);
 };
+//--------------------------------------------------------About us--------------------------------//
+
 //--------------------policies pdf download handler (App.jsx)------------------------------//
 const handlePoliciesDownload = () => {
   if (!output) return;
@@ -191,8 +194,220 @@ const handlePoliciesDownload = () => {
   const fileName = `${businessName.replace(/\s+/g, '_')}_${policyType.replace(/\s+/g, '_')}.pdf`;
   doc.save(fileName);
 };
-//---------------------------------------end of policies pdf download handler-----------------------------------//
+//--------------------------------------------about us ------------------------------------------//
+const handleAboutDownload = () => {
+  const doc = new jsPDF();
+  const margin = 20;
+  let yPos = 20;
 
+  doc.setFontSize(22);
+  doc.setTextColor(colors.deepBlue);
+  doc.text("COMPANY PROFILE", margin, yPos);
+  
+  doc.setFontSize(10);
+  doc.setTextColor(100);
+  doc.text(`Date: ${new Date().toLocaleDateString()}`, 150, yPos);
+  
+  yPos += 15;
+  doc.setDrawColor(colors.deepBlue);
+  doc.line(margin, yPos, 190, yPos);
+  yPos += 20;
+
+  if (output) {
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(50);
+    const wrappedText = doc.splitTextToSize(output, 170);
+    doc.text(wrappedText, margin, yPos);
+  }
+  doc.save(`${businessName || "Company"}_Bio.pdf`);
+};
+//-------------------------------------------End about us ----------------------------------------------//
+//-------------------------------------------------Apology-=--------------------------------------------//
+// 4. OFFICIAL APOLOGY HANDLER
+const handleApologyDownload = () => {
+  const doc = new jsPDF();
+  const margin = 20;
+  let yPos = 20;
+
+  // 1. Header
+  doc.setFontSize(22);
+  doc.setTextColor(colors.deepBlue);
+  doc.text("OFFICIAL CORRESPONDENCE", margin, yPos);
+  
+  doc.setFontSize(10);
+  doc.setTextColor(100);
+  doc.text(`Date: ${new Date().toLocaleDateString()}`, 150, yPos);
+  
+  yPos += 15;
+  doc.setDrawColor(colors.deepBlue);
+  doc.line(margin, yPos, 190, yPos);
+  yPos += 20;
+
+  // 2. Business Branding
+  if (businessName) {
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(0);
+    doc.text(businessName.toUpperCase(), margin, yPos);
+    yPos += 12;
+  }
+
+  // 3. Body Content
+  if (output) {
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(50);
+
+    const maxWidth = 170; 
+    const wrappedText = doc.splitTextToSize(output, maxWidth);
+    
+    wrappedText.forEach(line => {
+      if (yPos > 280) {
+        doc.addPage();
+        yPos = 20;
+      }
+      doc.text(line, margin, yPos);
+      yPos += 7;
+    });
+  }
+
+  // 4. Closing Placeholder
+  yPos += 15;
+  if (yPos > 270) {
+    doc.addPage();
+    yPos = 20;
+  }
+  doc.setFont("helvetica", "bold");
+  doc.text("Sincerely,", margin, yPos);
+  yPos += 10;
+  doc.text(businessName || "Management", margin, yPos);
+
+  doc.save("Official_Apology.pdf");
+};
+//-----------------------------------------------Responder---------------------------------------------//
+// SOCIAL MEDIA RESPONDER HANDLER
+const handleResponderDownload = () => {
+  const doc = new jsPDF();
+  const margin = 20;
+  let yPos = 20;
+
+  // 1. Header (Deep Blue)
+  doc.setFontSize(22);
+  doc.setTextColor(colors.deepBlue);
+  doc.text("CUSTOMER RESPONSE", margin, yPos);
+  
+  doc.setFontSize(10);
+  doc.setTextColor(100);
+  doc.text(`Date: ${new Date().toLocaleDateString()}`, 150, yPos);
+  
+  yPos += 15;
+  doc.setDrawColor(colors.deepBlue);
+  doc.line(margin, yPos, 190, yPos);
+  yPos += 20;
+
+  // 2. Business Branding (Black)
+  if (businessName) {
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(0); // Black
+    doc.text(businessName.toUpperCase(), margin, yPos);
+    yPos += 12;
+  }
+
+  // 3. AI Generated Response (Black)
+  if (output) {
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(0); // Black
+    doc.text("DRAFTED RESPONSE:", margin, yPos);
+    yPos += 10;
+
+    doc.setFont("helvetica", "normal");
+    const maxWidth = 170; 
+    const wrappedText = doc.splitTextToSize(output, maxWidth);
+    
+    wrappedText.forEach(line => {
+      if (yPos > 280) {
+        doc.addPage();
+        yPos = 20;
+      }
+      doc.text(line, margin, yPos);
+      yPos += 7;
+    });
+  }
+
+  doc.save(`${businessName || "Social"}_Response.pdf`);
+};
+//---------------------------------------end of policies pdf download handler-----------------------------------//
+//----------------------------------------sentiment--------------------------------------------------------------//
+// 5. SENTIMENT ANALYSIS HANDLER
+const handleSentimentDownload = () => {
+  const doc = new jsPDF();
+  const margin = 20;
+  let yPos = 20;
+
+  // 1. Header
+  doc.setFontSize(22);
+  doc.setTextColor(colors.deepBlue);
+  doc.text("SENTIMENT ANALYSIS REPORT", margin, yPos);
+  
+  doc.setFontSize(10);
+  doc.setTextColor(100);
+  doc.text(`Report Date: ${new Date().toLocaleDateString()}`, 145, yPos);
+  
+  yPos += 15;
+  doc.setDrawColor(colors.deepBlue);
+  doc.line(margin, yPos, 190, yPos);
+  yPos += 20;
+
+  // 2. Analysis Overview
+  if (businessName) {
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(0);
+    doc.text(`Analysis for: ${businessName.toUpperCase()}`, margin, yPos);
+    yPos += 15;
+  }
+
+  // 3. Body Content (The AI Analysis)
+  if (output) {
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(colors.deepBlue);
+    doc.text("EXECUTIVE SUMMARY:", margin, yPos);
+    yPos += 10;
+
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(50);
+
+    const maxWidth = 170; 
+    const wrappedText = doc.splitTextToSize(output, maxWidth);
+    
+    wrappedText.forEach(line => {
+      if (yPos > 280) {
+        doc.addPage();
+        yPos = 20;
+      }
+      doc.text(line, margin, yPos);
+      yPos += 7;
+    });
+  }
+
+  // 4. Footer Note
+  yPos += 15;
+  if (yPos > 275) {
+    doc.addPage();
+    yPos = 20;
+  }
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "italic");
+  doc.setTextColor(150);
+  doc.text("This report was generated via AI Sentiment Analysis for internal review purposes.", margin, yPos);
+
+  doc.save(`${businessName || "Business"}_Sentiment_Report.pdf`);
+};
 
 //--------------------------------------------contract pdf download--------------------------------------------///
 // --- Contracts PDF Download Handler ---
@@ -271,100 +486,209 @@ const handleContractDownload = () => {
 };
 //------=======================================================end of contract pdf download handler-----------------------------------//
 //----==------------------------------------------------------poGenerator pdf download handler (App.jsx)------------------------------//
+
+
 const handlePoDownload = () => {
   const doc = new jsPDF();
   const margin = 20;
-  let yPos = 20;
+  const pageWidth = doc.internal.pageSize.width - margin * 2;
+  const pageHeight = doc.internal.pageSize.height;
+  let y = margin;
 
-  // 1. Header
+  const accent = colors?.poGreen || "#2E7D32";
+  const textGray = "#333333";
+  const lightGray = "#E0E0E0";
+
+  // Page break helper
+  const checkPageBreak = (space = 12) => {
+    if (y + space > pageHeight - margin) {
+      doc.addPage();
+      y = margin;
+    }
+  };
+
+  // ---------------------------
+  // HEADER
+  // ---------------------------
+  doc.setFont("helvetica", "bold");
   doc.setFontSize(22);
-  doc.setTextColor(colors.poGreen);
-  doc.text("PURCHASE ORDER", margin, yPos);
-  
-  doc.setFontSize(10);
-  doc.setTextColor(100);
-  doc.text(`PO #: ${poDetails.poNumber}`, 150, yPos);
-  doc.text(`Date: ${poDetails.poDate}`, 150, yPos + 5);
-  
-  yPos += 15;
-  doc.setDrawColor(colors.poGreen);
-  doc.line(margin, yPos, 190, yPos);
-  yPos += 15;
+  doc.setTextColor(textGray);
+  doc.text("Purchase Order", margin, y);
 
-  // 2. Buyer & Vendor Columns
-  doc.setFontSize(10);
-  doc.setTextColor(0);
-  doc.setFont("helvetica", "bold");
-  doc.text("FROM (Buyer):", margin, yPos);
-  doc.text("TO (Vendor):", 110, yPos);
-  
-  yPos += 7;
   doc.setFont("helvetica", "normal");
-  doc.text(buyerInfo.companyName || "N/A", margin, yPos);
-  doc.text(vendorInfo.vendorName || "N/A", 110, yPos);
-  
-  yPos += 5;
-  doc.text(buyerInfo.companyAddress || "", margin, yPos);
-  doc.text(vendorInfo.vendorAddress || "", 110, yPos);
-  
-  yPos += 15;
+  doc.setFontSize(10);
+  doc.text(`PO #: ${poDetails?.poNumber || "N/A"}`, margin + pageWidth - 60, y);
+  doc.text(`Date: ${poDetails?.poDate || "N/A"}`, margin + pageWidth - 60, y + 6);
 
-  // 3. Items Table Header
-  doc.setFillColor(240, 240, 240);
-  doc.rect(margin, yPos, 170, 8, "F");
+  y += 14;
+  doc.setDrawColor(lightGray);
+  doc.line(margin, y, margin + pageWidth, y);
+  y += 10;
+
+  // ---------------------------
+  // BILL TO / SHIP TO / SHIP FROM
+  // ---------------------------
   doc.setFont("helvetica", "bold");
-  doc.text("Item / Description", margin + 2, yPos + 6);
-  doc.text("Qty", margin + 100, yPos + 6);
-  doc.text("Price", margin + 125, yPos + 6);
-  doc.text("Total", margin + 155, yPos + 6);
-  
-  yPos += 15;
-  doc.setFont("helvetica", "normal");
+  doc.setFontSize(11);
 
-  // 4. Map Items
-  poItems.forEach((item) => {
-    if (!item.itemName) return;
-    const lineTotal = (parseFloat(item.quantity || 0) * parseFloat(item.unitPrice || 0)).toFixed(2);
-    
-    doc.text(item.itemName, margin + 2, yPos);
-    doc.text(item.quantity.toString(), margin + 100, yPos);
-    doc.text(`$${item.unitPrice}`, margin + 125, yPos);
-    doc.text(`$${lineTotal}`, margin + 155, yPos);
-    yPos += 8;
-    
-    if (yPos > 270) { doc.addPage(); yPos = 20; }
+  doc.text("Bill To", margin, y);
+  doc.text("Ship To", margin, y + 20);
+  doc.text("Ship From", margin + pageWidth / 2, y);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+
+  // BILL TO
+  doc.text(buyerInfo?.companyName || "N/A", margin, y + 6);
+  doc.text(buyerInfo?.companyAddress || "", margin, y + 11);
+
+  // SHIP TO (under Bill To)
+  doc.text(buyerInfo?.shipToName || buyerInfo?.companyName || "N/A", margin, y + 26);
+  doc.text(buyerInfo?.shipToAddress || buyerInfo?.companyAddress || "", margin, y + 31);
+
+  // SHIP FROM (vendor)
+  doc.text(vendorInfo?.vendorName || "N/A", margin + pageWidth / 2, y + 6);
+  doc.text(vendorInfo?.vendorAddress || "", margin + pageWidth / 2, y + 11);
+
+  y += 45;
+
+  // ---------------------------
+  // SHIPPING METHOD
+  // ---------------------------
+  doc.setFont("helvetica", "bold");
+  doc.text("Shipping Method:", margin, y);
+
+  doc.setFont("helvetica", "normal");
+  doc.text(poDetails?.shippingMethod || "Standard", margin + 40, y);
+
+  y += 12;
+
+  // ---------------------------
+  // ITEMS TABLE HEADER
+  // ---------------------------
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10);
+  doc.text("Description", margin, y);
+  doc.text("Qty", margin + pageWidth - 90, y);
+  doc.text("Unit Price", margin + pageWidth - 60, y);
+  doc.text("Total", margin + pageWidth - 25, y);
+
+  y += 4;
+  doc.setDrawColor(lightGray);
+  doc.line(margin, y, margin + pageWidth, y);
+  y += 8;
+
+  // ---------------------------
+  // ITEMS (REAL DATA)
+  // ---------------------------
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+
+  (poItems || []).forEach(item => {
+    if (!item?.itemName) return;
+
+    checkPageBreak(10);
+
+    const qty = item.quantity || "0";
+    const price = parseFloat(item.unitPrice || 0).toFixed(2);
+    const total = (parseFloat(qty) * parseFloat(price)).toFixed(2);
+
+    doc.text(item.itemName, margin, y);
+    doc.text(qty.toString(), margin + pageWidth - 90, y);
+    doc.text(`$${price}`, margin + pageWidth - 60, y);
+    doc.text(`$${total}`, margin + pageWidth - 25, y);
+
+    y += 8;
   });
 
-  // 5. Totals Area
-  yPos += 10;
-  doc.setDrawColor(200);
-  doc.line(120, yPos, 190, yPos);
-  yPos += 10;
+  // ---------------------------
+  // USER REMARKS
+  // ---------------------------
+  if (poDetails?.notes) {
+    y += 6;
+    checkPageBreak(20);
 
-  const labelX = 120;
-  const valueX = 165;
+    doc.setFont("helvetica", "bold");
+    doc.text("User Remarks:", margin, y);
 
-  doc.text("Subtotal:", labelX, yPos);
-  doc.text(`$${poTotals.subtotal}`, valueX, yPos);
-  
-  yPos += 7;
-  doc.text(`Tax (${poTotals.taxRate}%):`, labelX, yPos);
-  doc.text(`$${poTotals.taxAmount}`, valueX, yPos);
+    y += 6;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
 
-  if (parseFloat(poTotals.shippingCost) > 0) {
-    yPos += 7;
-    doc.text("Shipping:", labelX, yPos);
-    doc.text(`$${poTotals.shippingCost}`, valueX, yPos);
+    const remarkLines = doc.splitTextToSize(poDetails.notes, pageWidth);
+    remarkLines.forEach(line => {
+      checkPageBreak(6);
+      doc.text(line, margin, y);
+      y += 5;
+    });
   }
 
-  yPos += 10;
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(12);
-  doc.text("Grand Total:", labelX, yPos);
-  doc.text(`$${poTotals.grandTotal}`, valueX, yPos);
+  // ---------------------------
+  // TERMS AND CONDITIONS ONLY
+  // (Warranty & Liability removed)
+  // ---------------------------
+  if (output) {
+    const termsMatch = output.match(/Terms and Conditions:?([\s\S]*?)(?=$)/i);
 
-  doc.save(`${poDetails.poNumber}_${vendorInfo.vendorName}.pdf`);
+    if (termsMatch && termsMatch[1].trim()) {
+      y += 10;
+      checkPageBreak(20);
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.text("Terms and Conditions:", margin, y);
+
+      y += 6;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+
+      const termsLines = doc.splitTextToSize(termsMatch[1].trim(), pageWidth);
+
+      termsLines.forEach(line => {
+        checkPageBreak(6);
+        doc.text(line, margin, y);
+        y += 5;
+      });
+    }
+  }
+
+  // ---------------------------
+  // TOTALS
+  // ---------------------------
+  y += 10;
+  checkPageBreak(30);
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(accent);
+  doc.text("Totals", margin, y);
+
+  y += 4;
+  doc.setDrawColor(lightGray);
+  doc.line(margin, y, margin + pageWidth, y);
+
+  y += 10;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.setTextColor(textGray);
+
+  const totals = [
+    ["Subtotal:", `$${poTotals?.subtotal || "0.00"}`],
+    [`Tax (${poTotals?.taxRate || 0}%):`, `$${poTotals?.taxAmount || "0.00"}`],
+    ["Grand Total:", `$${poTotals?.grandTotal || "0.00"}`]
+  ];
+
+  totals.forEach(([label, value]) => {
+    checkPageBreak(10);
+    doc.text(label, margin, y);
+    doc.text(value, margin + pageWidth, y, { align: "right" });
+    y += 8;
+  });
+
+  doc.save(`${poDetails?.poNumber || "PO"}_Official.pdf`);
 };
+
+
 //----end of poGenerator pdf download handler----//
 
 // 4. DOWNLOAD HANDLER (connects to your generate() function)
@@ -1454,6 +1778,10 @@ if (yPos > 250) {
                   else if (mode === "contracts") handleContractDownload();
                   else if (mode === "estimator") handleDownload();
                   else if (mode === "policies") handlePoliciesDownload();
+                  else if (mode === "about") handleAboutDownload();
+                  else if (mode === "responder") handleResponderDownload();
+                  else if (mode === "apology") handleApologyDownload();
+                  else if (mode === "sentiment") handleSentimentDownload();
                   else handleDownload();
                 }}
                 style={{

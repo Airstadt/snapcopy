@@ -69,7 +69,22 @@ export default function PoGenerator({
 
               <button onClick={() => setPoItems(poItems.filter((_, i) => i !== index))} style={{ height: "40px", background: colors.errorRed, color: "white", border: "none", borderRadius: "8px", cursor: "pointer" }}>×</button>
             </div>
-
+            <div style={{ padding: "20px", background: "#f8fafc", borderRadius: "12px", border: `1px solid ${colors.lightGray}` }}>
+  <h4 style={{ color: colors.poGreen, marginBottom: "15px", borderBottom: `2px solid ${colors.poGreen}`, display: "inline-block" }}>
+    General Notes & Instructions
+  </h4>
+  <textarea
+    placeholder="Enter any special instructions, delivery notes, or project references..."
+    value={poDetails.notes}
+    onChange={(e) => setPoDetails({ ...poDetails, notes: e.target.value })}
+    style={{
+      ...inputStyle,
+      height: "100px",
+      resize: "vertical",
+      fontFamily: "inherit"
+    }}
+  />
+</div>
             <div style={{ marginTop: "12px", width: "100%", opacity: 0.5 }}>
               <label style={{ fontSize: "10px", fontWeight: "700", color: "#718096", textTransform: "uppercase" }}>Where Used (Subscribers Only) *</label>
               <input type="text" disabled placeholder="Track product/service usage and quantity per item (Will not be included in PDF)" style={{ ...inputStyle, cursor: "not-allowed", fontSize: "12px", backgroundColor: "#f1f5f9" }} />
