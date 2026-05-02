@@ -410,7 +410,7 @@ const handleSentimentDownload = () => {
 };
 
 //--------------------------------------------contract pdf download--------------------------------------------///
-// --- Contracts PDF Download Handler ---
+// --- -------------------------------------------Contracts PDF Download Handler -----------------------------//
 const handleContractDownload = () => {
   const doc = new jsPDF();
   const margin = 20;
@@ -507,50 +507,152 @@ const handlePoDownload = () => {
     }
   };
 
-  // ---------------------------
-  // HEADER
-  // ---------------------------
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(22);
-  doc.setTextColor(textGray);
-  doc.text("Purchase Order", margin, y);
+ 
+// Header background box
+// ---------------------------
+// FORMATTED HEADER BLOCK
+// ---------------------------
 
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
-  doc.text(`PO #: ${poDetails?.poNumber || "N/A"}`, margin + pageWidth - 60, y);
-  doc.text(`Date: ${poDetails?.poDate || "N/A"}`, margin + pageWidth - 60, y + 6);
+// Full-width colored header bar
+// ---------------------------
+// LOW-INK HEADER BLOCK
+// ---------------------------
 
-  y += 14;
-  doc.setDrawColor(lightGray);
-  doc.line(margin, y, margin + pageWidth, y);
-  y += 10;
+// Light gray background strip (very low ink)
+doc.setFillColor(245, 245, 245); 
+doc.rect(0, 0, doc.internal.pageSize.width, 28, "F");
+
+// Thin green accent line under header
+doc.setDrawColor(46, 125, 50); // PO green
+doc.setLineWidth(1);
+doc.line(0, 28, doc.internal.pageSize.width, 28);
+
+// White title box overlay
+doc.setFillColor(255, 255, 255);
+doc.roundedRect(margin, 6, pageWidth, 22, 3, 3, "F");
+
+// Title text
+doc.setFont("helvetica", "bold");
+doc.setFontSize(20);
+doc.setTextColor(46, 125, 50); // PO green
+doc.text("Purchase Order", margin + 8, 22);
+
+// Right-side PO info
+doc.setFont("helvetica", "normal");
+doc.setFontSize(10);
+doc.setTextColor("#333333");
+
+doc.text(
+  `PO #: ${poDetails?.poNumber || "N/A"}`,
+  margin + pageWidth - 8,
+  16,
+  { align: "right" }
+);
+
+doc.text(
+  `Date: ${poDetails?.poDate || "N/A"}`,
+  margin + pageWidth - 8,
+  22,
+  { align: "right" }
+);
+
+// Move cursor down
+y = 40;
+
+// Reset line width
+doc.setLineWidth(0.2);
+
+
+// DIVIDER /////
+// Soft gradient-style divider (simulated with two lines)
+// Thick green divider
+doc.setDrawColor(46, 125, 50); // PO green
+doc.setLineWidth(1);
+doc.line(margin, y, margin + pageWidth, y);
+
+// Reset
+doc.setLineWidth(0.2);
+y += 16;
+
+
+
+
 
   // ---------------------------
   // BILL TO / SHIP TO / SHIP FROM
   // ---------------------------
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(11);
+  // ---------------------------
+// FORMATTED BILL/SHIP BLOCK
+// ---------------------------
 
-  doc.text("Bill To", margin, y);
-  doc.text("Ship To", margin, y + 20);
-  doc.text("Ship From", margin + pageWidth / 2, y);
+// ---------------------------
+// FORMATTED BILL/SHIP BLOCK WITH BOXES
+// ---------------------------
 
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
+// Box dimensions
+const boxHeight = 70;
+const halfWidth = pageWidth / 2 - 8;
 
-  // BILL TO
-  doc.text(buyerInfo?.companyName || "N/A", margin, y + 6);
-  doc.text(buyerInfo?.companyAddress || "", margin, y + 11);
+// LEFT BOX (Bill To + Ship To)
+doc.setFillColor(245, 245, 245); // light gray
+doc.roundedRect(margin, y, halfWidth, boxHeight, 4, 4, "F");
 
-  // SHIP TO (under Bill To)
-  doc.text(buyerInfo?.shipToName || buyerInfo?.companyName || "N/A", margin, y + 26);
-  doc.text(buyerInfo?.shipToAddress || buyerInfo?.companyAddress || "", margin, y + 31);
+// RIGHT BOX (Ship From)
+doc.roundedRect(margin + halfWidth + 16, y, halfWidth, boxHeight, 4, 4, "F");
 
-  // SHIP FROM (vendor)
-  doc.text(vendorInfo?.vendorName || "N/A", margin + pageWidth / 2, y + 6);
-  doc.text(vendorInfo?.vendorAddress || "", margin + pageWidth / 2, y + 11);
+// ---------------------------
+// HEADERS
+// ---------------------------
+doc.setFont("helvetica", "bold");
+doc.setFontSize(11);
+doc.setTextColor(46, 125, 50); // PO green
 
-  y += 45;
+// Left box headers
+doc.text("Bill To", margin + 6, y + 10);
+doc.text("Ship To", margin + 6, y + 38);
+
+// Right box header
+doc.text("Ship From", margin + halfWidth + 22, y + 10);
+
+// Accent lines under headers
+doc.setDrawColor(46, 125, 50);
+doc.setLineWidth(0.6);
+
+// Bill To underline
+doc.line(margin + 6, y + 13, margin + halfWidth - 6, y + 13);
+
+// Ship To underline
+doc.line(margin + 6, y + 41, margin + halfWidth - 6, y + 41);
+
+// Ship From underline
+doc.line(margin + halfWidth + 22, y + 13, margin + pageWidth - 6, y + 13);
+
+// Reset line width
+doc.setLineWidth(0.2);
+
+// ---------------------------
+// CONTENT
+// ---------------------------
+doc.setFont("helvetica", "normal");
+doc.setFontSize(10);
+doc.setTextColor("#333333");
+
+// BILL TO CONTENT
+doc.text(buyerInfo?.companyName || "N/A", margin + 6, y + 22);
+doc.text(buyerInfo?.companyAddress || "", margin + 6, y + 28);
+
+// SHIP TO CONTENT
+doc.text(buyerInfo?.shipToName || buyerInfo?.companyName || "N/A", margin + 6, y + 50);
+doc.text(buyerInfo?.shipToAddress || buyerInfo?.companyAddress || "", margin + 6, y + 56);
+
+// SHIP FROM CONTENT
+doc.text(vendorInfo?.vendorName || "N/A", margin + halfWidth + 22, y + 22);
+doc.text(vendorInfo?.vendorAddress || "", margin + halfWidth + 22, y + 28);
+
+// Move cursor down
+y += boxHeight + 15;
+
+
 
   // ---------------------------
   // SHIPPING METHOD
@@ -604,53 +706,78 @@ const handlePoDownload = () => {
   // ---------------------------
   // USER REMARKS
   // ---------------------------
-  if (poDetails?.notes) {
-    y += 6;
-    checkPageBreak(20);
+  (poItems || []).forEach(item => {
+  if (!item?.itemName) return;
 
-    doc.setFont("helvetica", "bold");
-    doc.text("User Remarks:", margin, y);
+  checkPageBreak(10);
 
-    y += 6;
-    doc.setFont("helvetica", "normal");
+  const qty = item.quantity || "0";
+  const price = parseFloat(item.unitPrice || 0).toFixed(2);
+  const total = (parseFloat(qty) * parseFloat(price)).toFixed(2);
+
+  // Item row
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.text(item.itemName, margin, y);
+  doc.text(qty.toString(), margin + pageWidth - 90, y);
+  doc.text(`$${price}`, margin + pageWidth - 60, y);
+  doc.text(`$${total}`, margin + pageWidth - 25, y);
+
+  y += 8;
+
+  // ---------------------------
+  // ITEM-SPECIFIC LINE NOTES
+  // ---------------------------
+  if (item.lineNotes && item.lineNotes.trim() !== "") {
+    const noteText = `Note: ${item.lineNotes}`;
+    const wrapped = doc.splitTextToSize(noteText, pageWidth - 20);
+
+    doc.setFont("helvetica", "italic");
     doc.setFontSize(9);
 
-    const remarkLines = doc.splitTextToSize(poDetails.notes, pageWidth);
-    remarkLines.forEach(line => {
+    wrapped.forEach(line => {
       checkPageBreak(6);
-      doc.text(line, margin, y);
+      doc.text(line, margin + 5, y);
       y += 5;
     });
+
+    // Reset font
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+
+    y += 3;
   }
+});
+
 
   // ---------------------------
   // TERMS AND CONDITIONS ONLY
   // (Warranty & Liability removed)
   // ---------------------------
   if (output) {
-    const termsMatch = output.match(/Terms and Conditions:?([\s\S]*?)(?=$)/i);
+  const termsMatch = output.match(/Terms and Conditions:?([\s\S]*?)(?=$)/i);
 
-    if (termsMatch && termsMatch[1].trim()) {
-      y += 10;
-      checkPageBreak(20);
+  if (termsMatch && termsMatch[1].trim()) {
+    y += 10;
+    checkPageBreak(20);
 
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(11);
-      doc.text("Terms and Conditions:", margin, y);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.text("Terms and Conditions:", margin, y);
 
-      y += 6;
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(9);
+    y += 6;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
 
-      const termsLines = doc.splitTextToSize(termsMatch[1].trim(), pageWidth);
+    const termsLines = doc.splitTextToSize(termsMatch[1].trim(), pageWidth);
 
-      termsLines.forEach(line => {
-        checkPageBreak(6);
-        doc.text(line, margin, y);
-        y += 5;
-      });
-    }
+    termsLines.forEach(line => {
+      checkPageBreak(6);
+      doc.text(line, margin, y);
+      y += 5;
+    });
   }
+}
 
   // ---------------------------
   // TOTALS

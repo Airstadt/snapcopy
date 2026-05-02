@@ -12,10 +12,14 @@ export default function PoGenerator({
   onDownload 
 }) {
 
+  // Improved update logic to ensure independent state for each array index
   const updateItem = (index, field, value) => {
-    const newItems = [...poItems];
-    newItems[index][field] = value;
-    setPoItems(newItems);
+    setPoItems(prevItems => {
+      const newItems = [...prevItems];
+      // Create a fresh object for this specific index to prevent data bleeding
+      newItems[index] = { ...newItems[index], [field]: value };
+      return newItems;
+    });
   };
 
   return (
@@ -63,7 +67,7 @@ export default function PoGenerator({
         <InputField label="Shipping Terms" value={poDetails.shippingTerms} onChange={(v) => setPoDetails({...poDetails, shippingTerms: v})} placeholder="FOB Destination" colors={colors} getInputStyle={getInputStyle} />
       </div>
 
-      {/* 6. ITEM LIST WITH USER REMARKS (LINE NOTES) */}
+      {/* 6. ITEM LIST WITH SEPARATE USER REMARKS */}
       <div style={{ border: `1px solid ${colors.lightGray}`, borderRadius: "12px", padding: "20px" }}>
         <h4 style={{ color: colors.poGreen, marginBottom: "15px" }}>Order Items</h4>
         {poItems.map((item, index) => (
@@ -79,18 +83,26 @@ export default function PoGenerator({
               </div>
               <button onClick={() => setPoItems(poItems.filter((_, i) => i !== index))} style={{ height: "40px", background: colors.errorRed, color: "white", border: "none", borderRadius: "8px", cursor: "pointer" }}>×</button>
             </div>
+            
+            {/* INDEPENDENT REMARKS BOX */}
             <div style={{ marginTop: "10px" }}>
               <label style={{ fontSize: "11px", fontWeight: "700", color: "#718096", textTransform: "uppercase" }}>User Remarks / Line Notes</label>
               <textarea
                 placeholder="Specific remarks for this item..."
-                value={item.lineNotes || ""}
+                // Pointing to item.lineNotes ensures this specific item's data is used
+                value={item.lineNotes || ""} 
                 onChange={(e) => updateItem(index, "lineNotes", e.target.value)}
                 style={{ ...inputStyle, height: "60px", resize: "vertical", fontFamily: "inherit", marginTop: "5px" }}
               />
             </div>
           </div>
         ))}
-        <button onClick={() => setPoItems([...poItems, { itemName: "", partNumber: "", quantity: 1, unitPrice: 0, lineNotes: "", taxable: false }])} style={{ background: colors.poGreen, color: "white", border: "none", padding: "10px 20px", borderRadius: "8px", fontWeight: "bold", cursor: "pointer" }}>+ Add Line Item</button>
+        <button 
+          onClick={() => setPoItems([...poItems, { itemName: "", partNumber: "", quantity: 1, unitPrice: 0, lineNotes: "", taxable: false }])} 
+          style={{ background: colors.poGreen, color: "white", border: "none", padding: "10px 20px", borderRadius: "8px", fontWeight: "bold", cursor: "pointer" }}
+        >
+          + Add Line Item
+        </button>
       </div>
 
       {/* 7. FINANCIAL SUMMARY & 8. TOTALS */}
