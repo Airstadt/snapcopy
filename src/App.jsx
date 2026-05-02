@@ -489,17 +489,25 @@ const handleContractDownload = () => {
 
 
 const handlePoDownload = () => {
+  // --- SCOPE SAFETY: Prevent ReferenceErrors ---
+  // If variables are undefined, these defaults prevent the crash
+  const currentPoTotals = typeof poTotals !== 'undefined' ? poTotals : { subtotal: "0.00", taxRate: 0, taxAmount: "0.00", grandTotal: "0.00" };
+  const currentPoItems = typeof poItems !== 'undefined' ? poItems : [];
+  const currentPoDetails = typeof poDetails !== 'undefined' ? poDetails : {};
+  const currentBuyerInfo = typeof buyerInfo !== 'undefined' ? buyerInfo : {};
+  const currentVendorInfo = typeof vendorInfo !== 'undefined' ? vendorInfo : {};
+  // ---------------------------------------------
+
   const doc = new jsPDF();
   const margin = 20;
   const pageWidth = doc.internal.pageSize.width - margin * 2;
   const pageHeight = doc.internal.pageSize.height;
   let y = margin;
 
-  const accent = colors?.poGreen || "#2E7D32";
+  const accent = "#2E7D32"; // Standardized green
   const textGray = "#333333";
   const lightGray = "#E0E0E0";
 
-  // Page break helper
   const checkPageBreak = (space = 12) => {
     if (y + space > pageHeight - margin) {
       doc.addPage();
@@ -507,189 +515,80 @@ const handlePoDownload = () => {
     }
   };
 
- 
-// Header background box
-// ---------------------------
-// FORMATTED HEADER BLOCK
-// ---------------------------
-
-// Full-width colored header bar
-// ---------------------------
-// LOW-INK HEADER BLOCK
-// ---------------------------
-
-// Light gray background strip (very low ink)
-doc.setFillColor(245, 245, 245); 
-doc.rect(0, 0, doc.internal.pageSize.width, 28, "F");
-
-// Thin green accent line under header
-doc.setDrawColor(46, 125, 50); // PO green
-doc.setLineWidth(1);
-doc.line(0, 28, doc.internal.pageSize.width, 28);
-
-// White title box overlay
-doc.setFillColor(255, 255, 255);
-doc.roundedRect(margin, 6, pageWidth, 22, 3, 3, "F");
-
-// Title text
-doc.setFont("helvetica", "bold");
-doc.setFontSize(20);
-doc.setTextColor(46, 125, 50); // PO green
-doc.text("Purchase Order", margin + 8, 22);
-
-// Right-side PO info
-doc.setFont("helvetica", "normal");
-doc.setFontSize(10);
-doc.setTextColor("#333333");
-
-doc.text(
-  `PO #: ${poDetails?.poNumber || "N/A"}`,
-  margin + pageWidth - 8,
-  16,
-  { align: "right" }
-);
-
-doc.text(
-  `Date: ${poDetails?.poDate || "N/A"}`,
-  margin + pageWidth - 8,
-  22,
-  { align: "right" }
-);
-
-// Move cursor down
-y = 40;
-
-// Reset line width
-doc.setLineWidth(0.2);
-
-
-// DIVIDER /////
-// Soft gradient-style divider (simulated with two lines)
-// Thick green divider
-doc.setDrawColor(46, 125, 50); // PO green
-doc.setLineWidth(1);
-doc.line(margin, y, margin + pageWidth, y);
-
-// Reset
-doc.setLineWidth(0.2);
-y += 16;
-
-
-
-
-
-  // ---------------------------
-  // BILL TO / SHIP TO / SHIP FROM
-  // ---------------------------
-  // ---------------------------
-// FORMATTED BILL/SHIP BLOCK
-// ---------------------------
-
-// ---------------------------
-// FORMATTED BILL/SHIP BLOCK WITH BOXES
-// ---------------------------
-
-// Box dimensions
-const boxHeight = 70;
-const halfWidth = pageWidth / 2 - 8;
-
-// LEFT BOX (Bill To + Ship To)
-doc.setFillColor(245, 245, 245); // light gray
-doc.roundedRect(margin, y, halfWidth, boxHeight, 4, 4, "F");
-
-// RIGHT BOX (Ship From)
-doc.roundedRect(margin + halfWidth + 16, y, halfWidth, boxHeight, 4, 4, "F");
-
-// ---------------------------
-// HEADERS
-// ---------------------------
-doc.setFont("helvetica", "bold");
-doc.setFontSize(11);
-doc.setTextColor(46, 125, 50); // PO green
-
-// Left box headers
-doc.text("Bill To", margin + 6, y + 10);
-doc.text("Ship To", margin + 6, y + 38);
-
-// Right box header
-doc.text("Ship From", margin + halfWidth + 22, y + 10);
-
-// Accent lines under headers
-doc.setDrawColor(46, 125, 50);
-doc.setLineWidth(0.6);
-
-// Bill To underline
-doc.line(margin + 6, y + 13, margin + halfWidth - 6, y + 13);
-
-// Ship To underline
-doc.line(margin + 6, y + 41, margin + halfWidth - 6, y + 41);
-
-// Ship From underline
-doc.line(margin + halfWidth + 22, y + 13, margin + pageWidth - 6, y + 13);
-
-// Reset line width
-doc.setLineWidth(0.2);
-
-// ---------------------------
-// CONTENT
-// ---------------------------
-doc.setFont("helvetica", "normal");
-doc.setFontSize(10);
-doc.setTextColor("#333333");
-
-// BILL TO CONTENT
-doc.text(buyerInfo?.companyName || "N/A", margin + 6, y + 22);
-doc.text(buyerInfo?.companyAddress || "", margin + 6, y + 28);
-
-// SHIP TO CONTENT
-doc.text(buyerInfo?.shipToName || buyerInfo?.companyName || "N/A", margin + 6, y + 50);
-doc.text(buyerInfo?.shipToAddress || buyerInfo?.companyAddress || "", margin + 6, y + 56);
-
-// SHIP FROM CONTENT
-doc.text(vendorInfo?.vendorName || "N/A", margin + halfWidth + 22, y + 22);
-doc.text(vendorInfo?.vendorAddress || "", margin + halfWidth + 22, y + 28);
-
-// Move cursor down
-y += boxHeight + 15;
-
-
-
-  // ---------------------------
-  // SHIPPING METHOD
-  // ---------------------------
+  // --- HEADER ---
+  doc.setFillColor(245, 245, 245); 
+  doc.rect(0, 0, doc.internal.pageSize.width, 28, "F");
+  doc.setDrawColor(46, 125, 50);
+  doc.setLineWidth(1);
+  doc.line(0, 28, doc.internal.pageSize.width, 28);
+  doc.setFillColor(255, 255, 255);
+  doc.roundedRect(margin, 6, pageWidth, 22, 3, 3, "F");
   doc.setFont("helvetica", "bold");
-  doc.text("Shipping Method:", margin, y);
+  doc.setFontSize(20);
+  doc.setTextColor(46, 125, 50);
+  doc.text("Purchase Order", margin + 8, 22);
 
   doc.setFont("helvetica", "normal");
-  doc.text(poDetails?.shippingMethod || "Standard", margin + 40, y);
-
-  y += 12;
-
-  // ---------------------------
-  // ITEMS TABLE HEADER
-  // ---------------------------
-  doc.setFont("helvetica", "bold");
   doc.setFontSize(10);
+  doc.setTextColor(textGray);
+  doc.text(`PO #: ${currentPoDetails?.poNumber || "N/A"}`, margin + pageWidth - 8, 16, { align: "right" });
+  doc.text(`Date: ${currentPoDetails?.poDate || "N/A"}`, margin + pageWidth - 8, 22, { align: "right" });
+
+  y = 40;
+  doc.setDrawColor(46, 125, 50);
+  doc.setLineWidth(1);
+  doc.line(margin, y, margin + pageWidth, y);
+  y += 16;
+
+  // --- ADDRESS BOXES ---
+  const boxHeight = 70;
+  const halfWidth = pageWidth / 2 - 8;
+  doc.setFillColor(245, 245, 245);
+  doc.roundedRect(margin, y, halfWidth, boxHeight, 4, 4, "F");
+  doc.roundedRect(margin + halfWidth + 16, y, halfWidth, boxHeight, 4, 4, "F");
+  
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(46, 125, 50);
+  doc.text("Bill To", margin + 6, y + 10);
+  doc.text("Ship To", margin + 6, y + 38);
+  doc.text("Ship From", margin + halfWidth + 22, y + 10);
+
+  doc.setLineWidth(0.6);
+  doc.line(margin + 6, y + 13, margin + halfWidth - 6, y + 13);
+  doc.line(margin + 6, y + 41, margin + halfWidth - 6, y + 41);
+  doc.line(margin + halfWidth + 22, y + 13, margin + pageWidth - 6, y + 13);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.setTextColor(textGray);
+  doc.text(currentBuyerInfo?.companyName || "N/A", margin + 6, y + 22);
+  doc.text(currentBuyerInfo?.companyAddress || "", margin + 6, y + 28);
+  doc.text(currentBuyerInfo?.shipToName || currentBuyerInfo?.companyName || "N/A", margin + 6, y + 50);
+  doc.text(currentBuyerInfo?.shipToAddress || currentBuyerInfo?.companyAddress || "", margin + 6, y + 56);
+  doc.text(currentVendorInfo?.vendorName || "N/A", margin + halfWidth + 22, y + 22);
+  doc.text(currentVendorInfo?.vendorAddress || "", margin + halfWidth + 22, y + 28);
+
+  y += boxHeight + 15;
+
+  // --- ITEMS TABLE ---
+  doc.setFont("helvetica", "bold");
   doc.text("Description", margin, y);
   doc.text("Qty", margin + pageWidth - 90, y);
   doc.text("Unit Price", margin + pageWidth - 60, y);
   doc.text("Total", margin + pageWidth - 25, y);
-
   y += 4;
   doc.setDrawColor(lightGray);
   doc.line(margin, y, margin + pageWidth, y);
   y += 8;
 
-  // ---------------------------
-  // ITEMS (REAL DATA)
-  // ---------------------------
+  // --- SINGLE LOOP FOR ITEMS ---
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
-
-  (poItems || []).forEach(item => {
+  
+  currentPoItems.forEach(item => {
     if (!item?.itemName) return;
-
-    checkPageBreak(10);
+    checkPageBreak(15);
 
     const qty = item.quantity || "0";
     const price = parseFloat(item.unitPrice || 0).toFixed(2);
@@ -699,120 +598,53 @@ y += boxHeight + 15;
     doc.text(qty.toString(), margin + pageWidth - 90, y);
     doc.text(`$${price}`, margin + pageWidth - 60, y);
     doc.text(`$${total}`, margin + pageWidth - 25, y);
+    y += 7;
 
-    y += 8;
+    // Line notes inside the same loop
+    if (item.lineNotes && item.lineNotes.trim() !== "") {
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(9);
+      const wrapped = doc.splitTextToSize(`Note: ${item.lineNotes}`, pageWidth - 25);
+      wrapped.forEach(line => {
+        checkPageBreak(6);
+        doc.text(line, margin + 5, y);
+        y += 5;
+      });
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      y += 2;
+    }
+
+    doc.setDrawColor("#E0E0E0");
+    doc.line(margin, y, margin + pageWidth, y);
+    y += 6;
   });
 
-  // ---------------------------
-  // USER REMARKS
-  // ---------------------------
-  (poItems || []).forEach(item => {
-  if (!item?.itemName) return;
-
-  checkPageBreak(10);
-
-  const qty = item.quantity || "0";
-  const price = parseFloat(item.unitPrice || 0).toFixed(2);
-  const total = (parseFloat(qty) * parseFloat(price)).toFixed(2);
-
-  // Item row
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
-  doc.text(item.itemName, margin, y);
-  doc.text(qty.toString(), margin + pageWidth - 90, y);
-  doc.text(`$${price}`, margin + pageWidth - 60, y);
-  doc.text(`$${total}`, margin + pageWidth - 25, y);
-
-  y += 8;
-
-  // ---------------------------
-  // ITEM-SPECIFIC LINE NOTES
-  // ---------------------------
-  if (item.lineNotes && item.lineNotes.trim() !== "") {
-    const noteText = `Note: ${item.lineNotes}`;
-    const wrapped = doc.splitTextToSize(noteText, pageWidth - 20);
-
-    doc.setFont("helvetica", "italic");
-    doc.setFontSize(9);
-
-    wrapped.forEach(line => {
-      checkPageBreak(6);
-      doc.text(line, margin + 5, y);
-      y += 5;
-    });
-
-    // Reset font
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-
-    y += 3;
-  }
-});
-
-
-  // ---------------------------
-  // TERMS AND CONDITIONS ONLY
-  // (Warranty & Liability removed)
-  // ---------------------------
-  if (output) {
-  const termsMatch = output.match(/Terms and Conditions:?([\s\S]*?)(?=$)/i);
-
-  if (termsMatch && termsMatch[1].trim()) {
-    y += 10;
-    checkPageBreak(20);
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(11);
-    doc.text("Terms and Conditions:", margin, y);
-
-    y += 6;
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-
-    const termsLines = doc.splitTextToSize(termsMatch[1].trim(), pageWidth);
-
-    termsLines.forEach(line => {
-      checkPageBreak(6);
-      doc.text(line, margin, y);
-      y += 5;
-    });
-  }
-}
-
-  // ---------------------------
-  // TOTALS
-  // ---------------------------
+  // --- TOTALS ---
   y += 10;
-  checkPageBreak(30);
-
+  checkPageBreak(35);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(11);
   doc.setTextColor(accent);
   doc.text("Totals", margin, y);
-
   y += 4;
-  doc.setDrawColor(lightGray);
   doc.line(margin, y, margin + pageWidth, y);
-
   y += 10;
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
-  doc.setTextColor(textGray);
 
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(textGray);
   const totals = [
-    ["Subtotal:", `$${poTotals?.subtotal || "0.00"}`],
-    [`Tax (${poTotals?.taxRate || 0}%):`, `$${poTotals?.taxAmount || "0.00"}`],
-    ["Grand Total:", `$${poTotals?.grandTotal || "0.00"}`]
+    ["Subtotal:", `$${currentPoTotals.subtotal}`],
+    [`Tax (${currentPoTotals.taxRate || 0}%):`, `$${currentPoTotals.taxAmount}`],
+    ["Grand Total:", `$${currentPoTotals.grandTotal}`]
   ];
 
   totals.forEach(([label, value]) => {
-    checkPageBreak(10);
     doc.text(label, margin, y);
     doc.text(value, margin + pageWidth, y, { align: "right" });
     y += 8;
   });
 
-  doc.save(`${poDetails?.poNumber || "PO"}_Official.pdf`);
+  doc.save(`${currentPoDetails?.poNumber || "PO"}_Official.pdf`);
 };
 
 
