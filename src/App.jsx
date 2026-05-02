@@ -28,6 +28,8 @@ function HomePage() {
   const [years, setYears] = useState("");
   const [businessType, setBusinessType] = useState("");
   const [customBusinessType, setCustomBusinessType] = useState("");
+  const [aboutDescription, setAboutDescription] = useState("");
+
   const [tone, setTone] = useState("");
   const [description, setDescription] = useState("");
   const [issueType, setIssueType] = useState("");
@@ -40,6 +42,7 @@ function HomePage() {
   const [scope, setScope] = useState("");
   const [terms, setTerms] = useState("");
   const [specialClauses, setSpecialClauses] = useState("");
+ 
 
   // POLICIES SNAP STATE
   const [policyType, setPolicyType] = useState("");
@@ -1125,7 +1128,7 @@ if (yPos > 250) {
           businessType,
           customBusinessType,
           tone,
-          description,
+          description: aboutDescription,
           issueType,
           apologyContext,
           rawComments,
@@ -1575,9 +1578,10 @@ if (yPos > 250) {
               setCustomBusinessType={setCustomBusinessType}
               tone={tone}
               setTone={setTone}
+              description={aboutDescription}          // ← NEW
+              setDescription={setAboutDescription}    // ← NEW
               inputStyle={inputStyle}
-              description={description}          // ⭐ REQUIRED
-              setDescription={setDescription}
+              
             />
           )}
 
