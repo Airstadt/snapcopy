@@ -1576,6 +1576,8 @@ if (yPos > 250) {
               tone={tone}
               setTone={setTone}
               inputStyle={inputStyle}
+              description={description}          // ⭐ REQUIRED
+              setDescription={setDescription}
             />
           )}
 
