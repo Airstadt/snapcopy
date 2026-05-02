@@ -29,6 +29,7 @@ function HomePage() {
   const [businessType, setBusinessType] = useState("");
   const [customBusinessType, setCustomBusinessType] = useState("");
   const [aboutDescription, setAboutDescription] = useState("");
+  const [responderMessage, setResponderMessage] = useState("");
 
   const [tone, setTone] = useState("");
   const [description, setDescription] = useState("");
@@ -525,8 +526,8 @@ const handlePoDownload = () => {
   doc.setLineWidth(1);
   doc.line(0, 28, doc.internal.pageSize.width, 28);
   doc.setFillColor(255, 255, 255);
-  doc.roundedRect(margin, 6, pageWidth, 22, 3, 3, "F");
-  doc.setFont("helvetica", "bold");
+  doc.roundedRect(margin, 4, pageWidth, 22, 3, 3, "F");
+  doc.setFont("Sprite Graffiti", "bold");
   doc.setFontSize(20);
   doc.setTextColor(46, 125, 50);
   doc.text("Purchase Order", margin + 8, 22);
@@ -569,8 +570,22 @@ const handlePoDownload = () => {
   doc.text(currentBuyerInfo?.companyAddress || "", margin + 6, y + 28);
   doc.text(currentBuyerInfo?.shipToName || currentBuyerInfo?.companyName || "N/A", margin + 6, y + 50);
   doc.text(currentBuyerInfo?.shipToAddress || currentBuyerInfo?.companyAddress || "", margin + 6, y + 56);
-  doc.text(currentVendorInfo?.vendorName || "N/A", margin + halfWidth + 22, y + 22);
-  doc.text(currentVendorInfo?.vendorAddress || "", margin + halfWidth + 22, y + 28);
+
+
+  // --- SHIP FROM (Right Box) ---
+const shipFromX = margin + halfWidth + 22;
+const shipFromWidth = halfWidth - 28; // keeps text inside the box
+
+doc.text(currentVendorInfo?.vendorName || "N/A", shipFromX, y + 22);
+
+// Wrap address text
+const wrappedShipFrom = doc.splitTextToSize(
+  currentVendorInfo?.vendorAddress || "",
+  shipFromWidth
+);
+
+// Print wrapped lines
+doc.text(wrappedShipFrom, shipFromX, y + 28);
 
   y += boxHeight + 15;
 
@@ -636,9 +651,10 @@ const handlePoDownload = () => {
   doc.setFont("helvetica", "normal");
   doc.setTextColor(textGray);
   const totals = [
-    ["Subtotal:", `$${currentPoTotals.subtotal}`],
-    [`Tax (${currentPoTotals.taxRate || 0}%):`, `$${currentPoTotals.taxAmount}`],
-    ["Grand Total:", `$${currentPoTotals.grandTotal}`]
+  ["Subtotal:", `$${currentPoTotals.subtotal}`],
+  [`Tax (${currentPoTotals.taxRate || 0}%):`, `$${currentPoTotals.taxAmount}`],
+  ["Shipping:", `$${currentPoTotals.shippingCost || "0.00"}`],
+  ["Grand Total:", `$${currentPoTotals.grandTotal}`]
   ];
 
   totals.forEach(([label, value]) => {
@@ -1128,7 +1144,12 @@ if (yPos > 250) {
           businessType,
           customBusinessType,
           tone,
-          description: aboutDescription,
+          description:
+                mode === "about"
+                  ? aboutDescription
+                : mode === "responder"
+                  ? responderMessage
+                : description,
           issueType,
           apologyContext,
           rawComments,
@@ -1594,8 +1615,8 @@ if (yPos > 250) {
               setCustomBusinessType={setCustomBusinessType}
               tone={tone}
               setTone={setTone}
-              description={description}
-              setDescription={setDescription}
+              description={responderMessage}
+              setDescription={setResponderMessage}
               inputStyle={inputStyle}
             />
           )}
