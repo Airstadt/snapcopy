@@ -1,5 +1,4 @@
-import { useSearchParams } from "react-router-dom";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Link, useSearchParams } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import { jsPDF } from "jspdf";
 
@@ -7,6 +6,7 @@ import snapcopyLogo from "./assets/snapcopyLogo.png";
 import airStadtLogo from "./assets/AirStadtLogo.png";
 
 import InterestForm from "./pages/InterestForm";
+import Auth from "./pages/Auth";
 
 // --- IMPORT SNAPS ---
 import JobEstimator from "./snaps/jobEstimator";
@@ -1877,6 +1877,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/interest" element={<InterestForm />} />
+        <Route path="/auth" element={<Auth />} />
       </Routes>
     </Router>
   );
