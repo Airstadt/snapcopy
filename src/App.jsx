@@ -7,6 +7,8 @@ import airStadtLogo from "./assets/AirStadtLogo.png";
 
 import InterestForm from "./pages/InterestForm";
 import Auth from "./pages/Auth";
+import Dashboard from "./pages/Dashboard";
+
 
 // --- IMPORT SNAPS ---
 import JobEstimator from "./snaps/jobEstimator";
@@ -1878,6 +1880,7 @@ export default function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/interest" element={<InterestForm />} />
         <Route path="/auth" element={<Auth />} />
+         <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
     </Router>
   );
