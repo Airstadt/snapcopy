@@ -29,44 +29,54 @@ function Auth() {
   }, [navigate]);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setIsSubmitting(true);
+  e.preventDefault();
+  setError("");
+  setIsSubmitting(true);
 
-    try {
-      if (mode === "login") {
-        await signInWithEmailAndPassword(auth, email.trim(), password);
-      } else {
-        await createUserWithEmailAndPassword(auth, email.trim(), password);
-      }
+  try {
+    if (mode === "login") {
+      const userCred = await signInWithEmailAndPassword(auth, email.trim(), password);
 
-      // If successful, Firebase auth listener will redirect to /dashboard
-    } catch (err) {
-      console.error(err);
-      let message = "Something went wrong. Please try again.";
+      // Update lastLogin
+      await updateDoc(doc(db, "users", userCred.user.uid), {
+        lastLogin: Date.now(),
+      });
 
-      if (err.code === "auth/invalid-email") {
-        message = "That email address is not valid.";
-      } else if (err.code === "auth/user-not-found") {
-        message = "No account found with that email.";
-      } else if (err.code === "auth/wrong-password") {
-        message = "Incorrect password.";
-      } else if (err.code === "auth/email-already-in-use") {
-        message = "That email is already registered.";
-      } else if (err.code === "auth/weak-password") {
-        message = "Password should be at least 6 characters.";
-      }
+    } else {
+      const userCred = await createUserWithEmailAndPassword(auth, email.trim(), password);
 
-      setError(message);
-    } finally {
-      setIsSubmitting(false);
+      // Create Firestore user profile
+      await setDoc(doc(db, "users", userCred.user.uid), {
+        email: userCred.user.email,
+        createdAt: Date.now(),
+        lastLogin: Date.now(),
+        plan: "free",
+        credits: 100,
+
+        businessName: null,
+        industry: null,
+        yearsInBusiness: null,
+
+        onboardingComplete: false
+      });
     }
-  };
 
-  const toggleMode = () => {
-    setError("");
-    setMode((prev) => (prev === "login" ? "signup" : "login"));
-  };
+    // Redirect handled by onAuthStateChanged
+  } catch (err) {
+    console.error(err);
+    let message = "Something went wrong. Please try again.";
+
+    if (err.code === "auth/invalid-email") message = "That email address is not valid.";
+    else if (err.code === "auth/user-not-found") message = "No account found with that email.";
+    else if (err.code === "auth/wrong-password") message = "Incorrect password.";
+    else if (err.code === "auth/email-already-in-use") message = "That email is already registered.";
+    else if (err.code === "auth/weak-password") message = "Password should be at least 6 characters.";
+
+    setError(message);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 //----------------------------------------------------page styling ------------------------------------------------//
   return (
     <div className="auth-container">
