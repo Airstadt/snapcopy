@@ -33,3 +33,4 @@ export default function ProtectedRoute({ children }) {
   // If not, redirect them to the /auth page.
   return user ? children : <Navigate to="/auth" replace />;
 }
+    
