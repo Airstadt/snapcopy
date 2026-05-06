@@ -48,6 +48,21 @@ export default function Dashboard() {
         Welcome back, {greetingName}
       </h1>
 
+
+    <button
+        onClick={() => navigate("/settings")}
+        style={{
+          marginBottom: "20px",
+          padding: "10px 20px",
+          background: "#6c757d",
+          color: "white",
+          borderRadius: "6px",
+          cursor: "pointer"
+        }}
+      >
+        Settings
+      </button>
+
       {/* If profile is incomplete */}
       {!profile.onboardingComplete && (
         <div
@@ -65,18 +80,19 @@ export default function Dashboard() {
           <p>Finish setting up your business details to unlock personalized snaps.</p>
 
           <button
-            onClick={() => navigate("/profile")}
-            style={{
-              marginTop: "10px",
-              padding: "10px 20px",
-              background: "#007bff",
-              color: "white",
-              borderRadius: "6px",
-              cursor: "pointer"
-            }}
-          >
-            Complete Profile
-          </button>
+  onClick={() => navigate("/settings/profile")}
+  style={{
+    marginTop: "10px",
+    padding: "10px 20px",
+    background: "#007bff",
+    color: "white",
+    borderRadius: "6px",
+    cursor: "pointer"
+  }}
+>
+  Complete Profile
+</button>
+
         </div>
       )}
 

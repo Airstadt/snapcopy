@@ -12,7 +12,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import ProfileSettings from "./pages/settings/ProfileSettings";
 import BillingSettings from "./pages/settings/BillingSettings";
 import SecuritySettings from "./pages/settings/SecuritySettings";
-
+import SettingsHome from "./pages/settings/SettingsHome";
 
 
 

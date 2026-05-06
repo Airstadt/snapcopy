@@ -1,4 +1,30 @@
-import React, { useState } from "react";
+/**
+ * PoGenerator.jsx — SnapCopy Component
+ * ------------------------------------
+ * This component renders the full Purchase Order generator UI:
+ * - Buyer info, vendor info, shipping info
+ * - PO details, items, remarks, totals
+ * - Independent line‑item notes
+ * - Dynamic tax, discount, shipping, and other cost calculations
+ *
+ * Behavior:
+ * - PUBLIC VISITORS (not logged in):
+ *      • See marketing text + CTA banner
+ *      • See the full PO form
+ *      • Cannot save snaps (handled in App.jsx)
+ *
+ * - LOGGED-IN USERS:
+ *      • Do NOT see marketing text or CTA
+ *      • See a clean, app-only version of the PO generator
+ *
+ * Notes:
+ * - All logic (state, totals, PDF generation, handlers) lives in App.jsx.
+ * - This file ONLY handles UI and conditional rendering.
+ * - Safe Firebase auth listener prevents blank screens.
+ */
+
+import React, { useState, useEffect } from "react";
+import { auth } from "../firebase";
 
 export default function PoGenerator({
   colors,
@@ -9,14 +35,20 @@ export default function PoGenerator({
   poDetails, setPoDetails,
   poItems, setPoItems,
   poTotals, setPoTotals,
-  onDownload 
+  onDownload
 }) {
+  const [user, setUser] = useState(null);
 
-  // Improved update logic to ensure independent state for each array index
+  // Safe Firebase auth listener — prevents crashes on first render
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((u) => setUser(u));
+    return unsubscribe;
+  }, []);
+
+  // Safe update logic for PO items
   const updateItem = (index, field, value) => {
-    setPoItems(prevItems => {
+    setPoItems((prevItems) => {
       const newItems = [...prevItems];
-      // Create a fresh object for this specific index to prevent data bleeding
       newItems[index] = { ...newItems[index], [field]: value };
       return newItems;
     });
@@ -25,102 +57,531 @@ export default function PoGenerator({
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "25px" }}>
 
+      {/* PUBLIC MARKETING CONTENT — only visible when NOT logged in */}
+      {!user && (
+        <>
+          <p style={{ marginBottom: "20px", color: "#4a5568" }}>
+            Create a clean, professional Purchase Order with line‑item notes,
+            tax handling, shipping, and totals. Perfect for contractors,
+            suppliers, and service businesses.
+          </p>
+
+          <div
+            style={{
+              background: "#edf2f7",
+              padding: "10px 15px",
+              borderRadius: "6px",
+              marginBottom: "20px",
+              fontWeight: "600",
+              color: "#2d3748"
+            }}
+          >
+            Interested in SnapCopy or SnapMatrix? Join the waitlist today.
+          </div>
+        </>
+      )}
+
       {/* 1. BILL TO & 2. SHIP TO */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "20px" }}>
-        <div style={{ padding: "20px", background: "#f8fafc", borderRadius: "12px", border: `1px solid ${colors.lightGray}` }}>
-          <h4 style={{ color: colors.poGreen, marginBottom: "15px", borderBottom: `2px solid ${colors.poGreen}`, display: "inline-block" }}>Bill To (Buyer)</h4>
-          <InputField label="Company Name" value={buyerInfo.companyName} onChange={(v) => setBuyerInfo({...buyerInfo, companyName: v})} colors={colors} getInputStyle={getInputStyle} />
-          <InputField label="Billing Address" value={buyerInfo.companyAddress} onChange={(v) => setBuyerInfo({...buyerInfo, companyAddress: v})} colors={colors} getInputStyle={getInputStyle} />
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+          gap: "20px"
+        }}
+      >
+        <div
+          style={{
+            padding: "20px",
+            background: "#f8fafc",
+            borderRadius: "12px",
+            border: `1px solid ${colors.lightGray}`
+          }}
+        >
+          <h4
+            style={{
+              color: colors.poGreen,
+              marginBottom: "15px",
+              borderBottom: `2px solid ${colors.poGreen}`,
+              display: "inline-block"
+            }}
+          >
+            Bill To (Buyer)
+          </h4>
+
+          <InputField
+            label="Company Name"
+            value={buyerInfo.companyName}
+            onChange={(v) => setBuyerInfo({ ...buyerInfo, companyName: v })}
+            colors={colors}
+            getInputStyle={getInputStyle}
+          />
+
+          <InputField
+            label="Billing Address"
+            value={buyerInfo.companyAddress}
+            onChange={(v) => setBuyerInfo({ ...buyerInfo, companyAddress: v })}
+            colors={colors}
+            getInputStyle={getInputStyle}
+          />
+
           <div style={{ display: "flex", gap: "10px" }}>
-            <InputField label="Contact Name" value={buyerInfo.contactName} onChange={(v) => setBuyerInfo({...buyerInfo, contactName: v})} colors={colors} getInputStyle={getInputStyle} />
-            <InputField label="Contact Email" value={buyerInfo.contactEmail} onChange={(v) => setBuyerInfo({...buyerInfo, contactEmail: v})} colors={colors} getInputStyle={getInputStyle} />
+            <InputField
+              label="Contact Name"
+              value={buyerInfo.contactName}
+              onChange={(v) => setBuyerInfo({ ...buyerInfo, contactName: v })}
+              colors={colors}
+              getInputStyle={getInputStyle}
+            />
+
+            <InputField
+              label="Contact Email"
+              value={buyerInfo.contactEmail}
+              onChange={(v) => setBuyerInfo({ ...buyerInfo, contactEmail: v })}
+              colors={colors}
+              getInputStyle={getInputStyle}
+            />
           </div>
         </div>
 
-        <div style={{ padding: "20px", background: "#f8fafc", borderRadius: "12px", border: `1px solid ${colors.lightGray}` }}>
-          <h4 style={{ color: colors.poGreen, marginBottom: "15px", borderBottom: `2px solid ${colors.poGreen}`, display: "inline-block" }}>Ship To</h4>
-          <InputField label="Shipping Address" value={poDetails.shippingAddress || ""} onChange={(v) => setPoDetails({...poDetails, shippingAddress: v})} placeholder="Enter destination address" colors={colors} getInputStyle={getInputStyle} />
-          <InputField label="Recipient Name" value={poDetails.shippingRecipient || ""} onChange={(v) => setPoDetails({...poDetails, shippingRecipient: v})} colors={colors} getInputStyle={getInputStyle} />
+        <div
+          style={{
+            padding: "20px",
+            background: "#f8fafc",
+            borderRadius: "12px",
+            border: `1px solid ${colors.lightGray}`
+          }}
+        >
+          <h4
+            style={{
+              color: colors.poGreen,
+              marginBottom: "15px",
+              borderBottom: `2px solid ${colors.poGreen}`,
+              display: "inline-block"
+            }}
+          >
+            Ship To
+          </h4>
+
+          <InputField
+            label="Shipping Address"
+            value={poDetails.shippingAddress || ""}
+            onChange={(v) => setPoDetails({ ...poDetails, shippingAddress: v })}
+            placeholder="Enter destination address"
+            colors={colors}
+            getInputStyle={getInputStyle}
+          />
+
+          <InputField
+            label="Recipient Name"
+            value={poDetails.shippingRecipient || ""}
+            onChange={(v) => setPoDetails({ ...poDetails, shippingRecipient: v })}
+            colors={colors}
+            getInputStyle={getInputStyle}
+          />
         </div>
       </div>
 
-      {/* 3. PURCHASED FROM & 4. SHIP FROM (OPTIONAL) */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "20px" }}>
-        <div style={{ padding: "20px", background: "#f8fafc", borderRadius: "12px", border: `1px solid ${colors.lightGray}` }}>
-          <h4 style={{ color: colors.poGreen, marginBottom: "15px", borderBottom: `2px solid ${colors.poGreen}`, display: "inline-block" }}>Purchased From</h4>
-          <InputField label="Vendor Name" value={vendorInfo.vendorName} onChange={(v) => setVendorInfo({...vendorInfo, vendorName: v})} colors={colors} getInputStyle={getInputStyle} />
-          <InputField label="Vendor Address" value={vendorInfo.vendorAddress} onChange={(v) => setVendorInfo({...vendorInfo, vendorAddress: v})} colors={colors} getInputStyle={getInputStyle} />
-          <InputField label="Payment Terms" value={vendorInfo.vendorPaymentTerms} onChange={(v) => setVendorInfo({...vendorInfo, vendorPaymentTerms: v})} placeholder="Net 30" colors={colors} getInputStyle={getInputStyle} />
+      {/* 3. PURCHASED FROM & 4. SHIP FROM */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+          gap: "20px"
+        }}
+      >
+        <div
+          style={{
+            padding: "20px",
+            background: "#f8fafc",
+            borderRadius: "12px",
+            border: `1px solid ${colors.lightGray}`
+          }}
+        >
+          <h4
+            style={{
+              color: colors.poGreen,
+              marginBottom: "15px",
+              borderBottom: `2px solid ${colors.poGreen}`,
+              display: "inline-block"
+            }}
+          >
+            Purchased From
+          </h4>
+
+          <InputField
+            label="Vendor Name"
+            value={vendorInfo.vendorName}
+            onChange={(v) => setVendorInfo({ ...vendorInfo, vendorName: v })}
+            colors={colors}
+            getInputStyle={getInputStyle}
+          />
+
+          <InputField
+            label="Vendor Address"
+            value={vendorInfo.vendorAddress}
+            onChange={(v) => setVendorInfo({ ...vendorInfo, vendorAddress: v })}
+            colors={colors}
+            getInputStyle={getInputStyle}
+          />
+
+          <InputField
+            label="Payment Terms"
+            value={vendorInfo.vendorPaymentTerms}
+            onChange={(v) =>
+              setVendorInfo({ ...vendorInfo, vendorPaymentTerms: v })
+            }
+            placeholder="Net 30"
+            colors={colors}
+            getInputStyle={getInputStyle}
+          />
         </div>
 
-        <div style={{ padding: "20px", background: "#f8fafc", borderRadius: "12px", border: `1px solid ${colors.lightGray}` }}>
-          <h4 style={{ color: colors.poGreen, marginBottom: "15px", borderBottom: `2px solid ${colors.poGreen}`, display: "inline-block" }}>Ship From (Optional)</h4>
-          <InputField label="Ship From Address" value={vendorInfo.shipFromAddress || ""} onChange={(v) => setVendorInfo({...vendorInfo, shipFromAddress: v})} placeholder="Leave blank if same as Vendor" colors={colors} getInputStyle={getInputStyle} />
+        <div
+          style={{
+            padding: "20px",
+            background: "#f8fafc",
+            borderRadius: "12px",
+            border: `1px solid ${colors.lightGray}`
+          }}
+        >
+          <h4
+            style={{
+              color: colors.poGreen,
+              marginBottom: "15px",
+              borderBottom: `2px solid ${colors.poGreen}`,
+              display: "inline-block"
+            }}
+          >
+            Ship From (Optional)
+          </h4>
+
+          <InputField
+            label="Ship From Address"
+            value={vendorInfo.shipFromAddress || ""}
+            onChange={(v) =>
+              setVendorInfo({ ...vendorInfo, shipFromAddress: v })
+            }
+            placeholder="Leave blank if same as Vendor"
+            colors={colors}
+            getInputStyle={getInputStyle}
+          />
         </div>
       </div>
 
       {/* 5. SHIPPING METHOD & PO DETAILS */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "15px", padding: "15px", background: "#f1f5f9", borderRadius: "10px" }}>
-        <InputField label="PO Number" value={poDetails.poNumber} onChange={(v) => setPoDetails({...poDetails, poNumber: v})} colors={colors} getInputStyle={getInputStyle} />
-        <InputField label="PO Date" type="date" value={poDetails.poDate} onChange={(v) => setPoDetails({...poDetails, poDate: v})} colors={colors} getInputStyle={getInputStyle} />
-        <InputField label="Shipping Method" value={poDetails.shippingMethod} onChange={(v) => setPoDetails({...poDetails, shippingMethod: v})} colors={colors} getInputStyle={getInputStyle} />
-        <InputField label="Shipping Terms" value={poDetails.shippingTerms} onChange={(v) => setPoDetails({...poDetails, shippingTerms: v})} placeholder="FOB Destination" colors={colors} getInputStyle={getInputStyle} />
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+          gap: "15px",
+          padding: "15px",
+          background: "#f1f5f9",
+          borderRadius: "10px"
+        }}
+      >
+        <InputField
+          label="PO Number"
+          value={poDetails.poNumber}
+          onChange={(v) => setPoDetails({ ...poDetails, poNumber: v })}
+          colors={colors}
+          getInputStyle={getInputStyle}
+        />
+
+        <InputField
+          label="PO Date"
+          type="date"
+          value={poDetails.poDate}
+          onChange={(v) => setPoDetails({ ...poDetails, poDate: v })}
+          colors={colors}
+          getInputStyle={getInputStyle}
+        />
+
+        <InputField
+          label="Shipping Method"
+          value={poDetails.shippingMethod}
+          onChange={(v) => setPoDetails({ ...poDetails, shippingMethod: v })}
+          colors={colors}
+          getInputStyle={getInputStyle}
+        />
+
+        <InputField
+          label="Shipping Terms"
+          value={poDetails.shippingTerms}
+          onChange={(v) => setPoDetails({ ...poDetails, shippingTerms: v })}
+          placeholder="FOB Destination"
+          colors={colors}
+          getInputStyle={getInputStyle}
+        />
       </div>
 
-      {/* 6. ITEM LIST WITH SEPARATE USER REMARKS */}
-      <div style={{ border: `1px solid ${colors.lightGray}`, borderRadius: "12px", padding: "20px" }}>
-        <h4 style={{ color: colors.poGreen, marginBottom: "15px" }}>Order Items</h4>
+      {/* 6. ITEM LIST WITH REMARKS */}
+      <div
+        style={{
+          border: `1px solid ${colors.lightGray}`,
+          borderRadius: "12px",
+          padding: "20px"
+        }}
+      >
+        <h4 style={{ color: colors.poGreen, marginBottom: "15px" }}>
+          Order Items
+        </h4>
+
         {poItems.map((item, index) => (
-          <div key={index} style={{ marginBottom: "20px", paddingBottom: "20px", borderBottom: `2px solid ${colors.lightGray}55` }}>
-            <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 0.6fr 0.8fr 0.6fr 40px", gap: "10px", alignItems: "end" }}>
-              <InputField label="Item Description" value={item.itemName} onChange={(v) => updateItem(index, "itemName", v)} colors={colors} getInputStyle={getInputStyle} />
-              <InputField label="Part Number" value={item.partNumber} onChange={(v) => updateItem(index, "partNumber", v)} colors={colors} getInputStyle={getInputStyle} />
-              <InputField label="Qty" type="number" value={item.quantity} onChange={(v) => updateItem(index, "quantity", v)} colors={colors} getInputStyle={getInputStyle} />
-              <InputField label="Price ($)" type="number" value={item.unitPrice} onChange={(v) => updateItem(index, "unitPrice", v)} colors={colors} getInputStyle={getInputStyle} />
-              <div style={{ display: "flex", flexDirection: "column", gap: "5px", alignItems: "center" }}>
-                <label style={{ fontSize: "10px", fontWeight: "bold" }}>Tax?</label>
-                <input type="checkbox" checked={item.taxable} onChange={(e) => updateItem(index, "taxable", e.target.checked)} />
+          <div
+            key={index}
+            style={{
+              marginBottom: "20px",
+              paddingBottom: "20px",
+              borderBottom: `2px solid ${colors.lightGray}55`
+            }}
+          >
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns:
+                  "2fr 1fr 0.6fr 0.8fr 0.6fr 40px",
+                gap: "10px",
+                alignItems: "end"
+              }}
+            >
+              <InputField
+                label="Item Description"
+                value={item.itemName}
+                onChange={(v) => updateItem(index, "itemName", v)}
+                colors={colors}
+                getInputStyle={getInputStyle}
+              />
+
+              <InputField
+                label="Part Number"
+                value={item.partNumber}
+                onChange={(v) => updateItem(index, "partNumber", v)}
+                colors={colors}
+                getInputStyle={getInputStyle}
+              />
+
+              <InputField
+                label="Qty"
+                type="number"
+                value={item.quantity}
+                onChange={(v) => updateItem(index, "quantity", v)}
+                colors={colors}
+                getInputStyle={getInputStyle}
+              />
+
+              <InputField
+                label="Price ($)"
+                type="number"
+                value={item.unitPrice}
+                onChange={(v) => updateItem(index, "unitPrice", v)}
+                colors={colors}
+                getInputStyle={getInputStyle}
+              />
+
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "5px",
+                  alignItems: "center"
+                }}
+              >
+                <label
+                  style={{
+                    fontSize: "10px",
+                    fontWeight: "bold"
+                  }}
+                >
+                  Tax?
+                </label>
+
+                <input
+                  type="checkbox"
+                  checked={item.taxable}
+                  onChange={(e) =>
+                    updateItem(index, "taxable", e.target.checked)
+                  }
+                />
               </div>
-              <button onClick={() => setPoItems(poItems.filter((_, i) => i !== index))} style={{ height: "40px", background: colors.errorRed, color: "white", border: "none", borderRadius: "8px", cursor: "pointer" }}>×</button>
+
+              <button
+                onClick={() =>
+                  setPoItems(poItems.filter((_, i) => i !== index))
+                }
+                style={{
+                  height: "40px",
+                  background: colors.errorRed,
+                  color: "white",
+                  border: "none",
+                  borderRadius: "8px",
+                  cursor: "pointer"
+                }}
+              >
+                ×
+              </button>
             </div>
-            
-            {/* INDEPENDENT REMARKS BOX */}
+
+            {/* REMARKS BOX */}
             <div style={{ marginTop: "10px" }}>
-              <label style={{ fontSize: "11px", fontWeight: "700", color: "#718096", textTransform: "uppercase" }}>User Remarks / Line Notes</label>
+              <label
+                style={{
+                  fontSize: "11px",
+                  fontWeight: "700",
+                  color: "#718096",
+                  textTransform: "uppercase"
+                }}
+              >
+                User Remarks / Line Notes
+              </label>
+
               <textarea
                 placeholder="Specific remarks for this item..."
-                // Pointing to item.lineNotes ensures this specific item's data is used
-                value={item.lineNotes || ""} 
-                onChange={(e) => updateItem(index, "lineNotes", e.target.value)}
-                style={{ ...inputStyle, height: "60px", resize: "vertical", fontFamily: "inherit", marginTop: "5px" }}
+                value={item.lineNotes || ""}
+                onChange={(e) =>
+                  updateItem(index, "lineNotes", e.target.value)
+                }
+                style={{
+                  ...inputStyle,
+                  height: "60px",
+                  resize: "vertical",
+                  fontFamily: "inherit",
+                  marginTop: "5px"
+                }}
               />
             </div>
           </div>
         ))}
-        <button 
-          onClick={() => setPoItems([...poItems, { itemName: "", partNumber: "", quantity: 1, unitPrice: 0, lineNotes: "", taxable: false }])} 
-          style={{ background: colors.poGreen, color: "white", border: "none", padding: "10px 20px", borderRadius: "8px", fontWeight: "bold", cursor: "pointer" }}
+
+        <button
+          onClick={() =>
+            setPoItems([
+              ...poItems,
+              {
+                itemName: "",
+                partNumber: "",
+                quantity: 1,
+                unitPrice: 0,
+                lineNotes: "",
+                taxable: false
+              }
+            ])
+          }
+          style={{
+            background: colors.poGreen,
+            color: "white",
+            border: "none",
+            padding: "10px 20px",
+            borderRadius: "8px",
+            fontWeight: "bold",
+            cursor: "pointer"
+          }}
         >
           + Add Line Item
         </button>
       </div>
 
-      {/* 7. FINANCIAL SUMMARY & 8. TOTALS */}
+      {/* 7. FINANCIAL SUMMARY & TOTALS */}
       <div style={{ display: "flex", justifyContent: "flex-end" }}>
-        <div style={{ width: "450px", padding: "20px", background: "#2d3748", color: "white", borderRadius: "12px" }}>
-          <h4 style={{ marginBottom: "15px", borderBottom: "1px solid #4a5568", paddingBottom: "5px" }}>Financial Summary</h4>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "15px" }}>
-            <InputField label="Discount (%)" type="number" value={poTotals.discountRate} onChange={(v) => setPoTotals({...poTotals, discountRate: v})} colors={colors} getInputStyle={getInputStyle} />
-            <InputField label="Sales Tax (%)" type="number" value={poTotals.taxRate} onChange={(v) => setPoTotals({...poTotals, taxRate: v})} colors={colors} getInputStyle={getInputStyle} />
-            <InputField label="Shipping ($)" type="number" value={poTotals.shippingCost} onChange={(v) => setPoTotals({...poTotals, shippingCost: v})} colors={colors} getInputStyle={getInputStyle} />
-            <InputField label="Other ($)" type="number" value={poTotals.otherCost} onChange={(v) => setPoTotals({...poTotals, otherCost: v})} colors={colors} getInputStyle={getInputStyle} />
+        <div
+          style={{
+            width: "450px",
+            padding: "20px",
+            background: "#2d3748",
+            color: "white",
+            borderRadius: "12px"
+          }}
+        >
+          <h4
+            style={{
+              marginBottom: "15px",
+              borderBottom: "1px solid #4a5568",
+              paddingBottom: "5px"
+            }}
+          >
+            Financial Summary
+          </h4>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "10px",
+              marginBottom: "15px"
+            }}
+          >
+            <InputField
+              label="Discount (%)"
+              type="number"
+              value={poTotals.discountRate}
+              onChange={(v) =>
+                setPoTotals({ ...poTotals, discountRate: v })
+              }
+              colors={colors}
+              getInputStyle={getInputStyle}
+            />
+
+            <InputField
+              label="Sales Tax (%)"
+              type="number"
+              value={poTotals.taxRate}
+              onChange={(v) =>
+                setPoTotals({ ...poTotals, taxRate: v })
+              }
+              colors={colors}
+              getInputStyle={getInputStyle}
+            />
+
+            <InputField
+              label="Shipping ($)"
+              type="number"
+              value={poTotals.shippingCost}
+              onChange={(v) =>
+                setPoTotals({ ...poTotals, shippingCost: v })
+              }
+              colors={colors}
+              getInputStyle={getInputStyle}
+            />
+
+            <InputField
+              label="Other ($)"
+              type="number"
+              value={poTotals.otherCost}
+              onChange={(v) =>
+                setPoTotals({ ...poTotals, otherCost: v })
+              }
+              colors={colors}
+              getInputStyle={getInputStyle}
+            />
           </div>
-          <div style={{ borderTop: "1px solid #4a5568", paddingTop: "10px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span>Subtotal:</span><span>${poTotals.subtotal}</span>
+
+          <div
+            style={{
+              borderTop: "1px solid #4a5568",
+              paddingTop: "10px"
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between"
+              }}
+            >
+              <span>Subtotal:</span>
+              <span>${poTotals.subtotal}</span>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", marginTop: "10px", fontWeight: "bold" }}>
-              <span>Grand Total:</span><span style={{ color: "#48bb78" }}>${poTotals.grandTotal}</span>
+
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                marginTop: "10px",
+                fontWeight: "bold"
+              }}
+            >
+              <span>Grand Total:</span>
+              <span style={{ color: "#48bb78" }}>
+                ${poTotals.grandTotal}
+              </span>
             </div>
           </div>
         </div>
@@ -129,14 +590,38 @@ export default function PoGenerator({
   );
 }
 
-function InputField({ label, value, onChange, placeholder, type = "text", colors, getInputStyle }) {
+/* Reusable Input Component */
+function InputField({
+  label,
+  value,
+  onChange,
+  placeholder,
+  type = "text",
+  colors,
+  getInputStyle
+}) {
   const [focused, setFocused] = useState(false);
+
   return (
     <div style={{ width: "100%" }}>
-      <label style={{ fontSize: "11px", fontWeight: "700", color: "#718096", textTransform: "uppercase" }}>{label}</label>
+      <label
+        style={{
+          fontSize: "11px",
+          fontWeight: "700",
+          color: "#718096",
+          textTransform: "uppercase"
+        }}
+      >
+        {label}
+      </label>
+
       <input
-        type={type} value={value} onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
         style={getInputStyle(focused)}
       />
     </div>
