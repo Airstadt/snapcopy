@@ -60,6 +60,7 @@ export default function Dashboard() {
             maxWidth: "450px"
           }}
         >
+          
           <h2 style={{ marginTop: 0 }}>Complete Your Profile</h2>
           <p>Finish setting up your business details to unlock personalized snaps.</p>
 

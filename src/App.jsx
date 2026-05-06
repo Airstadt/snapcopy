@@ -10,6 +10,9 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ProfileSettings from "./pages/settings/ProfileSettings";
+import BillingSettings from "./pages/settings/BillingSettings";
+import SecuritySettings from "./pages/settings/SecuritySettings";
+
 
 
 
@@ -1886,6 +1889,8 @@ export default function App() {
         <Route path="/auth" element={<Auth />} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>}/>
         <Route path="/settings/profile" element={ <ProtectedRoute><ProfileSettings /></ProtectedRoute>}/>
+        <Route path="/settings/billing" element={ <ProtectedRoute><BillingSettings /></ProtectedRoute>}/>
+        <Route path="/settings/security"element={<ProtectedRoute><SecuritySettings /></ProtectedRoute>}/>
       </Routes>
     </Router>
   );
