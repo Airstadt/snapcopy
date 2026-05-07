@@ -1,9 +1,10 @@
 import { BrowserRouter as Router, Routes, Route, Link, useSearchParams } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
+import { auth } from "./firebase";
 import { jsPDF } from "jspdf";
+import { db } from "./firebase";
+import { doc, setDoc, collection, serverTimestamp } from "firebase/firestore";
 import { useAuth } from "./hooks/useAuth";
-
-
 
 import snapcopyLogo from "./assets/snapcopyLogo.png";
 import airStadtLogo from "./assets/AirStadtLogo.png";
@@ -17,10 +18,6 @@ import BillingSettings from "./pages/settings/BillingSettings";
 import SecuritySettings from "./pages/settings/SecuritySettings";
 import SettingsHome from "./pages/settings/SettingsHome";
 
-
-
-
-// --- IMPORT SNAPS ---
 import JobEstimator from "./snaps/jobEstimator";
 import AboutUs from "./snaps/AboutUs";
 import Responder from "./snaps/Responder";
@@ -30,6 +27,7 @@ import PoGenerator from "./snaps/PoGenerator";
 import Contracts from "./snaps/Contracts";
 import PoliciesCompliance from "./snaps/Policies.jsx";
 import "jspdf-autotable";
+
 
 function HomePage() {
   // --- STATE MANAGEMENT ---
@@ -1106,50 +1104,50 @@ if (yPos > 250) {
   // ---------------------------------------------------------
   // GENERATE FUNCTION
   // ---------------------------------------------------------
-  async function generate() {
-    setOutput("");
-    setError("");
-    setLoading(true);
+  // ---------------------- GENERATE FUNCTION ----------------------
+async function generate() {
+  setOutput("");
+  setError("");
+  setLoading(true);
 
-    const payload =
-      mode === "po"
-        ? {
-            mode,
-            buyer: buyerInfo,
-            vendor: vendorInfo,
-            details: poDetails,
-            items: poItems,
-            totals: poTotals
-          }
-        : mode === "contracts"
-        ? {
-            mode,
-            contractType,
-            partyA,
-            partyB,
-            scope,
-            terms,
-            specialClauses
-          }
-        : mode === "policies"
-        ? {
-            mode,
-            policyType,
-            businessName,
-            details,
-          }
-        : mode === "estimator"
+  const payload =
+    mode === "po"
       ? {
           mode,
-          header,      // Sent as an object containing jobTitle, customerName, etc.
-          tasks,       // Sent as an array of task objects
-          materials,   // Sent as an array of material objects
+          buyer: buyerInfo,
+          vendor: vendorInfo,
+          details: poDetails,
+          items: poItems,
+          totals: poTotals
+        }
+      : mode === "contracts"
+      ? {
+          mode,
+          contractType,
+          partyA,
+          partyB,
+          scope,
+          terms,
+          specialClauses
+        }
+      : mode === "policies"
+      ? {
+          mode,
+          policyType,
+          businessName,
+          details
+        }
+      : mode === "estimator"
+      ? {
+          mode,
+          header,
+          tasks,
+          materials,
           fees,
           financials,
-          total: calculateTotal(), // Invokes your total calculation helper
+          total: calculateTotal()
         }
       : {
-          // Default/Legacy modes (About Us, Responder, etc.)
           mode,
           industry,
           city,
@@ -1158,69 +1156,76 @@ if (yPos > 250) {
           customBusinessType,
           tone,
           description:
-                mode === "about"
-                  ? aboutDescription
-                : mode === "responder"
-                  ? responderMessage
-                : description,
+            mode === "about"
+              ? aboutDescription
+              : mode === "responder"
+              ? responderMessage
+              : description,
           issueType,
           apologyContext,
-          rawComments,
+          rawComments
         };
 
-    try {
-      const response = await fetch("https://api.snapcopy.online/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
+  try {
+    const response = await fetch("https://api.snapcopy.online/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
 
-      const data = await response.json();
+    const data = await response.json();
 
-      if (!response.ok) throw new Error(data.error || "Server error");
+    if (!response.ok) throw new Error(data.error || "Server error");
 
-      const result =
-        data.about ||
-        data.reply ||
-        data.apology ||
-        data.sentiment ||
-        data.po ||
-        data.contract ||
-        data.policy ||
-        data.estimate ||
-        JSON.stringify(data, null, 2);
+    const result =
+      data.about ||
+      data.reply ||
+      data.apology ||
+      data.sentiment ||
+      data.po ||
+      data.contract ||
+      data.policy ||
+      data.estimate ||
+      JSON.stringify(data, null, 2);
 
-      setOutput(
-        typeof result === "string" ? result : JSON.stringify(result, null, 2)
-      );
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+    setOutput(typeof result === "string" ? result : JSON.stringify(result, null, 2));
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
   }
+}
 
 
-  async function saveSnap() {
+// ---------------------- SAVE SNAP FUNCTION ----------------------
+async function saveSnap() {
+  console.log("saveSnap() fired");
+
+  // 1. Check user
   if (!auth.currentUser) {
+    console.log("❌ No user logged in");
     alert("You must be logged in to save snaps.");
     return;
   }
 
-  // Free plan restriction (customize later)
+  // 2. Check plan
   if (profile?.plan !== "pro") {
+    console.log("❌ User is not Pro. plan =", profile?.plan);
     alert("Saving snaps is a Pro feature. Upgrade to unlock unlimited saves.");
     return;
   }
 
+  // 3. Check output
   if (!output) {
+    console.log("❌ No output to save");
     alert("Generate a Snap before saving.");
     return;
   }
 
   const uid = auth.currentUser.uid;
+  console.log("✔ User:", uid);
 
-  // Build the input payload based on active mode
+  // Build input payload
   const inputData =
     mode === "po"
       ? { buyerInfo, vendorInfo, poDetails, poItems, poTotals }
@@ -1240,7 +1245,7 @@ if (yPos > 250) {
       ? { rawComments }
       : {};
 
-  // Auto-generate a title
+  // Auto title
   const title =
     mode === "about"
       ? `${industry || "Business"} About Us`
@@ -1265,22 +1270,25 @@ if (yPos > 250) {
     title,
     input: inputData,
     output,
-    createdAt: serverTimestamp(),
+    createdAt: serverTimestamp()
   };
 
   try {
+    console.log("📡 Writing to Firestore...");
     const snapRef = doc(collection(db, "users", uid, "snaps"));
     await setDoc(snapRef, snapDoc);
-
+    console.log("✅ Firestore write success");
     alert("Snap saved successfully!");
   } catch (err) {
-    console.error("Save error:", err);
-    alert("Failed to save snap. Try again.");
+    console.error("🔥 Firestore Save Error:", err);
+    alert("Failed to save snap. Check console for details.");
   }
 }
 
-  // Make generate() callable from Snaps
-  window.generateSnap = generate;
+
+// Make generate() callable from Snaps
+window.generateSnap = generate;
+
 
   // ---------------------------------------------------------
   // RETURN UI
@@ -1901,10 +1909,11 @@ if (yPos > 250) {
                   <span style={{ fontWeight: "bold", fontSize: "16px" }}>
                   Save
                   </span>
-
                   <span style={{ fontSize: "10px", opacity: 0.8 }}>
                     {profile?.plan === "pro" ? "Save to Dashboard" : "Pro Feature"}
               </span>
+              
+
             </button>
           </div>
 
