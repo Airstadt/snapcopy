@@ -26,6 +26,7 @@ import Sentiment from "./snaps/Sentiment";
 import PoGenerator from "./snaps/PoGenerator";
 import Contracts from "./snaps/Contracts";
 import PoliciesCompliance from "./snaps/Policies.jsx";
+import MySnaps from "./pages/MySnaps";
 import "jspdf-autotable";
 
 
@@ -1988,6 +1989,7 @@ export default function App() {
         <Route path="/settings/profile" element={ <ProtectedRoute><ProfileSettings /></ProtectedRoute>}/>
         <Route path="/settings/billing" element={ <ProtectedRoute><BillingSettings /></ProtectedRoute>}/>
         <Route path="/settings/security"element={<ProtectedRoute><SecuritySettings /></ProtectedRoute>}/>
+        <Route path="/mysnaps" element={<ProtectedRoute><MySnaps /></ProtectedRoute>} />
       </Routes>
     </Router>
   );
