@@ -1,6 +1,9 @@
 import { BrowserRouter as Router, Routes, Route, Link, useSearchParams } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import { jsPDF } from "jspdf";
+import { useAuth } from "./hooks/useAuth";
+
+
 
 import snapcopyLogo from "./assets/snapcopyLogo.png";
 import airStadtLogo from "./assets/AirStadtLogo.png";
@@ -45,6 +48,7 @@ function HomePage() {
   const [issueType, setIssueType] = useState("");
   const [apologyContext, setApologyContext] = useState("");
   const [rawComments, setRawComments] = useState("");
+  const { user, profile } = useAuth();
 
   const [contractType, setContractType] = useState("");
   const [partyA, setPartyA] = useState("");
@@ -1196,6 +1200,85 @@ if (yPos > 250) {
     }
   }
 
+
+  async function saveSnap() {
+  if (!auth.currentUser) {
+    alert("You must be logged in to save snaps.");
+    return;
+  }
+
+  // Free plan restriction (customize later)
+  if (profile?.plan !== "pro") {
+    alert("Saving snaps is a Pro feature. Upgrade to unlock unlimited saves.");
+    return;
+  }
+
+  if (!output) {
+    alert("Generate a Snap before saving.");
+    return;
+  }
+
+  const uid = auth.currentUser.uid;
+
+  // Build the input payload based on active mode
+  const inputData =
+    mode === "po"
+      ? { buyerInfo, vendorInfo, poDetails, poItems, poTotals }
+      : mode === "contracts"
+      ? { contractType, partyA, partyB, scope, terms, specialClauses }
+      : mode === "policies"
+      ? { policyType, businessName, details }
+      : mode === "estimator"
+      ? { header, tasks, materials, fees, financials }
+      : mode === "about"
+      ? { industry, city, years, businessType, customBusinessType, aboutDescription }
+      : mode === "responder"
+      ? { businessType, customBusinessType, tone, responderMessage }
+      : mode === "apology"
+      ? { issueType, apologyContext }
+      : mode === "sentiment"
+      ? { rawComments }
+      : {};
+
+  // Auto-generate a title
+  const title =
+    mode === "about"
+      ? `${industry || "Business"} About Us`
+      : mode === "responder"
+      ? `Response (${tone || "Neutral"})`
+      : mode === "apology"
+      ? `Apology – ${issueType || "General"}`
+      : mode === "sentiment"
+      ? `Sentiment Analysis`
+      : mode === "contracts"
+      ? `${contractType || "Contract"}`
+      : mode === "policies"
+      ? `${policyType || "Policy"}`
+      : mode === "po"
+      ? `Purchase Order ${poDetails.poNumber || ""}`
+      : mode === "estimator"
+      ? `Estimate – ${header.jobTitle || "Untitled"}`
+      : "Snap";
+
+  const snapDoc = {
+    mode,
+    title,
+    input: inputData,
+    output,
+    createdAt: serverTimestamp(),
+  };
+
+  try {
+    const snapRef = doc(collection(db, "users", uid, "snaps"));
+    await setDoc(snapRef, snapDoc);
+
+    alert("Snap saved successfully!");
+  } catch (err) {
+    console.error("Save error:", err);
+    alert("Failed to save snap. Try again.");
+  }
+}
+
   // Make generate() callable from Snaps
   window.generateSnap = generate;
 
@@ -1796,26 +1879,31 @@ if (yPos > 250) {
             )}
 
             {/* SAVE BUTTON: Placeholder with Subscriber subtext */}
-            <button 
-              disabled
-              style={{
-                flex: 1,
-                padding: "12px 8px",
-                background: "#f1f5f9", 
-                color: "#94a3b8",      
-                border: "1px solid #cbd5e1",
-                borderRadius: "10px",
-                cursor: "not-allowed",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "2px"
-              }}
-            >
-              <span style={{ fontWeight: "bold", fontSize: "16px" }}>Save</span>
-              <span style={{ fontSize: "10px", fontWeight: "normal", opacity: 0.8 }}>
-                Subscribers save to DB
+            <button
+            onClick={saveSnap}
+            disabled={!output || loading}
+            style={{
+              flex: 1,
+              padding: "12px 8px",
+              background: output ? colors.deepBlue : "#f1f5f9",
+              color: output ? "white" : "#94a3b8",
+              border: output ? "none" : "1px solid #cbd5e1",
+              borderRadius: "10px",
+              cursor: output ? "pointer" : "not-allowed",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "2px",
+              transition: "0.2s"
+            }}
+          >
+                  <span style={{ fontWeight: "bold", fontSize: "16px" }}>
+                  Save
+                  </span>
+
+                  <span style={{ fontSize: "10px", opacity: 0.8 }}>
+                    {profile?.plan === "pro" ? "Save to Dashboard" : "Pro Feature"}
               </span>
             </button>
           </div>
