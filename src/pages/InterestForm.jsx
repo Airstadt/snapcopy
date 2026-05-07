@@ -135,10 +135,10 @@ export default function InterestForm() {
           <section style={{ flex: "1 1 550px", maxWidth: "650px" }} aria-labelledby="form-heading">
             <div style={{ marginBottom: "30px" }}>
               <h2 id="form-heading" style={{ fontSize: "28px", color: "#860aa5", marginBottom: "10px" }}>
-                Exclusive Access & Custom Solutions
+                Submit Your Idea 
               </h2>
               <p style={{ color: "#718096", lineHeight: "1.6" }}>
-                Join our priority waitlist for private tool access, enterprise features, or custom SaaS development.
+                Help shape the next AI tool we build for creators and businesses.
               </p>
             </div>
 

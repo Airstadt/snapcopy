@@ -63,6 +63,24 @@ export default function Dashboard() {
         Settings
       </button>
 
+
+      {/* My Snaps Button */}
+      <button
+        onClick={() => navigate("/mysnaps")}
+        style={{
+          marginBottom: "20px",
+          padding: "10px 20px",
+          background: "#007bff",
+          color: "white",
+          borderRadius: "6px",
+          cursor: "pointer"
+        }}
+      >
+        My Snaps
+      </button>
+
+
+
       {/* If profile is incomplete */}
       {!profile.onboardingComplete && (
         <div

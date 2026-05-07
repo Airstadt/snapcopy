@@ -1295,192 +1295,190 @@ window.generateSnap = generate;
   // RETURN UI
   // ---------------------------------------------------------
   return (
-    <main
+  <main
+    style={{
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      minHeight: "100vh",
+      width: "100vw",
+      background: "#f0f2f5",
+      padding: "20px",
+      boxSizing: "border-box",
+      fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+    }}
+  >
+
+    {/* ============================================================
+        HERO SECTION — Logo, headline, subtext, CTA button
+       ============================================================ */}
+    {!user && (
+  <>
+    {/* HERO SECTION */}
+    <section
       style={{
+        maxWidth: 1000,
+        textAlign: "center",
+        padding: "60px 20px",
         display: "flex",
         flexDirection: "column",
-        alignItems: "center",
-        minHeight: "100vh",
-        width: "100vw",
-        background: "#f0f2f5",
-        padding: "20px",
-        boxSizing: "border-box",
-        fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+        alignItems: "center"
       }}
     >
-      {/* HERO SECTION */}
-      <section
+      <img
+        src={snapcopyLogo}
+        alt="SnapCopy Logo"
         style={{
-          maxWidth: 1000,
-          textAlign: "center",
-          padding: "60px 20px",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center"
+          width: 180,
+          height: 180,
+          borderRadius: "50%",
+          marginBottom: 20
+        }}
+      />
+
+      <h1
+        style={{
+          fontSize: "48px",
+          fontWeight: "800",
+          background: "linear-gradient(to right, #860aa5, #390b64)",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          color: "transparent",
+          lineHeight: "1.4"
         }}
       >
-        <img
-          src={snapcopyLogo}
-          alt="SnapCopy Logo"
-          style={{
-            width: 180,
-            height: 180,
-            borderRadius: "50%",
-            marginBottom: 20
-          }}
-        />
+        The Complete AI Content Toolkit for Growing Businesses
+      </h1>
 
-        <h1
+      <p
+        style={{
+          color: "#4a5568",
+          fontSize: "18px",
+          marginTop: "14px",
+          maxWidth: "700px",
+          lineHeight: "1.6"
+        }}
+      >
+        From professional "About Us" bios to social media management and
+        sentiment analysis. SnapCopy is your all-in-one suite for high-impact
+        content.
+      </p>
+
+      <button
+        onClick={scrollToForm}
+        style={{
+          padding: "16px 32px",
+          background: colors.deepBlue,
+          color: "white",
+          border: "none",
+          borderRadius: "50px",
+          fontWeight: "bold",
+          fontSize: "18px",
+          cursor: "pointer",
+          marginTop: "30px",
+          boxShadow: "0 10px 20px rgba(134, 10, 165, 0.2)"
+        }}
+      >
+        Explore Tools
+      </button>
+    </section>
+
+    {/* TOOLKIT SECTION */}
+    <section
+      style={{
+        width: "100%",
+        maxWidth: 1000,
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+        gap: "40px",
+        padding: "40px 20px",
+        marginBottom: "40px"
+      }}
+    >
+      <div>
+        <h2 style={{ color: colors.purple, fontSize: "24px" }}>
+          The SnapCopy Toolkit
+        </h2>
+        <p style={{ color: "#4a5568", lineHeight: "1.6" }}>
+          We provide a growing ecosystem of AI tools designed for service
+          businesses. Whether you're building a brand bio or analyzing
+          customer feedback, we turn complex tasks into "Snaps."
+        </p>
+      </div>
+
+      <div
+        style={{
+          background: "white",
+          padding: "25px",
+          borderRadius: "15px",
+          boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
+          border: `1px solid ${colors.lightGray}`
+        }}
+      >
+        <h3
           style={{
-            fontSize: "48px",
-            fontWeight: "800",
-            background: "linear-gradient(to right, #860aa5, #390b64)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            color: "transparent",
-            lineHeight: "1.4"
+            fontSize: "14px",
+            color: colors.deepBlue,
+            textTransform: "uppercase",
+            marginBottom: "15px"
           }}
         >
-          The Complete AI Content Toolkit for Growing Businesses
-        </h1>
+          Current Capabilities
+        </h3>
 
-        <p
+        <ul
           style={{
             color: "#4a5568",
-            fontSize: "18px",
-            marginTop: "14px",
-            maxWidth: "700px",
-            lineHeight: "1.6"
+            fontSize: "15px",
+            paddingLeft: "20px",
+            lineHeight: "2"
           }}
         >
-          From professional "About Us" bios to social media management and
-          sentiment analysis. SnapCopy is your all-in-one suite for high-impact
-          content.
-        </p>
+          <li><b>About Us:</b> SEO-ready business bios.</li>
+          <li><b>Responder:</b> Engaging social media captions.</li>
+          <li><b>Apology:</b> Polished customer resolution writing.</li>
+          <li><b>Sentiment:</b> Deep emotional feedback analysis.</li>
+          <li><b>Contracts & Agreements:</b> Service agreements, NDAs, subcontractor contracts, and more.</li>
+          <li><b>Policies & Compliance:</b> Refund, Warranty, Privacy, and Terms of Service policies.</li>
+          <li><b style={{ color: colors.poGreen }}>PO Generator:</b> Instant PDF Purchase Orders.</li>
+        </ul>
+      </div>
+    </section>
+  </>
+)}
 
-        <button
-          onClick={scrollToForm}
-          style={{
-            padding: "16px 32px",
-            background: colors.deepBlue,
-            color: "white",
-            border: "none",
-            borderRadius: "50px",
-            fontWeight: "bold",
-            fontSize: "18px",
-            cursor: "pointer",
-            marginTop: "30px",
-            boxShadow: "0 10px 20px rgba(134, 10, 165, 0.2)"
-          }}
-        >
-          Explore Tools
-        </button>
-      </section>
 
-      {/* TOOLKIT SECTION */}
-      <section
+    {/* ============================================================
+        FORM SECTION — Waitlist CTA + Form container
+       ============================================================ */}
+       
+    <div ref={formRef} style={{ width: "100%", maxWidth: 900 }}>
+      
+      <Link
+        to="/interest"
         style={{
-          width: "100%",
-          maxWidth: 1000,
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-          gap: "40px",
-          padding: "40px 20px",
-          marginBottom: "40px"
+          textDecoration: "none",
+          marginBottom: "20px",
+          display: "block"
         }}
       >
-        <div>
-          <h2 style={{ color: colors.purple, fontSize: "24px" }}>
-            The SnapCopy Toolkit
-          </h2>
-          <p style={{ color: "#4a5568", lineHeight: "1.6" }}>
-            We provide a growing ecosystem of AI tools designed for service
-            businesses. Whether you're building a brand bio or analyzing
-            customer feedback, we turn complex tasks into "Snaps."
-          </p>
-        </div>
-
-        <div
+    
+        <button
           style={{
+            width: "100%",
+            padding: "12px",
             background: "white",
-            padding: "25px",
-            borderRadius: "15px",
-            boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
-            border: `1px solid ${colors.lightGray}`
+            color: colors.deepBlue,
+            border: `2px solid ${colors.deepBlue}`,
+            borderRadius: "8px",
+            fontWeight: "bold",
+            cursor: "pointer"
           }}
         >
-          <h3
-            style={{
-              fontSize: "14px",
-              color: colors.deepBlue,
-              textTransform: "uppercase",
-              marginBottom: "15px"
-            }}
-          >
-            Current Capabilities
-          </h3>
-
-          <ul
-            style={{
-              color: "#4a5568",
-              fontSize: "15px",
-              paddingLeft: "20px",
-              lineHeight: "2"
-            }}
-          >
-            <li>
-              <b>About Us:</b> SEO-ready business bios.
-            </li>
-            <li>
-              <b>Responder:</b> Engaging social media captions.
-            </li>
-            <li>
-              <b>Apology:</b> Polished customer resolution writing.
-            </li>
-            <li>
-              <b>Sentiment:</b> Deep emotional feedback analysis.
-            </li>
-            <li>
-              <b>Contracts & Agreements:</b> Service agreements, NDAs,
-              subcontractor contracts, and more.
-            </li>
-            <li>
-              <b>Policies & Compliance:</b> Refund, Warranty, Privacy, and Terms
-              of Service policies.
-            </li>
-            <li>
-              <b style={{ color: colors.poGreen }}>PO Generator:</b> Instant PDF
-              Purchase Orders.
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      {/* FORM SECTION */}
-      <div ref={formRef} style={{ width: "100%", maxWidth: 900 }}>
-        <Link
-          to="/interest"
-          style={{
-            textDecoration: "none",
-            marginBottom: "20px",
-            display: "block"
-          }}
-        >
-          <button
-            style={{
-              width: "100%",
-              padding: "12px",
-              background: "white",
-              color: colors.deepBlue,
-              border: `2px solid ${colors.deepBlue}`,
-              borderRadius: "8px",
-              fontWeight: "bold",
-              cursor: "pointer"
-            }}
-          >
-            Interested in SnapCopy or SnapMatrix? Join the waitlist today.
-          </button>
-        </Link>
+          Interested in what the next feature should be? I'd like to hear from you, submit your idea. 
+        </button>
+      </Link>
+    
 
         {/* NAV BUTTONS */}
         <nav
