@@ -17,6 +17,8 @@ import ProfileSettings from "./pages/settings/ProfileSettings";
 import BillingSettings from "./pages/settings/BillingSettings";
 import SecuritySettings from "./pages/settings/SecuritySettings";
 import SettingsHome from "./pages/settings/SettingsHome";
+import SnapDetail from "./pages/SnapDetail";
+
 
 import JobEstimator from "./snaps/jobEstimator";
 import AboutUs from "./snaps/AboutUs";
@@ -1475,7 +1477,7 @@ window.generateSnap = generate;
             cursor: "pointer"
           }}
         >
-          Interested in what the next feature should be? I'd like to hear from you, submit your idea. 
+          Interested in what the next features should be? I'd like to hear from you, submit your idea. 
         </button>
       </Link>
     
@@ -1988,6 +1990,7 @@ export default function App() {
         <Route path="/settings/billing" element={ <ProtectedRoute><BillingSettings /></ProtectedRoute>}/>
         <Route path="/settings/security"element={<ProtectedRoute><SecuritySettings /></ProtectedRoute>}/>
         <Route path="/mysnaps" element={<ProtectedRoute><MySnaps /></ProtectedRoute>} />
+        <Route path="/snaps/:id" element={<ProtectedRoute><SnapDetail /></ProtectedRoute>} />
       </Routes>
     </Router>
   );
