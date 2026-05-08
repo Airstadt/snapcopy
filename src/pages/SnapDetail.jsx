@@ -75,6 +75,54 @@ export default function SnapDetail() {
     navigate(`/snaps/${newRef.id}`);
   };
 
+  // Regenerate snap
+  const regenerateSnap = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const payload = {
+      mode: snap.mode,
+      ...snap.input
+    };
+
+    try {
+      const response = await fetch("https://api.snapcopy.online/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Server error");
+
+      const result =
+        data.about ||
+        data.reply ||
+        data.apology ||
+        data.sentiment ||
+        data.po ||
+        data.contract ||
+        data.policy ||
+        data.estimate ||
+        JSON.stringify(data, null, 2);
+
+      const newOutput =
+        typeof result === "string" ? result : JSON.stringify(result, null, 2);
+
+      // Update Firestore
+      await updateDoc(doc(db, "users", user.uid, "snaps", id), {
+        output: newOutput,
+        updatedAt: serverTimestamp()
+      });
+
+      // Update UI
+      setSnap((prev) => ({ ...prev, output: newOutput }));
+    } catch (err) {
+      console.error("Regenerate error:", err);
+      alert("Failed to regenerate snap.");
+    }
+  };
+
   if (loading) {
     return <div style={{ padding: 40 }}>Loading snap...</div>;
   }
@@ -156,6 +204,22 @@ export default function SnapDetail() {
       >
         {snap.output}
       </div>
+
+      {/* Regenerate Button */}
+      <button
+        onClick={regenerateSnap}
+        style={{
+          marginTop: 20,
+          marginRight: 10,
+          padding: "10px 20px",
+          background: "#0d6efd",
+          color: "white",
+          borderRadius: 6,
+          cursor: "pointer"
+        }}
+      >
+        Regenerate Snap
+      </button>
 
       {/* Duplicate Button */}
       <button
