@@ -9,7 +9,7 @@ export default function InterestForm() {
   
   // --- SEO INJECTION ---
   useEffect(() => {
-    document.title = "Join the Priority Waitlist | SnapCopy AI Business Solutions";
+    document.title = "Submit My Idea | SnapCopy AI Business Solutions";
     const metaDesc = document.querySelector('meta[name="description"]');
     if (metaDesc) {
       metaDesc.setAttribute("content", "Register for exclusive access to SnapCopy's AI Micro SaaS tools. Get custom AI content solutions and enterprise-level automation for your business.");
@@ -264,7 +264,7 @@ export default function InterestForm() {
                     cursor: loading ? "not-allowed" : "pointer", boxShadow: "0 4px 12px rgba(134, 10, 165, 0.2)"
                   }}
                 >
-                  {loading ? "Registering Interest..." : "Join Priority Waitlist"}
+                  {loading ? "Registering Interest..." : "Submit My Idea"}
                 </button>
                 <button 
                   type="button" 

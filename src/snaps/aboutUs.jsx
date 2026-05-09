@@ -50,7 +50,7 @@ const AboutUs = ({
               color: "#2d3748"
             }}
           >
-            Interested in SnapCopy or SnapMatrix? Join the waitlist today.
+            Submit your idea for our next AI tool
           </div>
         </>
       )}
