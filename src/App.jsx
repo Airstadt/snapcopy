@@ -5,6 +5,8 @@ import { jsPDF } from "jspdf";
 import { db } from "./firebase";
 import { doc, setDoc, collection, serverTimestamp } from "firebase/firestore";
 import { useAuth } from "./hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+
 
 import snapcopyLogo from "./assets/snapcopyLogo.png";
 import airStadtLogo from "./assets/AirStadtLogo.png";
@@ -34,8 +36,10 @@ import "jspdf-autotable";
 
 function HomePage() {
   // --- STATE MANAGEMENT ---
-  const [mode, setMode] = useState("about");
+  const navigate = useNavigate();
 
+  const [mode, setMode] = useState("about");
+  
   const [industry, setIndustry] = useState("");
   const [city, setCity] = useState("");
   const [years, setYears] = useState("");
@@ -1310,12 +1314,29 @@ window.generateSnap = generate;
       fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
     }}
   >
+    {/* SHOW ONLY FOR LOGGED-IN USERS */}
+{auth.currentUser && (
+  <button
+    onClick={() => navigate("/dashboard")}
+    style={{
+      marginBottom: "20px",
+      padding: "10px 20px",
+      background: "#6c757d",
+      color: "white",
+      borderRadius: "6px",
+      cursor: "pointer"
+    }}
+  >
+    Dashboard
+  </button>
+)}
 
     {/* ============================================================
         HERO SECTION — Logo, headline, subtext, CTA button
        ============================================================ */}
     {!user && (
   <>
+  
     {/* HERO SECTION */}
     <section
       style={{
@@ -1451,7 +1472,7 @@ window.generateSnap = generate;
 
 
     {/* ============================================================
-        FORM SECTION — Waitlist CTA + Form container
+        SUBMIT IDEAS CTA
        ============================================================ */}
        
     <div ref={formRef} style={{ width: "100%", maxWidth: 900 }}>
@@ -1480,7 +1501,8 @@ window.generateSnap = generate;
           Interested in what the next features should be? I'd like to hear from you, submit your idea. 
         </button>
       </Link>
-    
+          
+          
 
         {/* NAV BUTTONS */}
         <nav
@@ -1977,6 +1999,9 @@ window.generateSnap = generate;
     </main>
   );
 }
+
+
+
 
 export default function App() {
   return (

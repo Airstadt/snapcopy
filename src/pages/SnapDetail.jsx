@@ -11,6 +11,17 @@ import {
   serverTimestamp
 } from "firebase/firestore";
 
+import {
+  handleAboutPDF,
+  handleApologyPDF,
+  handleResponderPDF,
+  handleSentimentPDF,
+  handlePoliciesPDF,
+  handleContractPDF,
+  handlePoPDF,
+  handleEstimatorPDF
+} from "../pdf/pdfHandlers";
+
 export default function SnapDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -109,13 +120,11 @@ export default function SnapDetail() {
       const newOutput =
         typeof result === "string" ? result : JSON.stringify(result, null, 2);
 
-      // Update Firestore
       await updateDoc(doc(db, "users", user.uid, "snaps", id), {
         output: newOutput,
         updatedAt: serverTimestamp()
       });
 
-      // Update UI
       setSnap((prev) => ({ ...prev, output: newOutput }));
     } catch (err) {
       console.error("Regenerate error:", err);
@@ -126,6 +135,44 @@ export default function SnapDetail() {
   if (loading) {
     return <div style={{ padding: 40 }}>Loading snap...</div>;
   }
+
+  // PDF Download Router
+  const downloadPDF = () => {
+    if (!snap || !snap.output) return;
+
+    const mode = snap.mode;
+    const input = snap.input;
+    const output = snap.output;
+
+    switch (mode) {
+      case "about":
+        handleAboutPDF({ input, output });
+        break;
+      case "responder":
+        handleResponderPDF({ input, output });
+        break;
+      case "apology":
+        handleApologyPDF({ input, output });
+        break;
+      case "sentiment":
+        handleSentimentPDF({ input, output });
+        break;
+      case "policies":
+        handlePoliciesPDF({ input, output });
+        break;
+      case "contracts":
+        handleContractPDF({ input, output });
+        break;
+      case "po":
+        handlePoPDF({ input });
+        break;
+      case "estimator":
+        handleEstimatorPDF({ input, output });
+        break;
+      default:
+        alert("This Snap type does not support PDF export yet.");
+    }
+  };
 
   return (
     <div style={{ padding: 40, maxWidth: 900, margin: "0 auto" }}>
@@ -205,52 +252,71 @@ export default function SnapDetail() {
         {snap.output}
       </div>
 
-      {/* Regenerate Button */}
-      <button
-        onClick={regenerateSnap}
+      {/* ACTION BUTTON ROW */}
+      <div
         style={{
+          display: "flex",
+          gap: "10px",
           marginTop: 20,
-          marginRight: 10,
-          padding: "10px 20px",
-          background: "#0d6efd",
-          color: "white",
-          borderRadius: 6,
-          cursor: "pointer"
+          flexWrap: "wrap"
         }}
       >
-        Regenerate Snap
-      </button>
+        {/* Regenerate */}
+        <button
+          onClick={regenerateSnap}
+          style={{
+            padding: "10px 20px",
+            background: "#0d6efd",
+            color: "white",
+            borderRadius: 6,
+            cursor: "pointer"
+          }}
+        >
+          Regenerate Snap
+        </button>
 
-      {/* Duplicate Button */}
-      <button
-        onClick={duplicateSnap}
-        style={{
-          marginTop: 20,
-          marginRight: 10,
-          padding: "10px 20px",
-          background: "#4a5568",
-          color: "white",
-          borderRadius: 6,
-          cursor: "pointer"
-        }}
-      >
-        Duplicate Snap
-      </button>
+        {/* Duplicate */}
+        <button
+          onClick={duplicateSnap}
+          style={{
+            padding: "10px 20px",
+            background: "#4a5568",
+            color: "white",
+            borderRadius: 6,
+            cursor: "pointer"
+          }}
+        >
+          Duplicate Snap
+        </button>
 
-      {/* Delete Button */}
-      <button
-        onClick={handleDelete}
-        style={{
-          marginTop: 20,
-          padding: "10px 20px",
-          background: "#dc3545",
-          color: "white",
-          borderRadius: 6,
-          cursor: "pointer"
-        }}
-      >
-        Delete Snap
-      </button>
+        {/* Delete */}
+        <button
+          onClick={handleDelete}
+          style={{
+            padding: "10px 20px",
+            background: "#dc3545",
+            color: "white",
+            borderRadius: 6,
+            cursor: "pointer"
+          }}
+        >
+          Delete Snap
+        </button>
+
+        {/* Download PDF */}
+        <button
+          onClick={downloadPDF}
+          style={{
+            padding: "10px 20px",
+            background: "#198754",
+            color: "white",
+            borderRadius: 6,
+            cursor: "pointer"
+          }}
+        >
+          Download PDF
+        </button>
+      </div>
     </div>
   );
 }

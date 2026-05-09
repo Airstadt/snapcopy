@@ -47,6 +47,20 @@ export default function Dashboard() {
       <h1 style={{ marginBottom: "10px" }}>
         Welcome back, {greetingName}
       </h1>
+    {/* Back to Snap Form */}
+<button
+  onClick={() => navigate("/")}
+  style={{
+    marginBottom: "20px",
+    padding: "10px 20px",
+    background: "#6c757d",
+    color: "white",
+    borderRadius: "6px",
+    cursor: "pointer"
+  }}
+>
+  ← Back to Snap Form
+</button>
 
 
     <button

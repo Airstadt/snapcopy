@@ -14,7 +14,6 @@ export default function MySnaps() {
     const snapsRef = collection(db, "users", uid, "snaps");
     const q = query(snapsRef, orderBy("createdAt", "desc"));
 
-
     const unsub = onSnapshot(q, (snapshot) => {
       const list = snapshot.docs.map((doc) => ({
         id: doc.id,
@@ -28,6 +27,22 @@ export default function MySnaps() {
 
   return (
     <div style={{ padding: "30px" }}>
+      
+      {/* NEW BUTTON — Back to Dashboard */}
+      <button
+        onClick={() => navigate("/dashboard")}
+        style={{
+          marginBottom: 20,
+          padding: "8px 16px",
+          background: "#6c757d",
+          color: "white",
+          borderRadius: 6,
+          cursor: "pointer"
+        }}
+      >
+        ← Back to Dashboard
+      </button>
+
       <h1 style={{ marginBottom: "20px" }}>My Snaps</h1>
 
       {snaps.length === 0 && <p>You haven’t saved any snaps yet.</p>}
