@@ -1,36 +1,55 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase";
+import { doc, onSnapshot } from "firebase/firestore";
+import { db } from "../firebase";
 
-// A wrapper component that only renders its children if the user is logged in.
-// If not logged in, it redirects to /auth.
 export default function ProtectedRoute({ children }) {
-  // Tracks whether Firebase is still checking the user's auth state.
   const [loading, setLoading] = useState(true);
-
-  // Holds the current authenticated user (null if not logged in).
   const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const location = useLocation();
 
   useEffect(() => {
-    // Subscribe to Firebase's auth state listener.
-    // This fires whenever the user's login status changes.
     const unsub = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);   // Save the user (or null)
-      setLoading(false);      // Mark the check as complete
+      setUser(currentUser);
+
+
+      if (profile && profile.plan !== "pro") {
+  return <Navigate to="/upgrade" replace />;
+}
+
+      if (currentUser) {
+        const ref = doc(db, "users", currentUser.uid);
+        const unsubProfile = onSnapshot(ref, (snap) => {
+          setProfile(snap.data());
+          setLoading(false);
+        });
+
+        return () => unsubProfile();
+      } else {
+        setLoading(false);
+      }
     });
 
-    // Cleanup: unsubscribe from the listener when the component unmounts.
     return () => unsub();
   }, []);
 
-  // While Firebase is still determining the user's state, show a loading screen.
-  if (loading) {
-    return <div>Loading...</div>;
+  if (loading) return <div>Loading...</div>;
+
+  // Allow access to /auth ALWAYS
+  if (location.pathname === "/auth") {
+    return children;
   }
 
-  // If a user exists, allow access to the protected content.
-  // If not, redirect them to the /auth page.
-  return user ? children : <Navigate to="/auth" replace />;
+  // Not logged in → redirect to auth
+  if (!user) return <Navigate to="/auth" replace />;
+
+  // Logged in but NOT Pro → redirect to upgrade
+  if (profile && profile.plan !== "pro") {
+    return <Navigate to="/upgrade" replace />;
+  }
+
+  return children;
 }
-    

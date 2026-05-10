@@ -6,6 +6,7 @@ import { db } from "./firebase";
 import { doc, setDoc, collection, serverTimestamp } from "firebase/firestore";
 import { useAuth } from "./hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import UpgradeScreen from "./UpgradeScreen";
 
 
 import snapcopyLogo from "./assets/snapcopyLogo.png";
@@ -2003,20 +2004,53 @@ window.generateSnap = generate;
 
 
 
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Layout from "./Layout";
+import UpgradeScreen from "./UpgradeScreen";
+
 export default function App() {
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/interest" element={<InterestForm />} />
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>}/>
-        <Route path="/settings/profile" element={ <ProtectedRoute><ProfileSettings /></ProtectedRoute>}/>
-        <Route path="/settings/billing" element={ <ProtectedRoute><BillingSettings /></ProtectedRoute>}/>
-        <Route path="/settings/security"element={<ProtectedRoute><SecuritySettings /></ProtectedRoute>}/>
-        <Route path="/mysnaps" element={<ProtectedRoute><MySnaps /></ProtectedRoute>} />
-        <Route path="/snaps/:id" element={<ProtectedRoute><SnapDetail /></ProtectedRoute>} />
-      </Routes>
+      <Layout>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/interest" element={<InterestForm />} />
+          <Route path="/auth" element={<Auth />} />
+
+          <Route
+            path="/dashboard"
+            element={<ProtectedRoute><Dashboard /></ProtectedRoute>}
+          />
+
+          <Route
+            path="/settings/profile"
+            element={<ProtectedRoute><ProfileSettings /></ProtectedRoute>}
+          />
+
+          <Route
+            path="/settings/billing"
+            element={<ProtectedRoute><BillingSettings /></ProtectedRoute>}
+          />
+
+          <Route
+            path="/settings/security"
+            element={<ProtectedRoute><SecuritySettings /></ProtectedRoute>}
+          />
+
+          <Route
+            path="/mysnaps"
+            element={<ProtectedRoute><MySnaps /></ProtectedRoute>}
+          />
+
+          <Route path="/upgrade" element={<UpgradeScreen />} />
+
+          <Route
+            path="/snaps/:id"
+            element={<ProtectedRoute><SnapDetail /></ProtectedRoute>}
+          />
+        </Routes>
+      </Layout>
     </Router>
   );
 }
+
