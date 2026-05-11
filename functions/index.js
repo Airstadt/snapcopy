@@ -2,7 +2,8 @@ const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 admin.initializeApp();
 
-const stripe = require("stripe")(functions.config().stripe.secret_key);
+const Stripe = require("stripe");
+
 
 // ------------------------------
 // 1. CREATE CHECKOUT SESSION
@@ -21,13 +22,16 @@ exports.createCheckoutSession = functions.https.onCall(async (data, context) => 
       customer_email: data.email,
       line_items: [
         {
-          price: functions.config().stripe.monthly_price_id,
+          price: process.env.MONTHLY_PRICE_ID,
           quantity: 1,
         },
       ],
-      success_url: functions.config().stripe.success_url,
-      cancel_url: functions.config().stripe.cancel_url,
+      success_url: process.env.SUCCESS_URL,
+      cancel_url: process.env.CANCEL_URL,
       metadata: { uid },
+      subscription_data: {
+        metadata: { uid },
+      },
     });
 
     return { id: session.id };
@@ -57,7 +61,7 @@ exports.createPortalSession = functions.https.onCall(async (data, context) => {
 
     const session = await stripe.billingPortal.sessions.create({
       customer: stripeCustomerId,
-      return_url: functions.config().stripe.portal_return_url,
+      return_url: process.env.PORTAL_RETURN_URL,
     });
 
     return { url: session.url };
@@ -78,7 +82,7 @@ exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
     event = stripe.webhooks.constructEvent(
       req.rawBody,
       signature,
-      functions.config().stripe.webhook_secret
+      process.env.STRIPE_WEBHOOK_SECRET
     );
   } catch (err) {
     console.error("Webhook signature error:", err);
@@ -88,9 +92,10 @@ exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
   const data = event.data.object;
 
   // Handle subscription events
-  if (event.type === "customer.subscription.created" ||
-      event.type === "customer.subscription.updated") {
-    
+  if (
+    event.type === "customer.subscription.created" ||
+    event.type === "customer.subscription.updated"
+  ) {
     const uid = data.metadata?.uid;
     if (!uid) return res.status(200).send("No UID in metadata");
 
@@ -99,6 +104,7 @@ exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
         plan: data.status === "active" ? "pro" : "free",
         stripeCustomerId: data.customer,
         subscriptionStatus: data.status,
+        currentPeriodEnd: data.current_period_end,
       },
       { merge: true }
     );
@@ -111,6 +117,7 @@ exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
         {
           plan: "free",
           subscriptionStatus: "canceled",
+          currentPeriodEnd: null,
         },
         { merge: true }
       );
