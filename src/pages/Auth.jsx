@@ -20,9 +20,16 @@ import {
 
 import { auth, db } from "../firebase";
 import { doc, setDoc, updateDoc, getDoc } from "firebase/firestore";
+import { useSearchParams } from "react-router-dom";
+
+// Remember to update your import at the top:
+// import { useSearchParams, useNavigate } from "react-router-dom";
 
 function Auth() {
   const navigate = useNavigate();
+  // Added searchParams to capture the redirect URL
+  const [searchParams] = useSearchParams();
+  const redirectPath = searchParams.get("redirect");
 
   // Track whether user is logging in or signing up
   const [mode, setMode] = useState("login");
@@ -38,10 +45,10 @@ function Auth() {
   // Redirect immediately if user is already authenticated
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) navigate("/dashboard");
+      if (user) navigate(redirectPath || "/dashboard");
     });
     return () => unsubscribe();
-  }, [navigate]);
+  }, [navigate, redirectPath]);
 
   // Main login/signup handler with Firestore profile creation/update
   const handleSubmit = async (e) => {
@@ -79,6 +86,10 @@ function Auth() {
             onboardingComplete: false,
           });
         }
+        
+        // Navigate to the upgrade screen if redirect exists, otherwise dashboard
+        navigate(redirectPath || "/dashboard");
+
       } else {
         // Create new account
         const userCred = await createUserWithEmailAndPassword(
@@ -99,6 +110,9 @@ function Auth() {
           yearsInBusiness: null,
           onboardingComplete: false,
         });
+
+        // Navigate to the upgrade screen if redirect exists, otherwise dashboard
+        navigate(redirectPath || "/dashboard");
       }
     } catch (err) {
       console.error(err);
@@ -117,6 +131,7 @@ function Auth() {
       setIsSubmitting(false);
     }
   };
+
 
   // Switch between login and signup modes
   const toggleMode = () => {
