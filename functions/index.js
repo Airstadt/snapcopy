@@ -1,32 +1,121 @@
-/**
- * Import function triggers from their respective submodules:
- *
- * const {onCall} = require("firebase-functions/v2/https");
- * const {onDocumentWritten} = require("firebase-functions/v2/firestore");
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
- */
+const functions = require("firebase-functions");
+const admin = require("firebase-admin");
+admin.initializeApp();
 
-const {setGlobalOptions} = require("firebase-functions");
-const {onRequest} = require("firebase-functions/https");
-const logger = require("firebase-functions/logger");
+const stripe = require("stripe")(functions.config().stripe.secret_key);
 
-// For cost control, you can set the maximum number of containers that can be
-// running at the same time. This helps mitigate the impact of unexpected
-// traffic spikes by instead downgrading performance. This limit is a
-// per-function limit. You can override the limit for each function using the
-// `maxInstances` option in the function's options, e.g.
-// `onRequest({ maxInstances: 5 }, (req, res) => { ... })`.
-// NOTE: setGlobalOptions does not apply to functions using the v1 API. V1
-// functions should each use functions.runWith({ maxInstances: 10 }) instead.
-// In the v1 API, each function can only serve one request per container, so
-// this will be the maximum concurrent request count.
-setGlobalOptions({ maxInstances: 10 });
+// ------------------------------
+// 1. CREATE CHECKOUT SESSION
+// ------------------------------
+exports.createCheckoutSession = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError("unauthenticated", "Must be logged in");
+  }
 
-// Create and deploy your first functions
-// https://firebase.google.com/docs/functions/get-started
+  const uid = context.auth.uid;
 
-// exports.helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+  try {
+    const session = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      payment_method_types: ["card"],
+      customer_email: data.email,
+      line_items: [
+        {
+          price: functions.config().stripe.monthly_price_id,
+          quantity: 1,
+        },
+      ],
+      success_url: functions.config().stripe.success_url,
+      cancel_url: functions.config().stripe.cancel_url,
+      metadata: { uid },
+    });
+
+    return { id: session.id };
+  } catch (err) {
+    console.error("Checkout error:", err);
+    throw new functions.https.HttpsError("internal", err.message);
+  }
+});
+
+// ------------------------------
+// 2. BILLING PORTAL SESSION
+// ------------------------------
+exports.createPortalSession = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError("unauthenticated", "Must be logged in");
+  }
+
+  const uid = context.auth.uid;
+
+  try {
+    const userDoc = await admin.firestore().collection("users").doc(uid).get();
+    const stripeCustomerId = userDoc.data()?.stripeCustomerId;
+
+    if (!stripeCustomerId) {
+      throw new functions.https.HttpsError("failed-precondition", "No Stripe customer found");
+    }
+
+    const session = await stripe.billingPortal.sessions.create({
+      customer: stripeCustomerId,
+      return_url: functions.config().stripe.portal_return_url,
+    });
+
+    return { url: session.url };
+  } catch (err) {
+    console.error("Portal error:", err);
+    throw new functions.https.HttpsError("internal", err.message);
+  }
+});
+
+// ------------------------------
+// 3. STRIPE WEBHOOK
+// ------------------------------
+exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
+  let event;
+
+  try {
+    const signature = req.headers["stripe-signature"];
+    event = stripe.webhooks.constructEvent(
+      req.rawBody,
+      signature,
+      functions.config().stripe.webhook_secret
+    );
+  } catch (err) {
+    console.error("Webhook signature error:", err);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  const data = event.data.object;
+
+  // Handle subscription events
+  if (event.type === "customer.subscription.created" ||
+      event.type === "customer.subscription.updated") {
+    
+    const uid = data.metadata?.uid;
+    if (!uid) return res.status(200).send("No UID in metadata");
+
+    await admin.firestore().collection("users").doc(uid).set(
+      {
+        plan: data.status === "active" ? "pro" : "free",
+        stripeCustomerId: data.customer,
+        subscriptionStatus: data.status,
+      },
+      { merge: true }
+    );
+  }
+
+  if (event.type === "customer.subscription.deleted") {
+    const uid = data.metadata?.uid;
+    if (uid) {
+      await admin.firestore().collection("users").doc(uid).set(
+        {
+          plan: "free",
+          subscriptionStatus: "canceled",
+        },
+        { merge: true }
+      );
+    }
+  }
+
+  res.status(200).send("Webhook received");
+});
