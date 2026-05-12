@@ -1,4 +1,4 @@
-const { onCall, onRequest, HttpsError } = require("firebase-functions/v2/https"); // Added HttpsError
+const { onCall, onRequest, HttpsError } = require("firebase-functions/v2/https");
 const { defineSecret } = require("firebase-functions/params");
 const admin = require("firebase-admin");
 admin.initializeApp();
@@ -12,45 +12,42 @@ const PORTAL_RETURN_URL = defineSecret("PORTAL_RETURN_URL");
 
 const Stripe = require("stripe");
 
-// ------------------------------
-// 1. CREATE CHECKOUT SESSION
-// ------------------------------
+/* -------------------------------------------------------
+   1. CREATE CHECKOUT SESSION
+-------------------------------------------------------- */
 exports.createCheckoutSession = onCall(
   { secrets: [STRIPE_SECRET_KEY, MONTHLY_PRICE_ID, SUCCESS_URL, CANCEL_URL] },
-  async (request) => { // Changed (data, context) to (request) for v2 syntax
+  async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Must be logged in");
     }
 
-    const stripe = new Stripe(STRIPE_SECRET_KEY.value());
-    const uid = request.auth.uid;
-    const email = request.data.email;
+    try {
+      const stripe = new Stripe(STRIPE_SECRET_KEY.value());
+      const email = request.data.email;
 
-    const session = await stripe.checkout.sessions.create({
-      mode: "subscription",
-      payment_method_types: ["card"],
-      customer_email: email,
-      line_items: [
-        {
-          price: MONTHLY_PRICE_ID.value(),
-          quantity: 1,
-        },
-      ],
-      success_url: SUCCESS_URL.value(),
-      cancel_url: CANCEL_URL.value(),
-      metadata: { uid },
-      subscription_data: {
-        metadata: { uid }, // This ensures the UID is attached to the subscription object
-      },
-    });
+      const session = await stripe.checkout.sessions.create({
+        mode: "subscription",
+        payment_method_types: ["card"],
+        customer_email: email,
+        line_items: [{ price: MONTHLY_PRICE_ID.value(), quantity: 1 }],
+        success_url: SUCCESS_URL.value(),
+        cancel_url: CANCEL_URL.value(),
+        metadata: { uid: request.auth.uid },
+      });
 
-    return { id: session.id };
+      // IMPORTANT: You must return the URL for the redirect to happen
+      return { id: session.id, url: session.url }; 
+    } catch (error) {
+      console.error("Stripe Error:", error);
+      throw new HttpsError("internal", error.message);
+    }
   }
 );
 
-// ------------------------------
-// 2. BILLING PORTAL SESSION
-// ------------------------------
+/* -------------------------------------------------------
+   2. BILLING PORTAL SESSION
+-------------------------------------------------------- */
 exports.createPortalSession = onCall(
   { secrets: [STRIPE_SECRET_KEY, PORTAL_RETURN_URL] },
   async (request) => {
@@ -73,13 +70,13 @@ exports.createPortalSession = onCall(
       return_url: PORTAL_RETURN_URL.value(),
     });
 
-    return { url: session.url };
+    return { id: session.id};
   }
 );
 
-// ------------------------------
-// 3. STRIPE WEBHOOK
-// ------------------------------
+/* -------------------------------------------------------
+   3. STRIPE WEBHOOK (rawBody enabled in firebase.json)
+-------------------------------------------------------- */
 exports.stripeWebhook = onRequest(
   { secrets: [STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET] },
   async (req, res) => {
@@ -89,61 +86,90 @@ exports.stripeWebhook = onRequest(
     let event;
 
     try {
-      // Use req.rawBody for signature verification in Firebase Functions
       event = stripe.webhooks.constructEvent(
         req.rawBody,
         sig,
         STRIPE_WEBHOOK_SECRET.value()
       );
     } catch (err) {
-      console.error(`Webhook Error: ${err.message}`);
+      console.error("❌ Webhook signature error:", err.message);
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    console.log("stripewebhook: Received event", event.type, event.id);
+    console.log("⚡ Stripe Webhook Event:", event.type, event.id);
 
-    const subscription = event.data.object;
+    /* ------------------------------
+       Handle checkout.session.completed
+       (earliest reliable event)
+    ------------------------------ */
+    if (event.type === "checkout.session.completed") {
+      const session = event.data.object;
+      const uid = session.metadata?.uid;
 
-    // Handle the event
-    switch (event.type) {
-      case "customer.subscription.created":
-      case "customer.subscription.updated":
-        const uid = subscription.metadata?.uid;
-        
-        // IMPORTANT: stripe trigger doesn't include UID, so we log it here
-        if (!uid) {
-          console.log("No UID found in metadata. If this was 'stripe trigger', this is normal.");
-          return res.status(200).send("Webhook received, but no UID to update.");
-        }
-
+      if (uid) {
         await admin.firestore().collection("users").doc(uid).set(
           {
-            plan: subscription.status === "active" ? "pro" : "free",
-            stripeCustomerId: subscription.customer,
-            subscriptionStatus: subscription.status,
-            currentPeriodEnd: subscription.current_period_end,
+            stripeCustomerId: session.customer,
           },
           { merge: true }
         );
-        break;
+        console.log("✅ Stored Stripe customer ID for UID:", uid);
+      }
 
-      case "customer.subscription.deleted":
-        const deletedUid = subscription.metadata?.uid;
-        if (deletedUid) {
-          await admin.firestore().collection("users").doc(deletedUid).set(
-            {
-              plan: "free",
-              subscriptionStatus: "canceled",
-            },
-            { merge: true }
-          );
-        }
-        break;
-
-      default:
-        console.log(`Unhandled event type ${event.type}`);
+      return res.status(200).send("OK");
     }
 
-    res.status(200).send({ received: true });
+    /* ------------------------------
+       Handle subscription events
+    ------------------------------ */
+    if (
+      event.type === "customer.subscription.created" ||
+      event.type === "customer.subscription.updated"
+    ) {
+      const subscription = event.data.object;
+      const uid = subscription.metadata?.uid;
+
+      if (!uid) {
+        console.log("⚠ No UID in metadata (likely stripe trigger)");
+        return res.status(200).send("OK");
+      }
+
+      await admin.firestore().collection("users").doc(uid).set(
+        {
+          plan: subscription.status === "active" ? "pro" : "free",
+          stripeCustomerId: subscription.customer,
+          subscriptionStatus: subscription.status,
+          currentPeriodEnd: subscription.current_period_end,
+        },
+        { merge: true }
+      );
+
+      console.log("✅ Updated subscription for UID:", uid);
+      return res.status(200).send("OK");
+    }
+
+    /* ------------------------------
+       Handle subscription cancellation
+    ------------------------------ */
+    if (event.type === "customer.subscription.deleted") {
+      const subscription = event.data.object;
+      const uid = subscription.metadata?.uid;
+
+      if (uid) {
+        await admin.firestore().collection("users").doc(uid).set(
+          {
+            plan: "free",
+            subscriptionStatus: "canceled",
+          },
+          { merge: true }
+        );
+        console.log("⚠ Subscription canceled for UID:", uid);
+      }
+
+      return res.status(200).send("OK");
+    }
+
+    console.log("ℹ Unhandled event type:", event.type);
+    res.status(200).send("OK");
   }
 );
