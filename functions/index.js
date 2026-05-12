@@ -28,19 +28,16 @@ exports.createCheckoutSession = onCall(
       const uid = request.auth.uid;
 
       const session = await stripe.checkout.sessions.create({
-        mode: "subscription",
-        payment_method_types: ["card"],
-        customer_email: email,
-        line_items: [{ price: MONTHLY_PRICE_ID.value(), quantity: 1 }],
-        success_url: SUCCESS_URL.value(),
-        cancel_url: CANCEL_URL.value(),
-        // Metadata for the Checkout Session
-        metadata: { uid }, 
-        // Metadata for the Subscription (Ensures UID persists for the webhook)
-        subscription_data: {
+          mode: "subscription",
+          customer_email: email,
+          line_items: [{ price: MONTHLY_PRICE_ID.value(), quantity: 1 }],
+          success_url: SUCCESS_URL.value() + '?session_id={CHECKOUT_SESSION_ID}',
+          cancel_url: CANCEL_URL.value(),
+          metadata: { uid }, 
+          subscription_data: {
           metadata: { uid },
-        },
-      });
+     },
+    });
 
       return { id: session.id, url: session.url }; 
     } catch (error) {
@@ -88,14 +85,12 @@ exports.createPortalSession = onCall(
 exports.stripeWebhook = onRequest(
   { secrets: [STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET] },
   async (req, res) => {
-    // We initialize stripe here to ensure it uses the secret correctly
     const stripeInstance = require("stripe")(STRIPE_SECRET_KEY.value());
     const sig = req.headers["stripe-signature"];
 
     let event;
 
     try {
-      // Use the instance we just created
       event = stripeInstance.webhooks.constructEvent(
         req.rawBody,
         sig,
@@ -106,32 +101,58 @@ exports.stripeWebhook = onRequest(
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    const dataObject = event.data.object;
-    const uid = dataObject.metadata?.uid;
+    const data = event.data.object;
 
-    console.log(`⚡ Event: ${event.type} | UID: ${uid}`);
+    console.log(`⚡ Event: ${event.type}`);
 
-    // Update Firestore
+    // 1️⃣ Checkout completed → store customer + UID
     if (event.type === "checkout.session.completed") {
-      if (uid) {
-        await admin.firestore().collection("users").doc(uid).set(
-          { stripeCustomerId: dataObject.customer },
-          { merge: true }
-        );
-      }
-    }
+      const uid = data.metadata?.uid;
 
-    if (event.type === "customer.subscription.created" || event.type === "customer.subscription.updated") {
       if (uid) {
         await admin.firestore().collection("users").doc(uid).set(
           {
-            plan: dataObject.status === "active" ? "pro" : "free",
-            subscriptionStatus: dataObject.status,
-            currentPeriodEnd: dataObject.current_period_end,
+            stripeCustomerId: data.customer,
+            plan: "pro",
+            subscriptionStatus: "active",
           },
           { merge: true }
         );
-        console.log("✅ SUCCESS: User upgraded to PRO in Firestore");
+
+        console.log("✅ Stored Stripe customer + upgraded to PRO");
+      }
+    }
+
+    // 2️⃣ Subscription events → lookup user by customer ID
+    if (
+      event.type === "customer.subscription.created" ||
+      event.type === "customer.subscription.updated"
+    ) {
+      const customerId = data.customer;
+      const status = data.status;
+
+      const userSnap = await admin
+        .firestore()
+        .collection("users")
+        .where("stripeCustomerId", "==", customerId)
+        .limit(1)
+        .get();
+
+      if (!userSnap.empty) {
+        const userId = userSnap.docs[0].id;
+
+        await admin.firestore().collection("users").doc(userId).set(
+          {
+            plan: status === "active" ? "pro" : "free",
+            subscriptionStatus: status,
+            currentPeriodEnd: data.current_period_end,
+          },
+          { merge: true }
+        );
+
+        console.log("🔥 Subscription updated for:", userId);
+      } else {
+        console.log("⚠ No user found for customer:", customerId);
       }
     }
 
