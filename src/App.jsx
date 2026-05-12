@@ -2008,6 +2008,8 @@ window.generateSnap = generate;
 import Layout from "./Layout";
 
 
+import SuccessPage from "./pages/SuccessPage"; // Make sure to create this file!
+
 export default function App() {
   return (
     <Router>
@@ -2016,6 +2018,9 @@ export default function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/interest" element={<InterestForm />} />
           <Route path="/auth" element={<Auth />} />
+
+          {/* New Success Route - Handles the redirect from Stripe */}
+          <Route path="/success" element={<SuccessPage />} />
 
           <Route
             path="/dashboard"

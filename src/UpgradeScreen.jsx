@@ -3,6 +3,7 @@ import { getFunctions, httpsCallable } from "firebase/functions";
 import { useNavigate } from "react-router-dom";
 import { loadStripe } from "@stripe/stripe-js";
 import { auth as firebaseAuth } from "./firebase";
+import { signOut } from "firebase/auth";
 
 const STRIPE_PUBLISHABLE_KEY ="pk_test_51TVJEgADENv5PhcjEuwG61vojCrJBn8IZ2A2ZTomxmSR6VPJUcwJtjHHejDNdueerU92H5uIPBmXnsCCfMrh8RHk00PkS85NWA";
 
@@ -58,6 +59,26 @@ export default function UpgradeScreen() {
       >
         {isProcessing ? "Connecting to Stripe..." : "Upgrade to Pro – $19.99/mo"}
       </button>
+      <button
+  onClick={() => {
+    signOut(firebaseAuth);
+    navigate("/auth"); // or wherever your login page is
+  }}
+  style={{
+    marginTop: "20px",
+    padding: "10px 16px",
+    background: "#444",
+    color: "white",
+    borderRadius: "6px",
+    cursor: "pointer",
+    width: "100%",
+    fontSize: "14px",
+    border: "none",
+  }}
+>
+  Log Out
+</button>
     </div>
+    
   );
 }

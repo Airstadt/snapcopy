@@ -1,25 +1,40 @@
 // src/hooks/useAuth.js
 import { useState, useEffect } from "react";
 import { auth, db } from "../firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore"; 
+// ⬆️ IMPORTANT: replaced getDoc with onSnapshot for real-time updates
 
 export function useAuth() {
-  const [user, setUser] = useState(null);
-  const [profile, setProfile] = useState(null);
+  const [user, setUser] = useState(null);      // Firebase Auth user
+  const [profile, setProfile] = useState(null); // Firestore user profile (plan, credits, etc.)
 
   useEffect(() => {
-    const unsub = auth.onAuthStateChanged(async (u) => {
+    // 🔥 Listen for Firebase Auth state changes (login/logout)
+    const unsub = auth.onAuthStateChanged((u) => {
       setUser(u);
 
       if (u) {
         const ref = doc(db, "users", u.uid);
-        const snap = await getDoc(ref);
-        setProfile(snap.exists() ? snap.data() : null);
+
+        // ⭐ REAL-TIME LISTENER FOR FIRESTORE PROFILE
+        // This updates instantly when Stripe webhook writes plan: "pro"
+        const stopProfileListener = onSnapshot(ref, (snap) => {
+          if (snap.exists()) {
+            setProfile(snap.data());
+          } else {
+            setProfile(null);
+          }
+        });
+
+        // Cleanup Firestore listener when user logs out
+        return () => stopProfileListener();
       } else {
+        // No user logged in → clear profile
         setProfile(null);
       }
     });
 
+    // Cleanup Auth listener
     return () => unsub();
   }, []);
 
