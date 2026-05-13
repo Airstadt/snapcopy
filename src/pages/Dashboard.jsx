@@ -40,7 +40,9 @@ export default function Dashboard() {
     );
   }
 
+  // ⭐ Greeting priority: name → businessName → email username
   const greetingName =
+    profile?.name?.trim() ||
     profile?.businessName?.trim() ||
     auth.currentUser?.email?.split("@")[0] ||
     "there";
@@ -61,6 +63,7 @@ export default function Dashboard() {
           textAlign: "center",
         }}
       >
+        {/* Header */}
         <h1
           style={{
             fontSize: "2.6rem",
@@ -72,6 +75,23 @@ export default function Dashboard() {
           Welcome back, {greetingName}
         </h1>
 
+        {/* Optional badge */}
+        {profile?.onboardingComplete && (
+          <div
+            style={{
+              display: "inline-block",
+              background: "#d9c6ff",
+              color: "#4b2aad",
+              padding: "6px 14px",
+              borderRadius: "20px",
+              fontWeight: "600",
+              marginBottom: "20px",
+            }}
+          >
+            Profile Complete
+          </div>
+        )}
+
         <p
           style={{
             color: "#555",
@@ -82,7 +102,7 @@ export default function Dashboard() {
           Your hub for managing snaps, your business profile, and your subscription.
         </p>
 
-        {/* Overview Section - Centered horizontally */}
+        {/* Overview Section */}
         <div
           style={{
             background: "#f3eaff",
@@ -98,8 +118,7 @@ export default function Dashboard() {
           <h2 style={{ marginTop: 0, color: "#4b2aad" }}>Your Account Overview</h2>
           <p style={{ color: "#4b2aad", margin: "10px 0 0 0" }}>
             Keep your business profile up to date to ensure your SnapCopy results
-            are perfectly tailored to your brand. Access your snaps, update your
-            settings, and manage your subscription all from this dashboard.
+            are perfectly tailored to your brand.
           </p>
         </div>
 
@@ -113,9 +132,7 @@ export default function Dashboard() {
             marginBottom: "30px",
           }}
         >
-          <button onClick={() => navigate("/")} style={buttonSecondary}>
-            ← Back to Snap Form
-          </button>
+          
 
           <button onClick={() => navigate("/settings")} style={buttonSecondary}>
             Settings
@@ -132,8 +149,7 @@ export default function Dashboard() {
             <h2 style={{ marginTop: 0 }}>Complete Your Profile</h2>
             <p style={{ marginBottom: "20px" }}>
               Your business details help SnapCopy generate more accurate and
-              personalized content. Completing your profile unlocks your full
-              experience.
+              personalized content.
             </p>
 
             <button
@@ -145,16 +161,30 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Profile Card */}
+        {/* Full Business Profile */}
         {profile?.onboardingComplete && (
           <div style={card}>
             <h2 style={{ marginTop: 0, color: "#4b2aad" }}>
               Your Business Profile
             </h2>
 
-            <p><strong>Business Name:</strong> {profile.businessName}</p>
-            <p><strong>Industry:</strong> {profile.industry}</p>
-            <p><strong>Years in Business:</strong> {profile.yearsInBusiness}</p>
+            {/* Only show fields that exist */}
+            {profile.name && <p><strong>Name:</strong> {profile.name}</p>}
+            {profile.businessName && (
+              <p><strong>Business Name:</strong> {profile.businessName}</p>
+            )}
+            {profile.industry && (
+              <p><strong>Industry:</strong> {profile.industry}</p>
+            )}
+            {profile.yearsInBusiness && (
+              <p><strong>Years in Business:</strong> {profile.yearsInBusiness}</p>
+            )}
+            {profile.businessAddress && (
+              <p><strong>Business Address:</strong> {profile.businessAddress}</p>
+            )}
+            {profile.businessPhone && (
+              <p><strong>Business Phone:</strong> {profile.businessPhone}</p>
+            )}
 
             <hr style={{ margin: "15px 0" }} />
 
@@ -162,15 +192,15 @@ export default function Dashboard() {
             <p><strong>Credits:</strong> {profile.credits}</p>
 
             <button
-              onClick={() => navigate("/create-snap")}
-              style={{
-                ...buttonSuccess,
-                width: "100%",
-                marginTop: "20px",
-              }}
-            >
-              Create New Snap
-            </button>
+                onClick={() => navigate("/")}
+                style={{
+                  ...buttonSuccess,
+                  width: "100%",
+                  marginTop: "20px",
+                }}
+              >
+                Create New Snap
+              </button>
           </div>
         )}
 

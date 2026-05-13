@@ -1,28 +1,4 @@
-// src/pages/Profile.jsx
-
-/**
- * SUMMARY — WHAT THIS COMPONENT DOES
- * ----------------------------------
- * This Profile page allows a logged‑in user to complete or update their
- * business profile information stored in Firestore.
- *
- * Core responsibilities:
- * 1. Load the user's existing Firestore profile on mount.
- * 2. Pre-fill the form with any saved values (businessName, industry, years).
- * 3. Allow the user to edit these fields.
- * 4. Save updates back to Firestore and mark onboardingComplete = true.
- * 5. Redirect the user back to the dashboard after saving.
- *
- * Key behaviors:
- * - Uses Firebase Auth to identify the current user.
- * - Uses Firestore getDoc() to load profile data.
- * - Uses updateDoc() to persist changes.
- * - Shows a loading state while fetching.
- * - Shows a saving state while writing.
- *
- * This page is the core of your onboarding flow and ensures that
- * SnapCopy has the business metadata needed for future AI generation.
- */
+// src/pages/ProfileSettings.jsx
 
 import { useState, useEffect } from "react";
 import { auth, db } from "../../firebase.js";
@@ -30,123 +6,199 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 
 export default function ProfileSettings() {
-
   const navigate = useNavigate();
-
-  // Firebase Auth gives us the currently logged-in user.
-  // We assume the user is authenticated before reaching this page.
   const user = auth.currentUser;
 
-  // Local state for the three editable profile fields.
+  // ⭐ All editable fields
+  const [name, setName] = useState("");
   const [businessName, setBusinessName] = useState("");
   const [industry, setIndustry] = useState("");
   const [yearsInBusiness, setYearsInBusiness] = useState("");
-  const [name, setName] = useState("");
- const [businessAddress, setBusinessAddress] = useState("");
- const [businessPhone, setBusinessPhone] = useState("");
+  const [businessAddress, setBusinessAddress] = useState("");
+  const [businessPhone, setBusinessPhone] = useState("");
 
+  // UI state
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
-  // UI state flags
-  const [loading, setLoading] = useState(true);   // true until Firestore data loads
-  const [saving, setSaving] = useState(false);    // true while saving to Firestore
-
-  /**
-   * Load the user's profile from Firestore on component mount.
-   * This runs once because the dependency array only includes `user`.
-   */
+  // ⭐ Load Firestore profile on mount
   useEffect(() => {
     const loadProfile = async () => {
-      // Reference to the user's Firestore document
       const ref = doc(db, "users", user.uid);
-
-      // Fetch the document snapshot
       const snap = await getDoc(ref);
 
-      // If the document exists, populate the form fields
       if (snap.exists()) {
         const data = snap.data();
 
-        // Use empty strings as fallbacks so the inputs never show undefined
+        // ⭐ Pre-fill all fields
+        setName(data.name || "");
         setBusinessName(data.businessName || "");
         setIndustry(data.industry || "");
         setYearsInBusiness(data.yearsInBusiness || "");
-        setName(data.name || "");
         setBusinessAddress(data.businessAddress || "");
         setBusinessPhone(data.businessPhone || "");
-
       }
 
-      // Remove the loading state once data is ready
       setLoading(false);
     };
 
     loadProfile();
   }, [user]);
 
-  /**
-   * Handle form submission.
-   * Writes updated profile fields back to Firestore.
-   * Also sets onboardingComplete = true so the dashboard knows the user is done.
-   */
+  // ⭐ Save profile updates
   const handleSave = async (e) => {
-    e.preventDefault(); // Prevent page reload
-    setSaving(true);    // Disable button + show "Saving..."
+    e.preventDefault();
+    setSaving(true);
 
     const ref = doc(db, "users", user.uid);
 
-    // Update only the fields we allow the user to edit
     await updateDoc(ref, {
       name,
-    businessName,
-    industry,
-    yearsInBusiness,
-    businessAddress,
-    businessPhone,
-    onboardingComplete: true, // marks onboarding as finished
+      businessName,
+      industry,
+      yearsInBusiness,
+      businessAddress,
+      businessPhone,
+      onboardingComplete: true, // ⭐ Marks onboarding as finished
     });
 
-    // After saving, send the user back to the dashboard
     navigate("/dashboard");
   };
 
-  // While Firestore is loading, show a simple loading message
   if (loading) {
     return <div style={{ padding: "40px" }}>Loading profile...</div>;
   }
 
-  /**
-   * MAIN RENDER
-   * Displays a clean card-style form for editing profile fields.
-   */
   return (
-  <div
-    style={{
-      width: "100%",
-      display: "flex",
-      justifyContent: "center",
-      padding: "40px 20px",
-    }}
-  >
     <div
       style={{
         width: "100%",
-        maxWidth: "600px",
+        display: "flex",
+        justifyContent: "center",
+        padding: "40px 20px",
       }}
     >
-      <h1>Your Profile</h1>
-
       <div
         style={{
-          marginTop: "30px",
-          padding: "20px",
-          borderRadius: "12px",
-          background: "#f8f9fa",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+          width: "100%",
+          maxWidth: "600px",
         }}
       >
-        {/* your form goes here */}
+        <h1>Your Profile</h1>
+
+        <form
+          onSubmit={handleSave}
+          style={{
+            marginTop: "30px",
+            padding: "20px",
+            borderRadius: "12px",
+            background: "#f8f9fa",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+            display: "flex",
+            flexDirection: "column",
+            gap: "18px",
+          }}
+        >
+          {/* ⭐ Name */}
+          <label style={{ display: "flex", flexDirection: "column" }}>
+            <strong>Name</strong>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Your full name"
+              style={inputStyle}
+            />
+          </label>
+
+          {/* ⭐ Business Name */}
+          <label style={{ display: "flex", flexDirection: "column" }}>
+            <strong>Business Name</strong>
+            <input
+              type="text"
+              value={businessName}
+              onChange={(e) => setBusinessName(e.target.value)}
+              placeholder="e.g. Ric’s Tech Solutions"
+              style={inputStyle}
+            />
+          </label>
+
+          {/* ⭐ Industry */}
+          <label style={{ display: "flex", flexDirection: "column" }}>
+            <strong>Industry</strong>
+            <input
+              type="text"
+              value={industry}
+              onChange={(e) => setIndustry(e.target.value)}
+              placeholder="e.g. HVAC, Plumbing, Landscaping"
+              style={inputStyle}
+            />
+          </label>
+
+          {/* ⭐ Years in Business */}
+          <label style={{ display: "flex", flexDirection: "column" }}>
+            <strong>Years in Business</strong>
+            <input
+              type="number"
+              value={yearsInBusiness}
+              onChange={(e) => setYearsInBusiness(e.target.value)}
+              placeholder="e.g. 10"
+              style={inputStyle}
+            />
+          </label>
+
+          {/* ⭐ Business Address */}
+          <label style={{ display: "flex", flexDirection: "column" }}>
+            <strong>Business Address</strong>
+            <input
+              type="text"
+              value={businessAddress}
+              onChange={(e) => setBusinessAddress(e.target.value)}
+              placeholder="Street, City, State"
+              style={inputStyle}
+            />
+          </label>
+
+          {/* ⭐ Business Phone */}
+          <label style={{ display: "flex", flexDirection: "column" }}>
+            <strong>Business Phone</strong>
+            <input
+              type="tel"
+              value={businessPhone}
+              onChange={(e) => setBusinessPhone(e.target.value)}
+              placeholder="e.g. (555) 123‑4567"
+              style={inputStyle}
+            />
+          </label>
+
+          {/* ⭐ Save Button */}
+          <button
+            type="submit"
+            disabled={saving}
+            style={{
+              padding: "12px",
+              background: "#6a3df5",
+              color: "white",
+              border: "none",
+              borderRadius: "6px",
+              fontSize: "1rem",
+              cursor: "pointer",
+              opacity: saving ? 0.7 : 1,
+            }}
+          >
+            {saving ? "Saving..." : "Save Profile"}
+          </button>
+        </form>
       </div>
     </div>
-  </div>
-);
+  );
 }
+
+// ⭐ Shared input style
+const inputStyle = {
+  marginTop: "6px",
+  padding: "10px",
+  borderRadius: "6px",
+  border: "1px solid #ccc",
+  fontSize: "1rem",
+};
