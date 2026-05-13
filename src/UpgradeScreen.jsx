@@ -56,7 +56,6 @@ export default function UpgradeScreen() {
     borderRadius: "20px",
     background: "linear-gradient(135deg, #8a2be2 0%, #b57bff 100%)",
     color: "white",
-    boxShadow: "0 10px 28px rgba(0,0,0,0.18)",
     animation: "floatUp 1.2s ease",
   }}
       >
