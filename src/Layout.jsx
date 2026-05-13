@@ -31,6 +31,21 @@ export default function Layout({ children }) {
           style={{ height: 40 }}
         />
 
+
+{/* ⭐ Login button for returning users on Home page */}
+{!user && location.pathname === "/" && (
+  <Link
+    to="/auth?mode=login"
+    style={{
+      textDecoration: "none",
+      color: "#8a2be2",
+      fontWeight: "bold",
+    }}
+  >
+    Log in
+  </Link>
+)}
+
         {/* ⭐ PRIORITY: Back to Dashboard on Profile page */}
         {isProfilePage && user && (
           <Link
