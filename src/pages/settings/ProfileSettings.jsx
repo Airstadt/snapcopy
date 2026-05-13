@@ -119,8 +119,21 @@ export default function ProfileSettings() {
    * Displays a clean card-style form for editing profile fields.
    */
   return (
-    <div style={{ padding: "40px" }}>
-      <h1>Complete Your Profile</h1>
+  <div
+    style={{
+      width: "100%",
+      display: "flex",
+      justifyContent: "center",
+      padding: "40px 20px",
+    }}
+  >
+    <div
+      style={{
+        width: "100%",
+        maxWidth: "600px",
+      }}
+    >
+      <h1>Your Profile</h1>
 
       <div
         style={{
@@ -129,12 +142,11 @@ export default function ProfileSettings() {
           borderRadius: "12px",
           background: "#f8f9fa",
           boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-          maxWidth: "450px"
         }}
       >
- 
-
+        {/* your form goes here */}
       </div>
     </div>
-  );
+  </div>
+);
 }

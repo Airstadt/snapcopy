@@ -11,8 +11,10 @@ export default function Layout({ children }) {
   const isDashboard = location.pathname === "/dashboard";
 
   return (
-    <div>
-      <header style={{
+  <div style={{ width: "100%" }}>
+    <header
+      style={{
+        width: "100%",
         padding: "20px",
         display: "flex",
         alignItems: "center",

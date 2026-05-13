@@ -1,17 +1,9 @@
 // ============================================================================
-// Auth.jsx — Summary
-// ----------------------------------------------------------------------------
-// This component handles all authentication logic for SnapCopy.
-// It supports login and signup modes, listens for auth state changes,
-// redirects authenticated users to the dashboard, and manages Firestore
-// user profile creation and updates (createdAt, lastLogin, plan, credits, etc.).
-// The UI includes form inputs, error handling, loading states, and a toggle
-// between login and signup modes. No logic or structure has been modified.
+// Auth.jsx — Updated with correct redirect logic for Pro users
 // ============================================================================
 
-// src/pages/Auth.jsx
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -20,37 +12,71 @@ import {
 
 import { auth, db } from "../firebase";
 import { doc, setDoc, updateDoc, getDoc } from "firebase/firestore";
-import { useSearchParams } from "react-router-dom";
-
-// Remember to update your import at the top:
-// import { useSearchParams, useNavigate } from "react-router-dom";
 
 function Auth() {
   const navigate = useNavigate();
-  // Added searchParams to capture the redirect URL
   const [searchParams] = useSearchParams();
   const redirectPath = searchParams.get("redirect");
 
-  // Track whether user is logging in or signing up
   const [mode, setMode] = useState("login");
-
-  // Controlled form fields
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  // UI state for loading and error messages
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  // Redirect immediately if user is already authenticated
+  // NEW: Track profile loading so we don't redirect too early
+  const [checkingProfile, setCheckingProfile] = useState(true);
+
+  // NEW: Wait for Firestore profile before redirecting
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) navigate(redirectPath || "/dashboard");
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        setCheckingProfile(false);
+        return;
+      }
+
+      // Load Firestore profile
+      const ref = doc(db, "users", user.uid);
+      const snap = await getDoc(ref);
+
+      if (!snap.exists()) {
+        // Create missing profile
+        await setDoc(ref, {
+          email: user.email,
+          createdAt: Date.now(),
+          lastLogin: Date.now(),
+          plan: "free",
+          credits: 100,
+          businessName: null,
+          industry: null,
+          yearsInBusiness: null,
+          onboardingComplete: false,
+        });
+      } else {
+        // Update last login
+        await updateDoc(ref, { lastLogin: Date.now() });
+      }
+
+      const profile = snap.exists() ? snap.data() : { plan: "free" };
+
+      // ⭐ Correct redirect logic
+      if (profile.plan === "pro") {
+        navigate("/dashboard");
+      } else {
+        navigate(redirectPath || "/upgrade");
+      }
+
+      setCheckingProfile(false);
     });
+
     return () => unsubscribe();
   }, [navigate, redirectPath]);
 
-  // Main login/signup handler with Firestore profile creation/update
+  // Prevent UI flash while checking profile
+  if (checkingProfile) return null;
+
+  // Login / Signup handler
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -58,22 +84,18 @@ function Auth() {
 
     try {
       if (mode === "login") {
-        // Attempt login
         const userCred = await signInWithEmailAndPassword(
           auth,
           email.trim(),
           password
         );
 
-        // Reference to Firestore user document
         const userRef = doc(db, "users", userCred.user.uid);
         const snap = await getDoc(userRef);
 
         if (snap.exists()) {
-          // Update last login timestamp
           await updateDoc(userRef, { lastLogin: Date.now() });
         } else {
-          // Create missing profile for older accounts
           await setDoc(userRef, {
             email: userCred.user.email,
             createdAt: Date.now(),
@@ -86,19 +108,15 @@ function Auth() {
             onboardingComplete: false,
           });
         }
-        
-        // Navigate to the upgrade screen if redirect exists, otherwise dashboard
-        navigate(redirectPath || "/dashboard");
 
+        // Redirect handled by onAuthStateChanged
       } else {
-        // Create new account
         const userCred = await createUserWithEmailAndPassword(
           auth,
           email.trim(),
           password
         );
 
-        // Create Firestore profile for new user
         await setDoc(doc(db, "users", userCred.user.uid), {
           email: userCred.user.email,
           createdAt: Date.now(),
@@ -111,13 +129,11 @@ function Auth() {
           onboardingComplete: false,
         });
 
-        // Navigate to the upgrade screen if redirect exists, otherwise dashboard
-        navigate(redirectPath || "/dashboard");
+        // Redirect handled by onAuthStateChanged
       }
     } catch (err) {
       console.error(err);
 
-      // Friendly error messages based on Firebase error codes
       let message = "Something went wrong. Please try again.";
       if (err.code === "auth/invalid-email") message = "That email address is not valid.";
       else if (err.code === "auth/user-not-found") message = "No account found with that email.";
@@ -127,13 +143,10 @@ function Auth() {
 
       setError(message);
     } finally {
-      // Always stop loading state
       setIsSubmitting(false);
     }
   };
 
-
-  // Switch between login and signup modes
   const toggleMode = () => {
     setError("");
     setMode((prev) => (prev === "login" ? "signup" : "login"));

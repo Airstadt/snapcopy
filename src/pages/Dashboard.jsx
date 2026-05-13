@@ -33,157 +33,213 @@ export default function Dashboard() {
   }, []);
 
   if (loading) {
-    return <div style={{ padding: "40px" }}>Loading your dashboard...</div>;
+    return (
+      <div style={{ padding: "60px", textAlign: "center", fontSize: "1.2rem" }}>
+        Loading your dashboard…
+      </div>
+    );
   }
 
-  // Personalized greeting logic
   const greetingName =
-    profile.businessName?.trim() ||
-    auth.currentUser.email.split("@")[0] ||
+    profile?.businessName?.trim() ||
+    auth.currentUser?.email?.split("@")[0] ||
     "there";
 
   return (
-    <div style={{ padding: "40px" }}>
-      <h1 style={{ marginBottom: "10px" }}>
-        Welcome back, {greetingName}
-      </h1>
-    {/* Back to Snap Form */}
-<button
-  onClick={() => navigate("/")}
-  style={{
-    marginBottom: "20px",
-    padding: "10px 20px",
-    background: "#6c757d",
-    color: "white",
-    borderRadius: "6px",
-    cursor: "pointer"
-  }}
->
-  ← Back to Snap Form
-</button>
-
-
-    <button
-        onClick={() => navigate("/settings")}
+    <div
+      style={{
+        width: "100%",
+        display: "flex",
+        justifyContent: "center",
+        padding: "40px 20px",
+      }}
+    >
+      <div
         style={{
-          marginBottom: "20px",
-          padding: "10px 20px",
-          background: "#6c757d",
-          color: "white",
-          borderRadius: "6px",
-          cursor: "pointer"
+          width: "100%",
+          maxWidth: "900px",
+          textAlign: "center",
         }}
       >
-        Settings
-      </button>
-
-
-      {/* My Snaps Button */}
-      <button
-        onClick={() => navigate("/mysnaps")}
-        style={{
-          marginBottom: "20px",
-          padding: "10px 20px",
-          background: "#007bff",
-          color: "white",
-          borderRadius: "6px",
-          cursor: "pointer"
-        }}
-      >
-        My Snaps
-      </button>
-
-
-
-      {/* If profile is incomplete */}
-      {!profile.onboardingComplete && (
-        <div
+        <h1
           style={{
-            marginTop: "20px",
-            padding: "20px",
-            borderRadius: "12px",
-            background: "#fff3cd",
-            border: "1px solid #ffeeba",
-            maxWidth: "450px"
+            fontSize: "2.6rem",
+            fontWeight: "700",
+            marginBottom: "10px",
+            color: "#4b2aad",
           }}
         >
-          
-          <h2 style={{ marginTop: 0 }}>Complete Your Profile</h2>
-          <p>Finish setting up your business details to unlock personalized snaps.</p>
+          Welcome back, {greetingName}
+        </h1>
 
-          <button
-  onClick={() => navigate("/settings/profile")}
-  style={{
-    marginTop: "10px",
-    padding: "10px 20px",
-    background: "#007bff",
-    color: "white",
-    borderRadius: "6px",
-    cursor: "pointer"
-  }}
->
-  Complete Profile
-</button>
+        <p
+          style={{
+            color: "#555",
+            marginBottom: "40px",
+            fontSize: "1.15rem",
+          }}
+        >
+          Your hub for managing snaps, your business profile, and your subscription.
+        </p>
 
+        {/* Overview Section - Centered horizontally */}
+        <div
+          style={{
+            background: "#f3eaff",
+            border: "1px solid #d8c8ff",
+            padding: "25px",
+            borderRadius: "12px",
+            marginBottom: "40px",
+            maxWidth: "700px",
+            marginLeft: "auto",
+            marginRight: "auto",
+          }}
+        >
+          <h2 style={{ marginTop: 0, color: "#4b2aad" }}>Your Account Overview</h2>
+          <p style={{ color: "#4b2aad", margin: "10px 0 0 0" }}>
+            Keep your business profile up to date to ensure your SnapCopy results
+            are perfectly tailored to your brand. Access your snaps, update your
+            settings, and manage your subscription all from this dashboard.
+          </p>
         </div>
-      )}
 
-      {/* If profile is complete */}
-      {profile.onboardingComplete && (
+        {/* Button Row */}
         <div
           style={{
-            marginTop: "20px",
-            padding: "20px",
-            borderRadius: "12px",
-            background: "#f8f9fa",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-            maxWidth: "450px"
+            display: "flex",
+            gap: "12px",
+            justifyContent: "center",
+            flexWrap: "wrap",
+            marginBottom: "30px",
           }}
         >
-          <h2>Your Business Profile</h2>
+          <button onClick={() => navigate("/")} style={buttonSecondary}>
+            ← Back to Snap Form
+          </button>
 
-          <p><strong>Business Name:</strong> {profile.businessName}</p>
-          <p><strong>Industry:</strong> {profile.industry}</p>
-          <p><strong>Years in Business:</strong> {profile.yearsInBusiness}</p>
+          <button onClick={() => navigate("/settings")} style={buttonSecondary}>
+            Settings
+          </button>
 
-          <hr style={{ margin: "15px 0" }} />
-
-          <p><strong>Plan:</strong> {profile.plan}</p>
-          <p><strong>Credits:</strong> {profile.credits}</p>
-
-          {/* Create Snap Button */}
-          <button
-            onClick={() => navigate("/create-snap")}
-            style={{
-              marginTop: "20px",
-              padding: "12px 20px",
-              background: "#28a745",
-              color: "white",
-              borderRadius: "6px",
-              cursor: "pointer",
-              width: "100%"
-            }}
-          >
-            Create New Snap
+          <button onClick={() => navigate("/mysnaps")} style={buttonPrimary}>
+            My Snaps
           </button>
         </div>
-      )}
 
-      {/* Logout */}
-      <button
-        onClick={handleLogout}
-        style={{
-          marginTop: "30px",
-          padding: "10px 20px",
-          background: "#333",
-          color: "white",
-          borderRadius: "6px",
-          cursor: "pointer"
-        }}
-      >
-        Log out
-      </button>
+        {/* Profile Completion Card */}
+        {!profile?.onboardingComplete && (
+          <div style={cardWarning}>
+            <h2 style={{ marginTop: 0 }}>Complete Your Profile</h2>
+            <p style={{ marginBottom: "20px" }}>
+              Your business details help SnapCopy generate more accurate and
+              personalized content. Completing your profile unlocks your full
+              experience.
+            </p>
+
+            <button
+              onClick={() => navigate("/settings/profile")}
+              style={buttonPrimary}
+            >
+              Complete Profile
+            </button>
+          </div>
+        )}
+
+        {/* Profile Card */}
+        {profile?.onboardingComplete && (
+          <div style={card}>
+            <h2 style={{ marginTop: 0, color: "#4b2aad" }}>
+              Your Business Profile
+            </h2>
+
+            <p><strong>Business Name:</strong> {profile.businessName}</p>
+            <p><strong>Industry:</strong> {profile.industry}</p>
+            <p><strong>Years in Business:</strong> {profile.yearsInBusiness}</p>
+
+            <hr style={{ margin: "15px 0" }} />
+
+            <p><strong>Plan:</strong> {profile.plan}</p>
+            <p><strong>Credits:</strong> {profile.credits}</p>
+
+            <button
+              onClick={() => navigate("/create-snap")}
+              style={{
+                ...buttonSuccess,
+                width: "100%",
+                marginTop: "20px",
+              }}
+            >
+              Create New Snap
+            </button>
+          </div>
+        )}
+
+        {/* Logout */}
+        <div style={{ marginTop: "40px" }}>
+          <button onClick={handleLogout} style={buttonDark}>
+            Log out
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
 
+/* --- Reusable Styles --- */
+
+const buttonPrimary = {
+  padding: "10px 20px",
+  background: "#6a3df5",
+  color: "white",
+  borderRadius: "6px",
+  cursor: "pointer",
+  border: "none",
+  fontSize: "1rem",
+};
+
+const buttonSecondary = {
+  padding: "10px 20px",
+  background: "#6c757d",
+  color: "white",
+  borderRadius: "6px",
+  cursor: "pointer",
+  border: "none",
+  fontSize: "1rem",
+};
+
+const buttonSuccess = {
+  padding: "12px 20px",
+  background: "#28a745",
+  color: "white",
+  borderRadius: "6px",
+  cursor: "pointer",
+  border: "none",
+  fontSize: "1rem",
+};
+
+const buttonDark = {
+  padding: "10px 20px",
+  background: "#333",
+  color: "white",
+  borderRadius: "6px",
+  cursor: "pointer",
+  border: "none",
+  fontSize: "1rem",
+};
+
+const card = {
+  marginTop: "20px",
+  padding: "25px",
+  borderRadius: "12px",
+  background: "white",
+  boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+  maxWidth: "500px",
+  marginLeft: "auto",
+  marginRight: "auto",
+};
+
+const cardWarning = {
+  ...card,
+  background: "#fff3cd",
+  border: "1px solid #ffeeba",
+};

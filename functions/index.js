@@ -31,7 +31,7 @@ exports.createCheckoutSession = onCall(
           mode: "subscription",
           customer_email: email,
           line_items: [{ price: MONTHLY_PRICE_ID.value(), quantity: 1 }],
-          success_url: SUCCESS_URL.value() + '?session_id={CHECKOUT_SESSION_ID}',
+          success_url: `${SUCCESS_URL.value()}?session_id={CHECKOUT_SESSION_ID}`,
           cancel_url: CANCEL_URL.value(),
           metadata: { uid }, 
           subscription_data: {
