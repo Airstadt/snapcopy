@@ -2172,6 +2172,69 @@ window.generateSnap = generate;
           </SnapWorkspace>
 
 
+{/* TESTIMONIAL SECTION */}
+{/* TESTIMONIAL SECTION — only show to public visitors */}
+{!user && (
+  <section
+    style={{
+      width: "100%",
+      maxWidth: 900,
+      padding: "60px 20px",
+      margin: "0 auto",
+      textAlign: "center"
+    }}
+  >
+    <h2
+      style={{
+        fontSize: "32px",
+        fontWeight: "800",
+        color: "#1f2937",
+        marginBottom: "40px"
+      }}
+    >
+      What People Are Saying
+    </h2>
+
+    <div
+      style={{
+        background: "white",
+        padding: "30px",
+        borderRadius: "15px",
+        boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
+        border: `1px solid ${colors.lightGray}`,
+        maxWidth: "700px",
+        margin: "0 auto"
+      }}
+    >
+      {/* Five Stars */}
+      <div style={{ marginBottom: "15px" }}>
+        {"★★★★★"}
+      </div>
+
+      <p
+        style={{
+          fontSize: "18px",
+          color: "#4b5563",
+          lineHeight: "1.6",
+          marginBottom: "20px"
+        }}
+      >
+        “This works great — straightforward instructions, targeted tasks, and clean responses. Need more!”
+      </p>
+
+      <h4
+        style={{
+          fontSize: "16px",
+          fontWeight: "700",
+          color: colors.deepBlue
+        }}
+      >
+        — Ric
+      </h4>
+    </div>
+  </section>
+)}
+
 
           
         {/* FOOTER */}
