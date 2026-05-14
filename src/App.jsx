@@ -1720,7 +1720,7 @@ window.generateSnap = generate;
   <section 
     style={{
       width: "100%",
-      maxWidth: 900,
+      maxWidth: 1000,
       padding: "60px 20px",
       margin: "0 auto",
       textAlign: "center"
@@ -1737,45 +1737,93 @@ window.generateSnap = generate;
       What People Are Saying
     </h2>
 
+    {/* Grid container */}
     <div
       style={{
-        background: "white",
-        padding: "30px",
-        borderRadius: "15px",
-        boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
-        border: `1px solid ${colors.lightGray}`,
-        maxWidth: "700px",
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+        gap: "25px",
+        justifyContent: "center",
+        alignItems: "stretch",
+        maxWidth: "900px",
         margin: "0 auto"
       }}
     >
-      {/* Five Stars */}
-      <div style={{ marginBottom: "15px" }}>
-        {"★★★★★"}
+
+      {/* Ric */}
+      <div className="fancy-card"
+        style={{
+          background: "white",
+          padding: "25px",
+          borderRadius: "15px",
+          boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
+          border: `1px solid ${colors.lightGray}`,
+          textAlign: "center"
+        }}
+      >
+        <div style={{ marginBottom: "10px" }}>{"★★★★★"}</div>
+
+        <p
+          style={{
+            fontSize: "16px",
+            color: "#4b5563",
+            lineHeight: "1.6",
+            marginBottom: "15px"
+          }}
+        >
+          “This works great — straightforward instructions, targeted tasks, and clean responses. Need more!”
+        </p>
+
+        <h4
+          style={{
+            fontSize: "15px",
+            fontWeight: "700",
+            color: colors.deepBlue
+          }}
+        >
+          — Ric
+        </h4>
       </div>
 
-      <p
+      {/* Christa */}
+      <div className="fancy-card"
         style={{
-          fontSize: "18px",
-          color: "#4b5563",
-          lineHeight: "1.6",
-          marginBottom: "20px"
+          background: "white",
+          padding: "25px",
+          borderRadius: "15px",
+          boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
+          border: `1px solid ${colors.lightGray}`,
+          textAlign: "center"
         }}
       >
-        “This works great — straightforward instructions, targeted tasks, and clean responses. Need more!”
-      </p>
+        <div style={{ marginBottom: "10px" }}>{"★★★★★"}</div>
 
-      <h4
-        style={{
-          fontSize: "16px",
-          fontWeight: "700",
-          color: colors.deepBlue
-        }}
-      >
-        — Ric
-      </h4>
+        <p
+          style={{
+            fontSize: "16px",
+            color: "#4b5563",
+            lineHeight: "1.6",
+            marginBottom: "15px"
+          }}
+        >
+          “Perfect for mom and pop shops — people that don’t know how to use AI.”
+        </p>
+
+        <h4
+          style={{
+            fontSize: "15px",
+            fontWeight: "700",
+            color: colors.deepBlue
+          }}
+        >
+          — Christa
+        </h4>
+      </div>
+
     </div>
   </section>
 )}
+
 
 {/* TRUSTED BY SECTION — only show to public visitors */}
 {!user && (
@@ -2501,6 +2549,77 @@ window.generateSnap = generate;
 )}
 
 {/* END FAQ SECTION — only show to non‑subscribed users */}
+
+{/* FINAL CTA SECTION */}
+<section
+  style={{
+    width: "100%",
+    maxWidth: 900,
+    padding: "80px 20px",
+    margin: "0 auto",
+    textAlign: "center"
+  }}
+>
+  <h2
+    style={{
+      fontSize: "32px",
+      fontWeight: "800",
+      color: "#1f2937",
+      marginBottom: "20px"
+    }}
+  >
+    Ready to Look More Professional?
+  </h2>
+
+  <p
+    style={{
+      fontSize: "18px",
+      color: "#4b5563",
+      maxWidth: "600px",
+      margin: "0 auto 30px auto",
+      lineHeight: "1.6"
+    }}
+  >
+    Start writing better emails, bios, policies, and customer replies in minutes — 
+    no account or credit card required.
+  </p>
+
+  <button
+    onClick={scrollToForm}
+    style={{
+      padding: "16px 32px",
+      borderRadius: "10px",
+      background: `linear-gradient(135deg, ${colors.deepBlue}, ${colors.deepBlue}CC)`,
+      color: "white",
+      fontSize: "18px",
+      fontWeight: "700",
+      border: "none",
+      cursor: "pointer",
+      transition: "0.25s ease"
+    }}
+    onMouseEnter={(e) => {
+      e.target.style.transform = "translateY(-2px)";
+      e.target.style.boxShadow = "0 6px 20px rgba(0,0,0,0.25)";
+    }}
+    onMouseLeave={(e) => {
+      e.target.style.transform = "translateY(0)";
+      e.target.style.boxShadow = "none";
+    }}
+  >
+    Start Free — No Account Needed
+  </button>
+
+  <p
+    style={{
+      marginTop: "15px",
+      fontSize: "14px",
+      color: "#9ca3af"
+    }}
+  >
+    No credit card required. Cancel anytime.
+  </p>
+</section>
+
           
         {/* FOOTER */}
         <footer style={{ textAlign: "center", padding: "50px 0", borderTop: `1px solid ${colors.lightGray}` }}>
