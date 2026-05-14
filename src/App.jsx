@@ -9,6 +9,8 @@ import { useNavigate } from "react-router-dom";
 import UpgradeScreen from "./UpgradeScreen";
 
 
+
+
 import snapcopyLogo from "./assets/snapcopyLogo.png";
 import airStadtLogo from "./assets/AirStadtLogo.png";
 
@@ -43,7 +45,6 @@ function HomePage() {
   const navigate = useNavigate();
 
   const [mode, setMode] = useState("about");
-  
   const [industry, setIndustry] = useState("");
   const [city, setCity] = useState("");
   const [years, setYears] = useState("");
@@ -65,12 +66,10 @@ function HomePage() {
   const [scope, setScope] = useState("");
   const [terms, setTerms] = useState("");
   const [specialClauses, setSpecialClauses] = useState("");
- 
 
-  // POLICIES SNAP STATE
-  const [policyType, setPolicyType] = useState("");
-  const [businessName, setBusinessName] = useState("");
-  const [details, setDetails] = useState("");
+  // ... all your other state + helpers ...
+
+  
 
 // --- JOB ESTIMATOR LOGIC (App.jsx) ---
 
@@ -105,6 +104,7 @@ const [financials, setFinancials] = useState({
   taxRate: 8,
   terms: "Due on Receipt"
 });
+
 
 
 // 2. UPDATE HELPERS
@@ -171,6 +171,8 @@ const calculateTotal = () => {
   const subtotal = labor + mats + addOns;
   const afterDiscount = subtotal - parseFloat(financials.discount || 0);
   const tax = afterDiscount * (parseFloat(financials.taxRate || 0) / 100);
+
+    
 
   return (afterDiscount + tax).toFixed(2);
 };
@@ -1319,7 +1321,10 @@ window.generateSnap = generate;
       boxSizing: "border-box",
       fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
     }}
+    
   >
+
+    
     {/* SHOW ONLY FOR LOGGED-IN USERS */}
 {auth.currentUser && (
   <button
@@ -1346,7 +1351,7 @@ window.generateSnap = generate;
   
     {/* HERO SECTION */}
     {/* HERO SECTION */}
-<section
+<section className="fade-section"
   style={{
     maxWidth: 1000,
     textAlign: "center",
@@ -1356,6 +1361,7 @@ window.generateSnap = generate;
     alignItems: "center"
   }}
 >
+  
   <img
     src={snapcopyLogo}
     alt="SnapCopy Logo"
@@ -1393,7 +1399,7 @@ window.generateSnap = generate;
 
   {/* CTA BUTTONS */}
   <div style={{ display: "flex", justifyContent: "center", gap: "16px" }}>
-    <button
+    <button 
       onClick={scrollToForm}
       style={{
         padding: "14px 28px",
@@ -1444,7 +1450,7 @@ window.generateSnap = generate;
 
 
 {/* VALUE PROPOSITION SECTION */}
-<section
+<section 
   style={{
     width: "100%",
     maxWidth: 1000,
@@ -1547,7 +1553,7 @@ window.generateSnap = generate;
 </section>
 
 {/* FEATURE GRID SECTION */}
-<section
+<section 
   style={{
     width: "100%",
     maxWidth: 1100,
@@ -1711,7 +1717,7 @@ window.generateSnap = generate;
 
 {/* TESTIMONIAL SECTION — only show to public visitors */}
 {!user && (
-  <section
+  <section 
     style={{
       width: "100%",
       maxWidth: 900,
@@ -1779,7 +1785,7 @@ window.generateSnap = generate;
       padding: "30px 20px",
       margin: "0 auto",
       textAlign: "center",
-      opacity: 0.9
+      opacity: 0.95
     }}
   >
     <p
@@ -1797,43 +1803,31 @@ window.generateSnap = generate;
       style={{
         display: "flex",
         justifyContent: "center",
-        gap: "40px",
+        gap: "20px",
         flexWrap: "wrap",
         marginTop: "10px"
       }}
     >
-      {/* Neutral placeholders — NOT logos */}
-      <div style={{
-        width: 60,
-        height: 30,
-        background: "#e5e7eb",
-        borderRadius: "6px"
-      }} />
-
-      <div style={{
-        width: 60,
-        height: 30,
-        background: "#e5e7eb",
-        borderRadius: "6px"
-      }} />
-
-      <div style={{
-        width: 60,
-        height: 30,
-        background: "#e5e7eb",
-        borderRadius: "6px"
-      }} />
-
-      <div style={{
-        width: 60,
-        height: 30,
-        background: "#e5e7eb",
-        borderRadius: "6px"
-      }} />
+      {["Coming Soon", "Coming Soon", "Coming Soon", "Coming Soon"].map((text, i) => (
+        <div
+          key={i}
+          style={{
+            padding: "10px 20px",
+            background: "#e5e7eb",
+            borderRadius: "8px",
+            fontSize: "14px",
+            color: "#6b7280",
+            fontWeight: "600",
+            border: "1px solid #d1d5db"
+          }}
+        >
+          {text}
+        </div>
+      ))}
     </div>
   </section>
 )}
-
+{/* END TRUSTED BY SECTION — only show to public visitors */}
 
 
 <SnapWorkspace>
@@ -2386,7 +2380,7 @@ window.generateSnap = generate;
     </div>
   </section>
 )}
-
+{/* END HOW IT WORKS — only show to non‑subscribed users */}
 
 {/* FAQ SECTION — only show to non‑subscribed users */}
 {(!user || !isSubscribed) && (
@@ -2506,7 +2500,7 @@ window.generateSnap = generate;
   </section>
 )}
 
-
+{/* END FAQ SECTION — only show to non‑subscribed users */}
           
         {/* FOOTER */}
         <footer style={{ textAlign: "center", padding: "50px 0", borderTop: `1px solid ${colors.lightGray}` }}>
