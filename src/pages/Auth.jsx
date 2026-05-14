@@ -12,6 +12,9 @@ import {
 
 import { auth, db } from "../firebase";
 import { doc, setDoc, updateDoc, getDoc } from "firebase/firestore";
+import snapcopyLogo from "../assets/snapcopyLogo.png";
+import { sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 function Auth() {
   const navigate = useNavigate();
@@ -190,141 +193,127 @@ function Auth() {
   return (
   <div
     style={{
+      padding: "60px 20px",
+      maxWidth: "640px",
+      margin: "0 auto",
+      textAlign: "center",
       minHeight: "100vh",
       display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      background: "#f4f0ff",
-      padding: "20px",
+      flexDirection: "column",
+      justifyContent: "flex-start",
+      gap: "30px",
+      animation: "fadePage 0.8s ease",
     }}
   >
+
+    {/* ⭐ Premium Gradient Hero */}
     <div
+      className="glowHero"
       style={{
-        width: "100%",
-        maxWidth: "420px",
-        background: "white",
-        padding: "35px",
-        borderRadius: "16px",
-        boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
-        textAlign: "center",
+        padding: "45px 35px",
+        borderRadius: "22px",
+        background: "linear-gradient(135deg, #6d28d9 0%, #a78bfa 100%)",
+        color: "white",
+        animation: "floatUp 1.2s ease",
+        boxShadow: "0 12px 32px rgba(109,40,217,0.35)",
       }}
     >
-      {/* MODE HEADER */}
-      <h1
+      <h1 style={{ margin: 0, fontSize: "34px", fontWeight: "800" }}>
+        SnapCopy Pro
+      </h1>
+      <p style={{ marginTop: "14px", fontSize: "18px", opacity: 0.95, lineHeight: "1.5" }}>
+        Unlock the full power of your content workflow.
+      </p>
+    </div>
+
+    {/* ⭐ Pro Benefits */}
+    <div
+      style={{
+        background: "#ffffff",
+        padding: "32px",
+        borderRadius: "20px",
+        border: "1px solid #e5e7eb",
+        boxShadow: "0 10px 28px rgba(0,0,0,0.06)",
+        textAlign: "left",
+        animation: "slideUp 0.7s ease",
+      }}
+    >
+      <h3
         style={{
-          fontSize: "1.9rem",
+          marginBottom: "20px",
+          color: "#6d28d9",
+          textAlign: "center",
+          fontSize: "22px",
           fontWeight: "700",
-          marginBottom: "10px",
-          color: mode === "login" ? "#4b2aad" : "#28a745",
-          transition: "color 0.3s ease",
         }}
       >
-        {mode === "login" ? "Log in to SnapCopy" : "Create your SnapCopy account"}
-      </h1>
+        Why Upgrade to Pro?
+      </h3>
 
-      {/* SUBTEXT */}
+      <ul style={{ paddingLeft: "22px", lineHeight: "1.9", fontSize: "16px", color: "#374151" }}>
+        <li><strong>Save & Modify Content</strong> — Keep every generated snap and refine it anytime.</li>
+        <li><strong>Instant Recall</strong> — Quickly retrieve past content with one click.</li>
+        <li><strong>Access New Features First</strong> — Get early access to new tools and AI upgrades.</li>
+      </ul>
+
       <p
         style={{
-          color: "#666",
-          marginBottom: "25px",
-          fontSize: "0.95rem",
-        }}
-      >
-        {mode === "login"
-          ? "Welcome back! Enter your credentials to continue."
-          : "Create an account to start generating AI‑powered content."}
-      </p>
-
-      {/* FORM */}
-      <form onSubmit={handleSubmit} style={{ textAlign: "left" }}>
-        <label style={{ display: "block", marginBottom: "15px" }}>
-          <span style={{ fontWeight: "600", color: "#333" }}>Email</span>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            required
-            style={inputStyle}
-          />
-        </label>
-
-        <label style={{ display: "block", marginBottom: "15px" }}>
-          <span style={{ fontWeight: "600", color: "#333" }}>Password</span>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-            required
-            style={inputStyle}
-          />
-        </label>
-
-        {error && (
-          <div
-            style={{
-              background: "#ffe6e6",
-              color: "#b30000",
-              padding: "10px",
-              borderRadius: "6px",
-              marginBottom: "15px",
-              fontSize: "0.9rem",
-            }}
-          >
-            {error}
-          </div>
-        )}
-
-        {/* SUBMIT BUTTON */}
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          style={{
-            width: "100%",
-            padding: "12px",
-            background: mode === "login" ? "#4b2aad" : "#28a745",
-            color: "white",
-            border: "none",
-            borderRadius: "8px",
-            fontSize: "1rem",
-            cursor: "pointer",
-            marginTop: "10px",
-            opacity: isSubmitting ? 0.7 : 1,
-            transition: "background 0.3s ease",
-          }}
-        >
-          {isSubmitting
-            ? mode === "login"
-              ? "Logging in..."
-              : "Creating account..."
-            : mode === "login"
-            ? "Log in"
-            : "Sign up"}
-        </button>
-      </form>
-
-      {/* MODE SWITCH */}
-      <button
-        type="button"
-        onClick={toggleMode}
-        style={{
           marginTop: "20px",
-          background: "none",
-          border: "none",
-          color: "#4b2aad",
-          fontWeight: "600",
-          cursor: "pointer",
-          fontSize: "0.95rem",
+          fontSize: "15px",
+          opacity: 0.75,
+          textAlign: "center",
         }}
       >
-        {mode === "login"
-          ? "Need an account? Sign up"
-          : "Already have an account? Log in"}
-      </button>
+        ✨ Pro unlocks your full creative flow.
+      </p>
     </div>
+
+    {/* ⭐ Upgrade Button */}
+    <button
+      onClick={handleUpgrade}
+      disabled={isProcessing}
+      className="glowButton"
+      style={{
+        padding: "18px 20px",
+        background: isProcessing ? "#aaa" : "#6d28d9",
+        color: "white",
+        borderRadius: "12px",
+        cursor: isProcessing ? "not-allowed" : "pointer",
+        width: "100%",
+        fontSize: "18px",
+        fontWeight: "700",
+        border: "none",
+        transition: "0.25s ease",
+      }}
+    >
+      {isProcessing ? "Connecting to Stripe..." : "Upgrade to Pro – $19.99/mo"}
+    </button>
+
+    {/* ⭐ Log Out */}
+    <button
+      onClick={() => {
+        signOut(firebaseAuth);
+        navigate("/auth");
+      }}
+      style={{
+        marginTop: "10px",
+        padding: "12px 16px",
+        background: "#374151",
+        color: "white",
+        borderRadius: "10px",
+        cursor: "pointer",
+        width: "100%",
+        fontSize: "15px",
+        border: "none",
+        transition: "0.25s ease",
+      }}
+    >
+      Log Out
+    </button>
+
   </div>
 );
+
 
 }
 
