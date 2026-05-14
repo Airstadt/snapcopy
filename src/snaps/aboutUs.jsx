@@ -40,18 +40,7 @@ const AboutUs = ({
             local customers.
           </p>
 
-          <div
-            style={{
-              background: "#edf2f7",
-              padding: "10px 15px",
-              borderRadius: "6px",
-              marginBottom: "20px",
-              fontWeight: "600",
-              color: "#2d3748"
-            }}
-          >
-            Submit your idea for our next AI tool
-          </div>
+          
         </>
       )}
 

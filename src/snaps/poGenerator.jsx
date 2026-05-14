@@ -66,18 +66,7 @@ export default function PoGenerator({
             suppliers, and service businesses.
           </p>
 
-          <div
-            style={{
-              background: "#edf2f7",
-              padding: "10px 15px",
-              borderRadius: "6px",
-              marginBottom: "20px",
-              fontWeight: "600",
-              color: "#2d3748"
-            }}
-          >
-            Interested in SnapCopy or SnapMatrix? Join the waitlist today.
-          </div>
+          
         </>
       )}
 

@@ -13,6 +13,8 @@ import snapcopyLogo from "./assets/snapcopyLogo.png";
 import airStadtLogo from "./assets/AirStadtLogo.png";
 
 import MarketingHome from "./pages/MarketingHome";
+import SnapWorkspace from "./components/SnapWorkspace";
+
 import InterestForm from "./pages/InterestForm";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
@@ -1068,14 +1070,16 @@ if (yPos > 250) {
   };
 
   const inputStyle = {
-    width: "100%",
-    padding: "12px",
-    marginTop: "6px",
-    borderRadius: "8px",
-    border: `1px solid ${colors.lightGray}`,
-    fontSize: "15px",
-    outline: "none",
-    boxSizing: "border-box"
+     width: "100%",
+  padding: "12px 14px",
+  borderRadius: "10px",
+  border: "1px solid #d1d5db",
+  background: "white",
+  color: "#1f2937",
+  fontSize: "15px",
+  marginBottom: "16px",
+  outline: "none",
+  transition: "0.2s ease"
   };
 
   const getInputStyle = (isFocused) => ({
@@ -1336,348 +1340,307 @@ window.generateSnap = generate;
     {/* ============================================================
         HERO SECTION — Logo, headline, subtext, CTA button
        ============================================================ */}
-    {!user && (
   <MarketingHome>
-    <>
-      {/* HERO SECTION */}
-      <section
-        style={{
-          maxWidth: 1000,
-          textAlign: "center",
-          padding: "60px 20px",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center"
-        }}
-      >
-        <img
-          src={snapcopyLogo}
-          alt="SnapCopy Logo"
-          style={{
-            width: 180,
-            height: 180,
-            borderRadius: "50%",
-            marginBottom: 20
-          }}
-        />
-
-        <h1
-          style={{
-            fontSize: "48px",
-            fontWeight: "800",
-            background: "linear-gradient(to right, #860aa5, #390b64)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            color: "transparent",
-            lineHeight: "1.4"
-          }}
-        >
-          The Complete AI Content Toolkit for Growing Businesses
-        </h1>
-
-        <p
-          style={{
-            color: "#4a5568",
-            fontSize: "18px",
-            marginTop: "14px",
-            maxWidth: "700px",
-            lineHeight: "1.6"
-          }}
-        >
-          From professional "About Us" bios to social media management and
-          sentiment analysis. SnapCopy is your all-in-one suite for high-impact
-          content.
-        </p>
-
-        <button
-          onClick={scrollToForm}
-          style={{
-            padding: "16px 32px",
-            background: colors.deepBlue,
-            color: "white",
-            border: "none",
-            borderRadius: "50px",
-            fontWeight: "bold",
-            fontSize: "18px",
-            cursor: "pointer",
-            marginTop: "30px",
-            boxShadow: "0 10px 20px rgba(134, 10, 165, 0.2)"
-          }}
-        >
-          Explore Tools
-        </button>
-      </section>
-
-      {/* TOOLKIT SECTION */}
-      <section
-        style={{
-          width: "100%",
-          maxWidth: 1000,
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-          gap: "40px",
-          padding: "40px 20px",
-          marginBottom: "40px"
-        }}
-      >
-        <div>
-          <h2 style={{ color: colors.purple, fontSize: "24px" }}>
-            The SnapCopy Toolkit
-          </h2>
-          <p style={{ color: "#4a5568", lineHeight: "1.6" }}>
-            We provide a growing ecosystem of AI tools designed for service
-            businesses. Whether you're building a brand bio or analyzing
-            customer feedback, we turn complex tasks into "Snaps."
-          </p>
-        </div>
-
-        <div
-          style={{
-            background: "white",
-            padding: "25px",
-            borderRadius: "15px",
-            boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
-            border: `1px solid ${colors.lightGray}`
-          }}
-        >
-          <h3
-            style={{
-              fontSize: "14px",
-              color: colors.deepBlue,
-              textTransform: "uppercase",
-              marginBottom: "15px"
-            }}
-          >
-            Current Capabilities
-          </h3>
-
-          <ul
-            style={{
-              color: "#4a5568",
-              fontSize: "15px",
-              paddingLeft: "20px",
-              lineHeight: "2"
-            }}
-          >
-            <li><b>About Us:</b> SEO-ready business bios.</li>
-            <li><b>Responder:</b> Engaging social media captions.</li>
-            <li><b>Apology:</b> Polished customer resolution writing.</li>
-            <li><b>Sentiment:</b> Deep emotional feedback analysis.</li>
-            <li><b>Contracts & Agreements:</b> Service agreements, NDAs, subcontractor contracts, and more.</li>
-            <li><b>Policies & Compliance:</b> Refund, Warranty, Privacy, and Terms of Service policies.</li>
-            <li><b style={{ color: colors.poGreen }}>PO Generator:</b> Instant PDF Purchase Orders.</li>
-          </ul>
-        </div>
-      </section>
-    </>
-  </MarketingHome>
-)}
-
-
-
-    {/* ============================================================
-        SUBMIT IDEAS CTA
-       ============================================================ */}
-       
-    <div ref={formRef} style={{ width: "100%", maxWidth: 900 }}>
-      
-      {profile?.plan === "pro" && (
-  <Link to="/interest">
-    <button
+    {!user && (
+  <>
+  
+    {/* HERO SECTION */}
+    <section
       style={{
-        width: "100%",
-        padding: "12px",
-        background: "white",
-        color: colors.deepBlue,
-        border: `2px solid ${colors.deepBlue}`,
-        borderRadius: "8px",
-        fontWeight: "bold",
-        cursor: "pointer",
-        marginBottom: "20px"
+        maxWidth: 1000,
+        textAlign: "center",
+        padding: "60px 20px",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center"
       }}
     >
-      Interested in what the next features should be? I'd like to hear from you — submit your idea.
-    </button>
-  </Link>
+      <img
+        src={snapcopyLogo}
+        alt="SnapCopy Logo"
+        style={{
+          width: 180,
+          height: 180,
+          borderRadius: "50%",
+          marginBottom: 20
+        }}
+      />
+
+      <h1
+        style={{
+          fontSize: "48px",
+          fontWeight: "800",
+          background: "linear-gradient(to right, #860aa5, #390b64)",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          color: "transparent",
+          lineHeight: "1.4"
+        }}
+      >
+        The Complete AI Content Toolkit for Growing Businesses
+      </h1>
+
+      <p
+        style={{
+          color: "#4a5568",
+          fontSize: "18px",
+          marginTop: "14px",
+          maxWidth: "700px",
+          lineHeight: "1.6"
+        }}
+      >
+        From professional "About Us" bios to social media management and
+        sentiment analysis. SnapCopy is your all-in-one suite for high-impact
+        content.
+      </p>
+
+      <button
+        onClick={scrollToForm}
+        style={{
+          padding: "16px 32px",
+          background: colors.deepBlue,
+          color: "white",
+          border: "none",
+          borderRadius: "50px",
+          fontWeight: "bold",
+          fontSize: "18px",
+          cursor: "pointer",
+          marginTop: "30px",
+          boxShadow: "0 10px 20px rgba(134, 10, 165, 0.2)"
+        }}
+      >
+        Explore Tools
+      </button>
+    </section>
+
+    {/* TOOLKIT SECTION */}
+    <section
+      style={{
+        width: "100%",
+        maxWidth: 1000,
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+        gap: "40px",
+        padding: "40px 20px",
+        marginBottom: "40px"
+      }}
+    >
+      <div>
+        <h2 style={{ color: colors.purple, fontSize: "24px" }}>
+          The SnapCopy Toolkit
+        </h2>
+        <p style={{ color: "#4a5568", lineHeight: "1.6" }}>
+          We provide a growing ecosystem of AI tools designed for service
+          businesses. Whether you're building a brand bio or analyzing
+          customer feedback, we turn complex tasks into "Snaps."
+        </p>
+      </div>
+
+      <div
+        style={{
+          background: "white",
+          padding: "25px",
+          borderRadius: "15px",
+          boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
+          border: `1px solid ${colors.lightGray}`
+        }}
+      >
+        <h3
+          style={{
+            fontSize: "14px",
+            color: colors.deepBlue,
+            textTransform: "uppercase",
+            marginBottom: "15px"
+          }}
+        >
+          Current Capabilities
+        </h3>
+
+        <ul
+          style={{
+            color: "#4a5568",
+            fontSize: "15px",
+            paddingLeft: "20px",
+            lineHeight: "2"
+          }}
+        >
+          <li><b>About Us:</b> SEO-ready business bios.</li>
+          <li><b>Responder:</b> Engaging social media captions.</li>
+          <li><b>Apology:</b> Polished customer resolution writing.</li>
+          <li><b>Sentiment:</b> Deep emotional feedback analysis.</li>
+          <li><b>Contracts & Agreements:</b> Service agreements, NDAs, subcontractor contracts, and more.</li>
+          <li><b>Policies & Compliance:</b> Refund, Warranty, Privacy, and Terms of Service policies.</li>
+          <li><b style={{ color: colors.poGreen }}>PO Generator:</b> Instant PDF Purchase Orders.</li>
+        </ul>
+      </div>
+    </section>
+  </>
 )}
+
+</MarketingHome>
+<SnapWorkspace>
+
+  <div
+    ref={formRef}
+    style={{
+      width: "100%",
+      maxWidth: "900px",
+      margin: "0 auto",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center"
+    }}
+  >
+
+    {/* NAV BUTTONS */}
+    <nav
+      style={{
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        gap: "var(--space-3)",
+        marginBottom: "var(--space-6)",
+        alignItems: "center",
+        justifyContent: "center"
+      }}
+    >
+      {/* ROW 1 */}
+      <div
+        style={{
+          display: "flex",
+          gap: "10px",
+          flexWrap: "wrap",
+          justifyContent: "center",
+          width: "100%"
+        }}
+      >
+        {[
+          { key: "about", label: "About Us", color: colors.deepBlue },
+          { key: "responder", label: "Responder", color: colors.purple },
+          { key: "apology", label: "Apology", color: colors.orange },
+          { key: "sentiment", label: "Sentiment", color: colors.darkSlate }
+        ].map((btn) => (
+          <button
+            key={btn.key}
+            onClick={() => handleModeSwitch(btn.key)}
+            style={{
+              padding: "10px 18px",
+              borderRadius: "10px",
+              fontWeight: 600,
+              fontSize: "14px",
+              background:
+                mode === btn.key
+                  ? `linear-gradient(135deg, ${btn.color}, ${btn.color}CC)`
+                  : "rgba(255,255,255,0.15)",
+              color: "#7f8896",
+              border: "1px solid rgba(255,255,255,0.25)",
+              backdropFilter: "blur(6px)",
+              cursor: "pointer",
+              transition: "0.25s ease",
+              minWidth: "140px"
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.transform = "translateY(-2px)";
+              e.target.style.boxShadow = "0 6px 20px rgba(0,0,0,0.25)";
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.transform = "translateY(0)";
+              e.target.style.boxShadow = "none";
+            }}
+          >
+            {btn.label}
+          </button>
+        ))}
+      </div>
+
+      {/* ROW 2 */}
+      <div
+        style={{
+          display: "flex",
+          gap: "10px",
+          flexWrap: "wrap",
+          justifyContent: "center",
+          width: "100%"
+        }}
+      >
+        {[
+          { key: "po", label: "PO Generator", color: colors.poGreen },
+          { key: "estimator", label: "Job Estimator", color: colors.deepBlue },
+          { key: "contracts", label: "Contracts", color: colors.purple },
+          { key: "policies", label: "Policies", color: colors.orange }
+        ].map((btn) => (
+          <button
+            key={btn.key}
+            onClick={() => handleModeSwitch(btn.key)}
+            style={{
+              padding: "10px 18px",
+              borderRadius: "10px",
+              fontWeight: 600,
+              fontSize: "14px",
+              background:
+                mode === btn.key
+                  ? `linear-gradient(135deg, ${btn.color}, ${btn.color}CC)`
+                  : "rgba(255,255,255,0.15)",
+              color: "#7f8896",
+              border: "1px solid rgba(255,255,255,0.25)",
+              backdropFilter: "blur(6px)",
+              cursor: "pointer",
+              transition: "0.25s ease",
+              minWidth: "140px"
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.transform = "translateY(-2px)";
+              e.target.style.boxShadow = "0 6px 20px rgba(0,0,0,0.25)";
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.transform = "translateY(0)";
+              e.target.style.boxShadow = "none";
+            }}
+          >
+            {btn.label}
+          </button>
+        ))}
+      </div>
+    </nav>
+
+    {/* TOOL CONTENT */}
+    <div
+      style={{
+        background: "rgba(255, 255, 255, 0.12)",
+        backdropFilter: "blur(18px)",
+        WebkitBackdropFilter: "blur(18px)",
+        borderRadius: "24px",
+        padding: "var(--space-8)",
+        border: "1px solid rgba(255, 255, 255, 0.18)",
+        boxShadow: "0 20px 60px rgba(0, 0, 0, 0.25)",
+        width: "100%",
+        marginBottom: "var(--space-7)",
+        position: "relative",
+        zIndex: 2
+      }}
+    >
+      {/* your tool content goes here */}
+
           
-          
-
-        {/* NAV BUTTONS */}
-        <nav
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "10px",
-            marginBottom: "25px"
-          }}
-        >
-          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-            <button
-              onClick={() => handleModeSwitch("about")}
-              style={{
-                flex: 1,
-                minWidth: "120px",
-                padding: "12px",
-                background:
-                  mode === "about" ? colors.deepBlue : "#bda4c9",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                fontWeight: "600",
-                cursor: "pointer"
-              }}
-            >
-              About Us
-            </button>
-
-            <button
-              onClick={() => handleModeSwitch("responder")}
-              style={{
-                flex: 1,
-                minWidth: "120px",
-                padding: "12px",
-                background:
-                  mode === "responder" ? colors.purple : "#bda4c9",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                fontWeight: "600",
-                cursor: "pointer"
-              }}
-            >
-              Responder
-            </button>
-
-            <button
-              onClick={() => handleModeSwitch("apology")}
-              style={{
-                flex: 1,
-                minWidth: "120px",
-                padding: "12px",
-                background:
-                  mode === "apology" ? colors.orange : "#bda4c9",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                fontWeight: "600",
-                cursor: "pointer"
-              }}
-            >
-              Apology
-            </button>
-
-            <button
-              onClick={() => handleModeSwitch("sentiment")}
-              style={{
-                flex: 1,
-                minWidth: "120px",
-                padding: "12px",
-                background:
-                  mode === "sentiment" ? colors.darkSlate : "#bda4c9",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                fontWeight: "600",
-                cursor: "pointer"
-              }}
-            >
-              Sentiment
-            </button>
-          </div>
-
-          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-            <button
-              onClick={() => handleModeSwitch("po")}
-              style={{
-                flex: 1,
-                minWidth: "120px",
-                padding: "12px",
-                background:
-                  mode === "po" ? colors.poGreen : "#bda4c9",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                fontWeight: "600",
-                cursor: "pointer"
-              }}
-            >
-              PO Generator
-            </button>
-
-            <button
-              onClick={() => handleModeSwitch("estimator")}
-              style={{
-                flex: 1,
-                minWidth: "120px",
-                padding: "12px",
-                background:
-                mode === "estimator" ? colors.deepBlue : "#bda4c9",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                fontWeight: "600",
-                cursor: "pointer"
-              }}
-            >
-              Job Estimator
-            </button>
-
-            <button
-              onClick={() => handleModeSwitch("contracts")}
-              style={{
-                flex: 1,
-                minWidth: "120px",
-                padding: "12px",
-                background:
-                  mode === "contracts" ? colors.purple : "#bda4c9",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                fontWeight: "600",
-                cursor: "pointer"
-              }}
-            >
-              Contracts
-            </button>
-
-            <button
-              onClick={() => handleModeSwitch("policies")}
-              style={{
-                flex: 1,
-                minWidth: "120px",
-                padding: "12px",
-                background:
-                  mode === "policies" ? colors.orange : "#bda4c9",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                fontWeight: "600",
-                cursor: "pointer"
-              }}
-            >
-              Policies
-            </button>
-          </div>
-        </nav>
-
-        {/* TOOL CONTENT */}
-        <div
-          style={{
-            background: "white",
-            padding: "40px",
-            borderRadius: "20px",
-            boxShadow: "0 20px 40px rgba(0,0,0,0.1)",
-            border: `1px solid ${colors.lightGray}`,
-            marginBottom: "40px"
-          }}
-        >
           <header style={{ textAlign: "center", marginBottom: "30px" }}>
-            <h2 key={mode} style={{ 
-              fontSize: "28px", margin: 0, fontWeight: "800", display: "inline-block",
-              background: mode === "po" ? "linear-gradient(to right, #2d6a4f, #38a169)" : "linear-gradient(to right, #860aa5, #390b64)", 
-              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", color: "transparent" 
-            }}>
+            <h2
+    key={mode}
+    style={{
+      fontSize: "32px",
+      margin: 0,
+      fontWeight: "800",
+      letterSpacing: "-0.5px",
+      background:
+        mode === "po"
+          ? "linear-gradient(135deg, #2d6a4f, #38a169)"
+          : "linear-gradient(135deg, #7c3aed, #4c1d95)",
+      WebkitBackgroundClip: "text",
+      WebkitTextFillColor: "transparent",
+      color: "transparent",
+      display: "inline-block",
+      padding: "var(--space-2) var(--space-3)",
+      borderRadius: "12px",
+    }}>
               {mode === "about" ? "About Us Snap" : 
                mode === "responder" ? "Responder Snap" : 
                mode === "apology" ? "Apology Snap" : 
@@ -1689,18 +1652,7 @@ window.generateSnap = generate;
             </h2>
           </header>
 
-          <div style={{ ...instructionStyle, borderLeftColor: mode === "po" ? colors.poGreen : colors.deepBlue }}>
-            <strong>Instructions:</strong> {
-              mode === "about" ? "Tell us your industry, location, and experience level. We will generate a professional, SEO-optimized 'About Us' story that builds trust with your local customers." :
-              mode === "responder" ? "Choose your business type and a brand voice. We'll craft engaging social media captions, replies, or calls-to-action that resonate with your target audience." :
-              mode === "apology" ? "Select the specific issue and provide a brief summary of what happened. Our AI will draft a sincere, de-escalating response to help maintain your professional reputation." :
-              mode === "sentiment" ? "Paste raw customer reviews or comments below. We'll analyze the emotional tone and provide a summary of whether the feedback is positive, negative, or neutral." :
-              mode === "po" ? "Provide the SKU, vendor, and pricing details. We'll format this into a professional Purchase Order data structure ready to be exported as a high-quality PDF document." :
-              mode === "contracts" ? "Enter the details for both parties and the specific scope of work. We will generate a structured legal agreement tailored to your service or partnership needs." :
-              mode === "policies" ? "Specify the policy type and your business rules. We'll draft a comprehensive compliance document, such as a Privacy Policy or Terms of Service, for your operations." :
-              "Fill out the labor, materials, and fees. Our AI will help classify tasks and suggest a professional job summary for your customer."
-            }
-          </div>
+          
 
           {/* ==========================================
               1. RENDER SNAPS - TOOL-SPECIFIC INPUTS
@@ -1971,7 +1923,7 @@ window.generateSnap = generate;
               <div
                 style={{
                   background: "#f8fafc",
-                  padding: "20px",
+                  padding: "var(--space-5)",
                   borderRadius: "10px",
                   border: `1px solid ${colors.lightGray}`,
                   whiteSpace: "pre-wrap",
@@ -1984,17 +1936,23 @@ window.generateSnap = generate;
                 {output}
               </div>
             </div>
+            
           )}
         </div> {/* End of main white container card */}
+        </div>
+          </SnapWorkspace>
 
+
+
+          
         {/* FOOTER */}
-        <footer style={{ textAlign: "center", padding: "40px 0", borderTop: `1px solid ${colors.lightGray}` }}>
+        <footer style={{ textAlign: "center", padding: "50px 0", borderTop: `1px solid ${colors.lightGray}` }}>
           <img src={airStadtLogo} alt="AirStadt Logo" style={{ height: 40, opacity: 0.8, marginBottom: 15 }} />
           <p style={{ color: colors.footerText, fontSize: "14px" }}>
             &copy; {new Date().getFullYear()} SnapCopy by AirStadt. All rights reserved.
           </p>
         </footer>
-      </div>
+      
     </main>
   );
 }
