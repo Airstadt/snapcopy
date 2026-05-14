@@ -1351,7 +1351,7 @@ window.generateSnap = generate;
   
     {/* HERO SECTION */}
     {/* HERO SECTION */}
-<section className="fade-section"
+<section 
   style={{
     maxWidth: 1000,
     textAlign: "center",
@@ -1399,7 +1399,7 @@ window.generateSnap = generate;
 
   {/* CTA BUTTONS */}
   <div style={{ display: "flex", justifyContent: "center", gap: "16px" }}>
-    <button 
+    <button  className="fancy-card"
       onClick={scrollToForm}
       style={{
         padding: "14px 28px",
@@ -1424,7 +1424,7 @@ window.generateSnap = generate;
       Start Free — No Account Needed
     </button>
 
-    <button
+    <button className="fancy-card"
       style={{
         padding: "14px 28px",
         borderRadius: "10px",
@@ -1561,7 +1561,7 @@ window.generateSnap = generate;
     margin: "0 auto",
   }}
 >
-  <h2
+  <h2 
     style={{
       fontSize: "32px",
       fontWeight: "800",
@@ -1573,7 +1573,7 @@ window.generateSnap = generate;
     What You Can Create With SnapCopy
   </h2>
 
-  <div
+  <div 
     style={{
       display: "grid",
       gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
@@ -1581,7 +1581,7 @@ window.generateSnap = generate;
     }}
   >
     {/* About Us */}
-    <div
+    <div className="fancy-card"
       style={{
         background: "white",
         padding: "25px",
@@ -1599,7 +1599,7 @@ window.generateSnap = generate;
     </div>
 
     {/* Responder */}
-    <div
+    <div className="fancy-card"
       style={{
         background: "white",
         padding: "25px",
@@ -1617,7 +1617,7 @@ window.generateSnap = generate;
     </div>
 
     {/* Apology */}
-    <div
+    <div className="fancy-card"
       style={{
         background: "white",
         padding: "25px",
@@ -1635,7 +1635,7 @@ window.generateSnap = generate;
     </div>
 
     {/* Sentiment */}
-    <div
+    <div className="fancy-card"
       style={{
         background: "white",
         padding: "25px",
@@ -1648,12 +1648,12 @@ window.generateSnap = generate;
         Sentiment
       </h3>
       <p style={{ color: "#4b5563", marginTop: "10px", lineHeight: "1.6" }}>
-        Understand the tone and emotion behind customer messages instantly.
+        Paste a large block of comments or reviews and get a clear breakdown of positive, negative, and neutral sentiment.
       </p>
     </div>
 
     {/* PO Generator */}
-    <div
+    <div className="fancy-card"
       style={{
         background: "white",
         padding: "25px",
@@ -1671,7 +1671,7 @@ window.generateSnap = generate;
     </div>
 
     {/* Contracts */}
-    <div
+    <div className="fancy-card"
       style={{
         background: "white",
         padding: "25px",
@@ -1689,7 +1689,7 @@ window.generateSnap = generate;
     </div>
 
     {/* Policies */}
-    <div
+    <div className="fancy-card"
       style={{
         background: "white",
         padding: "25px",
@@ -2325,7 +2325,7 @@ window.generateSnap = generate;
       }}
     >
       {/* Step 1 */}
-      <div
+      <div className="fancy-card"
         style={{
           background: "white",
           padding: "25px",
@@ -2343,7 +2343,7 @@ window.generateSnap = generate;
       </div>
 
       {/* Step 2 */}
-      <div
+      <div className="fancy-card"
         style={{
           background: "white",
           padding: "25px",
@@ -2361,7 +2361,7 @@ window.generateSnap = generate;
       </div>
 
       {/* Step 3 */}
-      <div
+      <div className="fancy-card"
         style={{
           background: "white",
           padding: "25px",
@@ -2407,7 +2407,7 @@ window.generateSnap = generate;
     <div style={{ display: "flex", flexDirection: "column", gap: "25px" }}>
       
       {/* Q1 */}
-      <div
+      <div className="fancy-card"
         style={{
           background: "white",
           padding: "20px",
@@ -2425,7 +2425,7 @@ window.generateSnap = generate;
       </div>
 
       {/* Q2 */}
-      <div
+      <div className="fancy-card"
         style={{
           background: "white",
           padding: "20px",
@@ -2443,7 +2443,7 @@ window.generateSnap = generate;
       </div>
 
       {/* Q3 */}
-      <div
+      <div className="fancy-card"
         style={{
           background: "white",
           padding: "20px",
@@ -2461,7 +2461,7 @@ window.generateSnap = generate;
       </div>
 
       {/* Q4 */}
-      <div
+      <div className="fancy-card"
         style={{
           background: "white",
           padding: "20px",
@@ -2479,7 +2479,7 @@ window.generateSnap = generate;
       </div>
 
       {/* Q5 */}
-      <div
+      <div className="fancy-card"
         style={{
           background: "white",
           padding: "20px",
