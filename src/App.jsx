@@ -1707,8 +1707,136 @@ window.generateSnap = generate;
 )}
 
 </MarketingHome>
-<SnapWorkspace>
 
+
+{/* TESTIMONIAL SECTION — only show to public visitors */}
+{!user && (
+  <section
+    style={{
+      width: "100%",
+      maxWidth: 900,
+      padding: "60px 20px",
+      margin: "0 auto",
+      textAlign: "center"
+    }}
+  >
+    <h2
+      style={{
+        fontSize: "32px",
+        fontWeight: "800",
+        color: "#1f2937",
+        marginBottom: "40px"
+      }}
+    >
+      What People Are Saying
+    </h2>
+
+    <div
+      style={{
+        background: "white",
+        padding: "30px",
+        borderRadius: "15px",
+        boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
+        border: `1px solid ${colors.lightGray}`,
+        maxWidth: "700px",
+        margin: "0 auto"
+      }}
+    >
+      {/* Five Stars */}
+      <div style={{ marginBottom: "15px" }}>
+        {"★★★★★"}
+      </div>
+
+      <p
+        style={{
+          fontSize: "18px",
+          color: "#4b5563",
+          lineHeight: "1.6",
+          marginBottom: "20px"
+        }}
+      >
+        “This works great — straightforward instructions, targeted tasks, and clean responses. Need more!”
+      </p>
+
+      <h4
+        style={{
+          fontSize: "16px",
+          fontWeight: "700",
+          color: colors.deepBlue
+        }}
+      >
+        — Ric
+      </h4>
+    </div>
+  </section>
+)}
+
+{/* TRUSTED BY SECTION — only show to public visitors */}
+{!user && (
+  <section
+    style={{
+      width: "100%",
+      padding: "30px 20px",
+      margin: "0 auto",
+      textAlign: "center",
+      opacity: 0.9
+    }}
+  >
+    <p
+      style={{
+        fontSize: "18px",
+        color: "#4b5563",
+        fontWeight: "500",
+        marginBottom: "20px"
+      }}
+    >
+      Trusted by small business owners across the U.S.
+    </p>
+
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        gap: "40px",
+        flexWrap: "wrap",
+        marginTop: "10px"
+      }}
+    >
+      {/* Neutral placeholders — NOT logos */}
+      <div style={{
+        width: 60,
+        height: 30,
+        background: "#e5e7eb",
+        borderRadius: "6px"
+      }} />
+
+      <div style={{
+        width: 60,
+        height: 30,
+        background: "#e5e7eb",
+        borderRadius: "6px"
+      }} />
+
+      <div style={{
+        width: 60,
+        height: 30,
+        background: "#e5e7eb",
+        borderRadius: "6px"
+      }} />
+
+      <div style={{
+        width: 60,
+        height: 30,
+        background: "#e5e7eb",
+        borderRadius: "6px"
+      }} />
+    </div>
+  </section>
+)}
+
+
+
+<SnapWorkspace>
   <div
     ref={formRef}
     style={{
@@ -2172,13 +2300,12 @@ window.generateSnap = generate;
           </SnapWorkspace>
 
 
-{/* TESTIMONIAL SECTION */}
-{/* TESTIMONIAL SECTION — only show to public visitors */}
-{!user && (
+{/* HOW IT WORKS — only show to non‑subscribed users */}
+{(!user || !isSubscribed) && (
   <section
     style={{
       width: "100%",
-      maxWidth: 900,
+      maxWidth: 1100,
       padding: "60px 20px",
       margin: "0 auto",
       textAlign: "center"
@@ -2192,45 +2319,189 @@ window.generateSnap = generate;
         marginBottom: "40px"
       }}
     >
-      What People Are Saying
+      How SnapCopy Works
     </h2>
 
     <div
       style={{
-        background: "white",
-        padding: "30px",
-        borderRadius: "15px",
-        boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
-        border: `1px solid ${colors.lightGray}`,
-        maxWidth: "700px",
-        margin: "0 auto"
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+        gap: "30px",
+        marginTop: "20px"
       }}
     >
-      {/* Five Stars */}
-      <div style={{ marginBottom: "15px" }}>
-        {"★★★★★"}
+      {/* Step 1 */}
+      <div
+        style={{
+          background: "white",
+          padding: "25px",
+          borderRadius: "15px",
+          boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
+          border: `1px solid ${colors.lightGray}`
+        }}
+      >
+        <h3 style={{ fontSize: "22px", fontWeight: "700", color: colors.deepBlue }}>
+          1. Choose a Snap
+        </h3>
+        <p style={{ color: "#4b5563", marginTop: "10px", lineHeight: "1.6" }}>
+          Pick the writing tool you need — About Us, Responder, Apology, Policies, and more.
+        </p>
       </div>
 
-      <p
+      {/* Step 2 */}
+      <div
         style={{
-          fontSize: "18px",
-          color: "#4b5563",
-          lineHeight: "1.6",
-          marginBottom: "20px"
+          background: "white",
+          padding: "25px",
+          borderRadius: "15px",
+          boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
+          border: `1px solid ${colors.lightGray}`
         }}
       >
-        “This works great — straightforward instructions, targeted tasks, and clean responses. Need more!”
-      </p>
+        <h3 style={{ fontSize: "22px", fontWeight: "700", color: colors.purple }}>
+          2. Fill Out a Few Details
+        </h3>
+        <p style={{ color: "#4b5563", marginTop: "10px", lineHeight: "1.6" }}>
+          Enter the key information about your business or situation — nothing complicated.
+        </p>
+      </div>
 
-      <h4
+      {/* Step 3 */}
+      <div
         style={{
-          fontSize: "16px",
-          fontWeight: "700",
-          color: colors.deepBlue
+          background: "white",
+          padding: "25px",
+          borderRadius: "15px",
+          boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
+          border: `1px solid ${colors.lightGray}`
         }}
       >
-        — Ric
-      </h4>
+        <h3 style={{ fontSize: "22px", fontWeight: "700", color: colors.orange }}>
+          3. Generate Clean, Professional Writing
+        </h3>
+        <p style={{ color: "#4b5563", marginTop: "10px", lineHeight: "1.6" }}>
+          SnapCopy instantly creates polished, ready‑to‑use content you can copy, send, or save.
+        </p>
+      </div>
+    </div>
+  </section>
+)}
+
+
+{/* FAQ SECTION — only show to non‑subscribed users */}
+{(!user || !isSubscribed) && (
+  <section
+    style={{
+      width: "100%",
+      maxWidth: 900,
+      padding: "60px 20px",
+      margin: "0 auto",
+    }}
+  >
+    <h2
+      style={{
+        fontSize: "32px",
+        fontWeight: "800",
+        color: "#1f2937",
+        textAlign: "center",
+        marginBottom: "40px"
+      }}
+    >
+      Frequently Asked Questions
+    </h2>
+
+    <div style={{ display: "flex", flexDirection: "column", gap: "25px" }}>
+      
+      {/* Q1 */}
+      <div
+        style={{
+          background: "white",
+          padding: "20px",
+          borderRadius: "12px",
+          border: `1px solid ${colors.lightGray}`,
+          boxShadow: "0 6px 20px rgba(0,0,0,0.04)"
+        }}
+      >
+        <h3 style={{ fontSize: "18px", fontWeight: "700", color: colors.deepBlue }}>
+          Do I need an account to use SnapCopy?
+        </h3>
+        <p style={{ marginTop: "8px", color: "#4b5563", lineHeight: "1.6" }}>
+          Nope. You can generate Snaps instantly without creating an account. Accounts are only needed to save your Snaps or upgrade to Pro.
+        </p>
+      </div>
+
+      {/* Q2 */}
+      <div
+        style={{
+          background: "white",
+          padding: "20px",
+          borderRadius: "12px",
+          border: `1px solid ${colors.lightGray}`,
+          boxShadow: "0 6px 20px rgba(0,0,0,0.04)"
+        }}
+      >
+        <h3 style={{ fontSize: "18px", fontWeight: "700", color: colors.purple }}>
+          Is SnapCopy really free?
+        </h3>
+        <p style={{ marginTop: "8px", color: "#4b5563", lineHeight: "1.6" }}>
+          Yes. All core Snaps are free to use. SnapCopy Pro will offer advanced features, unlimited saves, and more.
+        </p>
+      </div>
+
+      {/* Q3 */}
+      <div
+        style={{
+          background: "white",
+          padding: "20px",
+          borderRadius: "12px",
+          border: `1px solid ${colors.lightGray}`,
+          boxShadow: "0 6px 20px rgba(0,0,0,0.04)"
+        }}
+      >
+        <h3 style={{ fontSize: "18px", fontWeight: "700", color: colors.orange }}>
+          What can I create with SnapCopy?
+        </h3>
+        <p style={{ marginTop: "8px", color: "#4b5563", lineHeight: "1.6" }}>
+          Business bios, customer replies, apologies, policies, contracts, purchase orders, sentiment analysis, and more.
+        </p>
+      </div>
+
+      {/* Q4 */}
+      <div
+        style={{
+          background: "white",
+          padding: "20px",
+          borderRadius: "12px",
+          border: `1px solid ${colors.lightGray}`,
+          boxShadow: "0 6px 20px rgba(0,0,0,0.04)"
+        }}
+      >
+        <h3 style={{ fontSize: "18px", fontWeight: "700", color: colors.darkSlate }}>
+          Who is SnapCopy for?
+        </h3>
+        <p style={{ marginTop: "8px", color: "#4b5563", lineHeight: "1.6" }}>
+          Small businesses, contractors, freelancers, and anyone who wants to look more professional without spending hours writing.
+        </p>
+      </div>
+
+      {/* Q5 */}
+      <div
+        style={{
+          background: "white",
+          padding: "20px",
+          borderRadius: "12px",
+          border: `1px solid ${colors.lightGray}`,
+          boxShadow: "0 6px 20px rgba(0,0,0,0.04)"
+        }}
+      >
+        <h3 style={{ fontSize: "18px", fontWeight: "700", color: colors.poGreen }}>
+          What is SnapCopy Pro?
+        </h3>
+        <p style={{ marginTop: "8px", color: "#4b5563", lineHeight: "1.6" }}>
+          A premium version coming soon with unlimited saves, advanced tools, and priority features.
+        </p>
+      </div>
+
     </div>
   </section>
 )}
@@ -2248,9 +2519,6 @@ window.generateSnap = generate;
     </main>
   );
 }
-
-
-
 
 
 import Layout from "./Layout";
