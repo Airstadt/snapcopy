@@ -1345,135 +1345,364 @@ window.generateSnap = generate;
   <>
   
     {/* HERO SECTION */}
-    <section
+    {/* HERO SECTION */}
+<section
+  style={{
+    maxWidth: 1000,
+    textAlign: "center",
+    padding: "60px 20px",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center"
+  }}
+>
+  <img
+    src={snapcopyLogo}
+    alt="SnapCopy Logo"
+    style={{
+      width: 180,
+      height: 180,
+      borderRadius: "50%",
+      marginBottom: 20
+    }}
+  />
+
+  <h1
+    style={{
+      fontSize: "42px",
+      fontWeight: "800",
+      color: "#1f2937",
+      marginBottom: "20px",
+      lineHeight: "1.2"
+    }}
+  >
+    Write better. Respond faster. Look more professional.
+  </h1>
+
+  <p
+    style={{
+      fontSize: "20px",
+      color: "#4b5563",
+      maxWidth: "700px",
+      margin: "0 auto 30px auto",
+      lineHeight: "1.5"
+    }}
+  >
+    Professional writing for the parts of your business you don’t have time to write.
+  </p>
+
+  {/* CTA BUTTONS */}
+  <div style={{ display: "flex", justifyContent: "center", gap: "16px" }}>
+    <button
+      onClick={scrollToForm}
       style={{
-        maxWidth: 1000,
-        textAlign: "center",
-        padding: "60px 20px",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center"
+        padding: "14px 28px",
+        borderRadius: "10px",
+        background: `linear-gradient(135deg, ${colors.deepBlue}, ${colors.deepBlue}CC)`,
+        color: "white",
+        fontSize: "16px",
+        fontWeight: "600",
+        border: "none",
+        cursor: "pointer",
+        transition: "0.25s ease"
+      }}
+      onMouseEnter={(e) => {
+        e.target.style.transform = "translateY(-2px)";
+        e.target.style.boxShadow = "0 6px 20px rgba(0,0,0,0.25)";
+      }}
+      onMouseLeave={(e) => {
+        e.target.style.transform = "translateY(0)";
+        e.target.style.boxShadow = "none";
       }}
     >
-      <img
-        src={snapcopyLogo}
-        alt="SnapCopy Logo"
-        style={{
-          width: 180,
-          height: 180,
-          borderRadius: "50%",
-          marginBottom: 20
-        }}
-      />
+      Start Free — No Account Needed
+    </button>
 
-      <h1
+    <button
+      style={{
+        padding: "14px 28px",
+        borderRadius: "10px",
+        background: "white",
+        border: "2px solid #d1d5db",
+        color: "#374151",
+        fontSize: "16px",
+        fontWeight: "600",
+        cursor: "pointer",
+        transition: "0.25s ease"
+      }}
+      onMouseEnter={(e) => {
+        e.target.style.background = "#f3f4f6";
+      }}
+      onMouseLeave={(e) => {
+        e.target.style.background = "white";
+      }}
+    >
+      See How It Works
+    </button>
+  </div>
+</section>
+
+
+{/* VALUE PROPOSITION SECTION */}
+<section
+  style={{
+    width: "100%",
+    maxWidth: 1000,
+    padding: "40px 20px",
+    margin: "0 auto",
+    textAlign: "center"
+  }}
+>
+  <h2
+    style={{
+      fontSize: "32px",
+      fontWeight: "800",
+      color: "#1f2937",
+      marginBottom: "30px"
+    }}
+  >
+    Why Businesses Choose SnapCopy
+  </h2>
+
+  <div
+    style={{
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+      gap: "30px",
+      marginTop: "20px"
+    }}
+  >
+    {/* 1. Save Hours */}
+    <div style={{ padding: "10px 20px" }}>
+      <h3
         style={{
-          fontSize: "48px",
-          fontWeight: "800",
-          background: "linear-gradient(to right, #860aa5, #390b64)",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          color: "transparent",
-          lineHeight: "1.4"
+          fontSize: "20px",
+          fontWeight: "700",
+          color: colors.deepBlue,
+          marginBottom: "10px"
         }}
       >
-        The Complete AI Content Toolkit for Growing Businesses
-      </h1>
-
-      <p
-        style={{
-          color: "#4a5568",
-          fontSize: "18px",
-          marginTop: "14px",
-          maxWidth: "700px",
-          lineHeight: "1.6"
-        }}
-      >
-        From professional "About Us" bios to social media management and
-        sentiment analysis. SnapCopy is your all-in-one suite for high-impact
-        content.
+        Save Hours Every Week
+      </h3>
+      <p style={{ color: "#4b5563", lineHeight: "1.6" }}>
+        Stop spending time writing emails, bios, policies, and customer replies.
+        SnapCopy handles the busywork so you can focus on the real work.
       </p>
+    </div>
 
-      <button
-        onClick={scrollToForm}
+    {/* 2. Look More Professional */}
+    <div style={{ padding: "10px 20px" }}>
+      <h3
         style={{
-          padding: "16px 32px",
-          background: colors.deepBlue,
-          color: "white",
-          border: "none",
-          borderRadius: "50px",
-          fontWeight: "bold",
-          fontSize: "18px",
-          cursor: "pointer",
-          marginTop: "30px",
-          boxShadow: "0 10px 20px rgba(134, 10, 165, 0.2)"
+          fontSize: "20px",
+          fontWeight: "700",
+          color: colors.purple,
+          marginBottom: "10px"
         }}
       >
-        Explore Tools
-      </button>
-    </section>
+        Look More Professional
+      </h3>
+      <p style={{ color: "#4b5563", lineHeight: "1.6" }}>
+        Every message, policy, and document comes out clean, confident, and
+        polished — even if writing isn’t your thing.
+      </p>
+    </div>
 
-    {/* TOOLKIT SECTION */}
-    <section
+    {/* 3. Win More Jobs */}
+    <div style={{ padding: "10px 20px" }}>
+      <h3
+        style={{
+          fontSize: "20px",
+          fontWeight: "700",
+          color: colors.orange,
+          marginBottom: "10px"
+        }}
+      >
+        Win More Jobs
+      </h3>
+      <p style={{ color: "#4b5563", lineHeight: "1.6" }}>
+        Better communication builds trust. Trust closes deals. SnapCopy helps
+        you sound sharp and stay ahead of competitors.
+      </p>
+    </div>
+
+    {/* 4. Tools That Grow With You */}
+    <div style={{ padding: "10px 20px" }}>
+      <h3
+        style={{
+          fontSize: "20px",
+          fontWeight: "700",
+          color: colors.darkSlate,
+          marginBottom: "10px"
+        }}
+      >
+        Tools That Grow With You
+      </h3>
+      <p style={{ color: "#4b5563", lineHeight: "1.6" }}>
+        From About Us pages to contracts and purchase orders, SnapCopy keeps
+        expanding to support your business as it grows.
+      </p>
+    </div>
+  </div>
+</section>
+
+{/* FEATURE GRID SECTION */}
+<section
+  style={{
+    width: "100%",
+    maxWidth: 1100,
+    padding: "60px 20px",
+    margin: "0 auto",
+  }}
+>
+  <h2
+    style={{
+      fontSize: "32px",
+      fontWeight: "800",
+      color: "#1f2937",
+      textAlign: "center",
+      marginBottom: "40px",
+    }}
+  >
+    What You Can Create With SnapCopy
+  </h2>
+
+  <div
+    style={{
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+      gap: "30px",
+    }}
+  >
+    {/* About Us */}
+    <div
       style={{
-        width: "100%",
-        maxWidth: 1000,
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-        gap: "40px",
-        padding: "40px 20px",
-        marginBottom: "40px"
+        background: "white",
+        padding: "25px",
+        borderRadius: "15px",
+        boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
+        border: `1px solid ${colors.lightGray}`,
       }}
     >
-      <div>
-        <h2 style={{ color: colors.purple, fontSize: "24px" }}>
-          The SnapCopy Toolkit
-        </h2>
-        <p style={{ color: "#4a5568", lineHeight: "1.6" }}>
-          We provide a growing ecosystem of AI tools designed for service
-          businesses. Whether you're building a brand bio or analyzing
-          customer feedback, we turn complex tasks into "Snaps."
-        </p>
-      </div>
+      <h3 style={{ fontSize: "20px", fontWeight: "700", color: colors.deepBlue }}>
+        About Us
+      </h3>
+      <p style={{ color: "#4b5563", marginTop: "10px", lineHeight: "1.6" }}>
+        Create clean, professional business bios that build trust and tell your story.
+      </p>
+    </div>
 
-      <div
-        style={{
-          background: "white",
-          padding: "25px",
-          borderRadius: "15px",
-          boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
-          border: `1px solid ${colors.lightGray}`
-        }}
-      >
-        <h3
-          style={{
-            fontSize: "14px",
-            color: colors.deepBlue,
-            textTransform: "uppercase",
-            marginBottom: "15px"
-          }}
-        >
-          Current Capabilities
-        </h3>
+    {/* Responder */}
+    <div
+      style={{
+        background: "white",
+        padding: "25px",
+        borderRadius: "15px",
+        boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
+        border: `1px solid ${colors.lightGray}`,
+      }}
+    >
+      <h3 style={{ fontSize: "20px", fontWeight: "700", color: colors.purple }}>
+        Responder
+      </h3>
+      <p style={{ color: "#4b5563", marginTop: "10px", lineHeight: "1.6" }}>
+        Write clear, confident replies for customers, clients, and social media.
+      </p>
+    </div>
 
-        <ul
-          style={{
-            color: "#4a5568",
-            fontSize: "15px",
-            paddingLeft: "20px",
-            lineHeight: "2"
-          }}
-        >
-          <li><b>About Us:</b> SEO-ready business bios.</li>
-          <li><b>Responder:</b> Engaging social media captions.</li>
-          <li><b>Apology:</b> Polished customer resolution writing.</li>
-          <li><b>Sentiment:</b> Deep emotional feedback analysis.</li>
-          <li><b>Contracts & Agreements:</b> Service agreements, NDAs, subcontractor contracts, and more.</li>
-          <li><b>Policies & Compliance:</b> Refund, Warranty, Privacy, and Terms of Service policies.</li>
-          <li><b style={{ color: colors.poGreen }}>PO Generator:</b> Instant PDF Purchase Orders.</li>
-        </ul>
-      </div>
-    </section>
+    {/* Apology */}
+    <div
+      style={{
+        background: "white",
+        padding: "25px",
+        borderRadius: "15px",
+        boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
+        border: `1px solid ${colors.lightGray}`,
+      }}
+    >
+      <h3 style={{ fontSize: "20px", fontWeight: "700", color: colors.orange }}>
+        Apology
+      </h3>
+      <p style={{ color: "#4b5563", marginTop: "10px", lineHeight: "1.6" }}>
+        Turn tough situations into professional, respectful resolutions.
+      </p>
+    </div>
+
+    {/* Sentiment */}
+    <div
+      style={{
+        background: "white",
+        padding: "25px",
+        borderRadius: "15px",
+        boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
+        border: `1px solid ${colors.lightGray}`,
+      }}
+    >
+      <h3 style={{ fontSize: "20px", fontWeight: "700", color: colors.darkSlate }}>
+        Sentiment
+      </h3>
+      <p style={{ color: "#4b5563", marginTop: "10px", lineHeight: "1.6" }}>
+        Understand the tone and emotion behind customer messages instantly.
+      </p>
+    </div>
+
+    {/* PO Generator */}
+    <div
+      style={{
+        background: "white",
+        padding: "25px",
+        borderRadius: "15px",
+        boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
+        border: `1px solid ${colors.lightGray}`,
+      }}
+    >
+      <h3 style={{ fontSize: "20px", fontWeight: "700", color: colors.poGreen }}>
+        PO Generator
+      </h3>
+      <p style={{ color: "#4b5563", marginTop: "10px", lineHeight: "1.6" }}>
+        Generate clean, ready-to-send purchase orders in seconds.
+      </p>
+    </div>
+
+    {/* Contracts */}
+    <div
+      style={{
+        background: "white",
+        padding: "25px",
+        borderRadius: "15px",
+        boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
+        border: `1px solid ${colors.lightGray}`,
+      }}
+    >
+      <h3 style={{ fontSize: "20px", fontWeight: "700", color: colors.deepBlue }}>
+        Contracts & Agreements
+      </h3>
+      <p style={{ color: "#4b5563", marginTop: "10px", lineHeight: "1.6" }}>
+        Service agreements, NDAs, subcontractor contracts, and more — all written clearly.
+      </p>
+    </div>
+
+    {/* Policies */}
+    <div
+      style={{
+        background: "white",
+        padding: "25px",
+        borderRadius: "15px",
+        boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
+        border: `1px solid ${colors.lightGray}`,
+      }}
+    >
+      <h3 style={{ fontSize: "20px", fontWeight: "700", color: colors.orange }}>
+        Policies & Compliance
+      </h3>
+      <p style={{ color: "#4b5563", marginTop: "10px", lineHeight: "1.6" }}>
+        Refund, warranty, privacy, and terms of service policies written professionally.
+      </p>
+    </div>
+  </div>
+</section>
+
+
   </>
 )}
 
@@ -1532,7 +1761,7 @@ window.generateSnap = generate;
                 mode === btn.key
                   ? `linear-gradient(135deg, ${btn.color}, ${btn.color}CC)`
                   : "rgba(255,255,255,0.15)",
-              color: "#7f8896",
+              color: "#374151",
               border: "1px solid rgba(255,255,255,0.25)",
               backdropFilter: "blur(6px)",
               cursor: "pointer",
