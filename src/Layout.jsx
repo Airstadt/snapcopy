@@ -46,19 +46,7 @@ export default function Layout({ children }) {
   </Link>
 )}
 
-        {/* ⭐ PRIORITY: Back to Dashboard on Profile page */}
-        {isProfilePage && user && (
-          <Link
-            to="/dashboard"
-            style={{
-              textDecoration: "none",
-              color: "#8a2be2",
-              fontWeight: "bold",
-            }}
-          >
-            Back to Dashboard
-          </Link>
-        )}
+        
 
         {/* Existing logic for other pages */}
         {!isDashboard && !isProfilePage && !user ? (

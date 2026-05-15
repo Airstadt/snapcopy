@@ -59,7 +59,7 @@ export default function ProfileSettings() {
       yearsInBusiness,
       businessAddress,
       businessPhone,
-      onboardingComplete: true, // ⭐ Marks onboarding as finished
+      onboardingComplete: true,
     });
 
     navigate("/dashboard");
@@ -82,9 +82,41 @@ export default function ProfileSettings() {
         style={{
           width: "100%",
           maxWidth: "600px",
+          color: "#333",
         }}
       >
-        <h1>Your Profile</h1>
+
+        {/* ⭐ Back to Dashboard */}
+        <button
+          onClick={() => navigate("/dashboard")}
+          style={{
+            padding: "10px 18px",
+            background: "#6c757d",
+            color: "white",
+            borderRadius: "8px",
+            cursor: "pointer",
+            border: "none",
+            fontSize: "14px",
+            marginBottom: "20px",
+            fontWeight: "500",
+            transition: "0.2s",
+          }}
+          onMouseOver={(e) => (e.target.style.background = "#5a6268")}
+          onMouseOut={(e) => (e.target.style.background = "#6c757d")}
+        >
+          ← Back to Dashboard
+        </button>
+
+        <h1
+          style={{
+            color: "#beb6d6",
+            fontWeight: "800",
+            marginBottom: "20px",
+            fontSize: "32px",
+          }}
+        >
+          Your Profile
+        </h1>
 
         <form
           onSubmit={handleSave}

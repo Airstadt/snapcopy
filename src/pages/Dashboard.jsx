@@ -222,8 +222,14 @@ export default function Dashboard() {
 
           <div style={overviewCard}>
             <h3 style={cardTitle}>⚡ Credits</h3>
-            <p style={cardValue}>{profile.credits}</p>
-          </div>
+
+            {/* Original dynamic credits (saved for future use) */}
+            {/* <p style={cardValue}>{profile.credits}</p> */}
+
+            {/* Temporary unlimited credits */}
+            <p style={cardValue}>Unlimited</p>
+        </div>
+
 
           <div style={overviewCard}>
             <h3 style={cardTitle}>📊 Snaps Created</h3>
