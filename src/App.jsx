@@ -1436,27 +1436,7 @@ window.generateSnap = generate;
       Start Free — No Login Required
     </button>
 
-    <button className="fancy-card"
-      style={{
-        padding: "16px 32px",
-        borderRadius: "12px",
-        background: "white",
-        border: "2px solid #d1d5db",
-        color: "#374151",
-        fontSize: "17px",
-        fontWeight: "700",
-        cursor: "pointer",
-        transition: "0.25s ease"
-      }}
-      onMouseEnter={(e) => {
-        e.target.style.background = "#f3f4f6";
-      }}
-      onMouseLeave={(e) => {
-        e.target.style.background = "white";
-      }}
-    >
-      See SnapCopy in Action
-    </button>
+    
   </div>
 </section>
 
