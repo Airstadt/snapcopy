@@ -314,7 +314,7 @@ function SectionCard({ title, color, children }) {
   );
 }
 
-function LabeledInput({ label, inputStyle, ...props }) {
+function LabeledInput({ label, inputStyle, onChange, ...props }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
       <label style={{ fontWeight: 600, fontSize: "13px", color: "#4a5568" }}>
@@ -322,6 +322,7 @@ function LabeledInput({ label, inputStyle, ...props }) {
       </label>
       <input
         {...props}
+        onChange={(e) => onChange(e.target.value)}
         style={{
           ...inputStyle,
           width: "100%",
@@ -333,7 +334,8 @@ function LabeledInput({ label, inputStyle, ...props }) {
   );
 }
 
-function LabeledSelect({ label, options, inputStyle, ...props }) {
+
+function LabeledSelect({ label, options, inputStyle, onChange, ...props }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
       <label style={{ fontWeight: 600, fontSize: "13px", color: "#4a5568" }}>
@@ -341,6 +343,7 @@ function LabeledSelect({ label, options, inputStyle, ...props }) {
       </label>
       <select
         {...props}
+        onChange={(e) => onChange(e.target.value)}
         style={{
           ...inputStyle,
           width: "100%",
@@ -356,6 +359,7 @@ function LabeledSelect({ label, options, inputStyle, ...props }) {
   );
 }
 
+
 function RemoveButton({ onClick, color }) {
   return (
     <button
@@ -365,15 +369,9 @@ function RemoveButton({ onClick, color }) {
         color: "white",
         border: "none",
         borderRadius: "6px",
-        padding: "4px 8px",
+        padding: "10px",
         cursor: "pointer",
-        fontSize: "14px",
-        width: "150px",
-        height: "32px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        lineHeight: 1
+        width: "100%"
       }}
     >
       ×
