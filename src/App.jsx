@@ -1940,9 +1940,9 @@ window.generateSnap = generate;
       >
         {[
           { key: "about", label: "About Us", color: colors.deepBlue },
-          { key: "responder", label: "Responder", color: colors.purple },
-          { key: "apology", label: "Apology", color: colors.orange },
-          { key: "sentiment", label: "Sentiment", color: colors.darkSlate }
+          { key: "responder", label: "Responder", color: colors.deepBlue },
+          { key: "apology", label: "Apology", color: colors.deepBlue },
+          { key: "sentiment", label: "Sentiment", color: colors.deepBlue }
         ].map((btn) => (
           <button
             key={btn.key}
@@ -1955,8 +1955,8 @@ window.generateSnap = generate;
               background:
                 mode === btn.key
                   ? `linear-gradient(135deg, ${btn.color}, ${btn.color}CC)`
-                  : "rgba(255,255,255,0.15)",
-              color: "#374151",
+                  : "rgba(17, 16, 16, 0.15)",
+              color: "#00040a",
               border: "1px solid rgba(255,255,255,0.25)",
               backdropFilter: "blur(6px)",
               cursor: "pointer",
@@ -1977,6 +1977,9 @@ window.generateSnap = generate;
         ))}
       </div>
 
+
+
+
       {/* ROW 2 */}
       <div
         style={{
@@ -1988,10 +1991,10 @@ window.generateSnap = generate;
         }}
       >
         {[
-          { key: "po", label: "PO Generator", color: colors.poGreen },
-          { key: "estimator", label: "Job Estimator", color: colors.deepBlue },
-          { key: "contracts", label: "Contracts", color: colors.purple },
-          { key: "policies", label: "Policies", color: colors.orange }
+          { key: "po", label: "PO Generator", color: colors.orange  },
+          { key: "estimator", label: "Job Estimator", color: colors.orange  },
+          { key: "contracts", label: "Contracts", color: colors.orange  },
+          { key: "policies", label: "Policies", color: colors.orange  }
         ].map((btn) => (
           <button
             key={btn.key}
@@ -2004,8 +2007,8 @@ window.generateSnap = generate;
               background:
                 mode === btn.key
                   ? `linear-gradient(135deg, ${btn.color}, ${btn.color}CC)`
-                  : "rgba(255,255,255,0.15)",
-              color: "#7f8896",
+                  : "rgba(17, 16, 16, 0.15)",
+              color: "#00040a",
               border: "1px solid rgba(255,255,255,0.25)",
               backdropFilter: "blur(6px)",
               cursor: "pointer",
@@ -2044,6 +2047,31 @@ window.generateSnap = generate;
       }}
     >
       {/* your tool content goes here */}
+<button
+  onClick={() => window.location.reload()}
+  style={{
+    marginTop: "10px",
+    padding: "10px 22px",
+    borderRadius: "10px",
+    fontWeight: 700,
+    fontSize: "14px",
+    background: "#ef4444",
+    color: "white",
+    border: "none",
+    cursor: "pointer",
+    transition: "0.25s ease",
+  }}
+  onMouseEnter={(e) => {
+    e.target.style.transform = "translateY(-2px)";
+    e.target.style.boxShadow = "0 6px 20px rgba(0,0,0,0.25)";
+  }}
+  onMouseLeave={(e) => {
+    e.target.style.transform = "translateY(0)";
+    e.target.style.boxShadow = "none";
+  }}
+>
+  Clear Form
+</button>
 
           
           <header style={{ textAlign: "center", marginBottom: "30px" }}>
