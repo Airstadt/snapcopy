@@ -1460,8 +1460,8 @@ window.generateSnap = generate;
 
 
 
-{/* TESTIMONIAL SECTION — only show to public visitors */}
-{!user && (
+{/* TESTIMONIAL SECTION — only show to public visitors & non‑Pro */}
+{profile?.plan !== "pro" && !user && (
   <section 
     style={{
       width: "100%",
@@ -1494,7 +1494,8 @@ window.generateSnap = generate;
     >
 
       {/* Ric */}
-      <div className="fancy-card"
+      <div
+        className="fancy-card"
         style={{
           background: "white",
           padding: "28px",
@@ -1531,7 +1532,8 @@ window.generateSnap = generate;
       </div>
 
       {/* Christa */}
-      <div className="fancy-card"
+      <div
+        className="fancy-card"
         style={{
           background: "white",
           padding: "28px",
@@ -1573,266 +1575,273 @@ window.generateSnap = generate;
 
 
 {/* VALUE PROPOSITION SECTION */}
-<section 
-  style={{
-    width: "100%",
-    maxWidth: 1000,
-    padding: "60px 20px",
-    margin: "0 auto",
-    textAlign: "center"
-  }}
->
-  <h2
+
+{profile?.plan !== "pro" && (
+  <section 
     style={{
-      fontSize: "36px",
-      fontWeight: "800",
-      color: "#1f2937",
-      marginBottom: "40px",
-      lineHeight: "1.2"
+      width: "100%",
+      maxWidth: 1000,
+      padding: "60px 20px",
+      margin: "0 auto",
+      textAlign: "center"
     }}
   >
-    What Makes SnapCopy Different
-  </h2>
+    <h2
+      style={{
+        fontSize: "36px",
+        fontWeight: "800",
+        color: "#1f2937",
+        marginBottom: "40px",
+        lineHeight: "1.2"
+      }}
+    >
+      What Makes SnapCopy Different
+    </h2>
 
-  <div
-    style={{
-      display: "grid",
-      gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-      gap: "40px",
-      marginTop: "20px"
-    }}
-  >
-    {/* 1. Save Hours */}
-    <div style={{ padding: "10px 20px" }}>
-      <h3
-        style={{
-          fontSize: "22px",
-          fontWeight: "700",
-          color: colors.deepBlue,
-          marginBottom: "12px"
-        }}
-      >
-        Save Hours Every Week
-      </h3>
-      <p style={{ color: "#4b5563", lineHeight: "1.65", fontSize: "16px" }}>
-        Stop wasting time writing emails, bios, policies, and customer replies.  
-        SnapCopy handles the writing so you can stay focused on running your business.
-      </p>
-    </div>
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+        gap: "40px",
+        marginTop: "20px"
+      }}
+    >
+      {/* 1. Save Hours */}
+      <div style={{ padding: "10px 20px" }}>
+        <h3
+          style={{
+            fontSize: "22px",
+            fontWeight: "700",
+            color: colors.deepBlue,
+            marginBottom: "12px"
+          }}
+        >
+          Save Hours Every Week
+        </h3>
+        <p style={{ color: "#4b5563", lineHeight: "1.65", fontSize: "16px" }}>
+          Stop wasting time writing emails, bios, policies, and customer replies.  
+          SnapCopy handles the writing so you can stay focused on running your business.
+        </p>
+      </div>
 
-    {/* 2. Look More Professional */}
-    <div style={{ padding: "10px 20px" }}>
-      <h3
-        style={{
-          fontSize: "22px",
-          fontWeight: "700",
-          color: colors.purple,
-          marginBottom: "12px"
-        }}
-      >
-        Look More Professional
-      </h3>
-      <p style={{ color: "#4b5563", lineHeight: "1.65", fontSize: "16px" }}>
-        Every message comes out clean, confident, and polished — even if writing isn’t your thing.
-      </p>
-    </div>
+      {/* 2. Look More Professional */}
+      <div style={{ padding: "10px 20px" }}>
+        <h3
+          style={{
+            fontSize: "22px",
+            fontWeight: "700",
+            color: colors.purple,
+            marginBottom: "12px"
+          }}
+        >
+          Look More Professional
+        </h3>
+        <p style={{ color: "#4b5563", lineHeight: "1.65", fontSize: "16px" }}>
+          Every message comes out clean, confident, and polished — even if writing isn’t your thing.
+        </p>
+      </div>
 
-    {/* 3. Win More Jobs */}
-    <div style={{ padding: "10px 20px" }}>
-      <h3
-        style={{
-          fontSize: "22px",
-          fontWeight: "700",
-          color: colors.orange,
-          marginBottom: "12px"
-        }}
-      >
-        Win More Jobs
-      </h3>
-      <p style={{ color: "#4b5563", lineHeight: "1.65", fontSize: "16px" }}>
-        Better communication builds trust. Trust closes deals.  
-        SnapCopy helps you sound sharp and stay ahead of competitors.
-      </p>
-    </div>
+      {/* 3. Win More Jobs */}
+      <div style={{ padding: "10px 20px" }}>
+        <h3
+          style={{
+            fontSize: "22px",
+            fontWeight: "700",
+            color: colors.orange,
+            marginBottom: "12px"
+          }}
+        >
+          Win More Jobs
+        </h3>
+        <p style={{ color: "#4b5563", lineHeight: "1.65", fontSize: "16px" }}>
+          Better communication builds trust. Trust closes deals.  
+          SnapCopy helps you sound sharp and stay ahead of competitors.
+        </p>
+      </div>
 
-    {/* 4. Tools That Grow With You */}
-    <div style={{ padding: "10px 20px" }}>
-      <h3
-        style={{
-          fontSize: "22px",
-          fontWeight: "700",
-          color: colors.darkSlate,
-          marginBottom: "12px"
-        }}
-      >
-        Tools That Grow With You
-      </h3>
-      <p style={{ color: "#4b5563", lineHeight: "1.65", fontSize: "16px" }}>
-        From About Us pages to contracts and purchase orders, SnapCopy keeps expanding  
-        to support your business as it grows.
-      </p>
+      {/* 4. Tools That Grow With You */}
+      <div style={{ padding: "10px 20px" }}>
+        <h3
+          style={{
+            fontSize: "22px",
+            fontWeight: "700",
+            color: colors.darkSlate,
+            marginBottom: "12px"
+          }}
+        >
+          Tools That Grow With You
+        </h3>
+        <p style={{ color: "#4b5563", lineHeight: "1.65", fontSize: "16px" }}>
+          From About Us pages to contracts and purchase orders, SnapCopy keeps expanding  
+          to support your business as it grows.
+        </p>
+      </div>
     </div>
-  </div>
-</section>
+  </section>
+)}
 {/* END VALUE PROPOSITION SECTION */}
 
+
 {/* FEATURE GRID SECTION */}
-<section 
-  style={{
-    width: "100%",
-    maxWidth: 1100,
-    padding: "70px 20px",
-    margin: "0 auto",
-  }}
->
-  <h2 
+{profile?.plan !== "pro" && (
+  <section 
     style={{
-      fontSize: "34px",
-      fontWeight: "800",
-      color: "#1f2937",
-      textAlign: "center",
-      marginBottom: "50px",
-      lineHeight: "1.2",
+      width: "100%",
+      maxWidth: 1100,
+      padding: "70px 20px",
+      margin: "0 auto",
     }}
   >
-    What You Can Create
-  </h2>
-
-  <div 
-    style={{
-      display: "grid",
-      gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-      gap: "35px",
-    }}
-  >
-    {/* About Us */}
-    <div className="fancy-card"
+    <h2 
       style={{
-        background: "white",
-        padding: "28px",
-        borderRadius: "14px",
-        boxShadow: "0 8px 24px rgba(0,0,0,0.06)",
-        border: `1px solid ${colors.lightGray}`,
+        fontSize: "34px",
+        fontWeight: "800",
+        color: "#1f2937",
+        textAlign: "center",
+        marginBottom: "50px",
+        lineHeight: "1.2",
       }}
     >
-      <h3 style={{ fontSize: "20px", fontWeight: "700", color: colors.deepBlue }}>
-        About Us
-      </h3>
-      <p style={{ color: "#4b5563", marginTop: "12px", lineHeight: "1.55" }}>
-        Clean, simple business bios that build trust.
-      </p>
-    </div>
+      What You Can Create
+    </h2>
 
-    {/* Responder */}
-    <div className="fancy-card"
+    <div 
       style={{
-        background: "white",
-        padding: "28px",
-        borderRadius: "14px",
-        boxShadow: "0 8px 24px rgba(0,0,0,0.06)",
-        border: `1px solid ${colors.lightGray}`,
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+        gap: "35px",
       }}
     >
-      <h3 style={{ fontSize: "20px", fontWeight: "700", color: colors.purple }}>
-        Responder
-      </h3>
-      <p style={{ color: "#4b5563", marginTop: "12px", lineHeight: "1.55" }}>
-        Fast, confident replies for customers and clients.
-      </p>
-    </div>
+      {/* About Us */}
+      <div className="fancy-card"
+        style={{
+          background: "white",
+          padding: "28px",
+          borderRadius: "14px",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.06)",
+          border: `1px solid ${colors.lightGray}`,
+        }}
+      >
+        <h3 style={{ fontSize: "20px", fontWeight: "700", color: colors.deepBlue }}>
+          About Us
+        </h3>
+        <p style={{ color: "#4b5563", marginTop: "12px", lineHeight: "1.55" }}>
+          Clean, simple business bios that build trust.
+        </p>
+      </div>
 
-    {/* Apology */}
-    <div className="fancy-card"
-      style={{
-        background: "white",
-        padding: "28px",
-        borderRadius: "14px",
-        boxShadow: "0 8px 24px rgba(0,0,0,0.06)",
-        border: `1px solid ${colors.lightGray}`,
-      }}
-    >
-      <h3 style={{ fontSize: "20px", fontWeight: "700", color: colors.orange }}>
-        Apology
-      </h3>
-      <p style={{ color: "#4b5563", marginTop: "12px", lineHeight: "1.55" }}>
-        Clear, respectful messages for tough situations.
-      </p>
-    </div>
+      {/* Responder */}
+      <div className="fancy-card"
+        style={{
+          background: "white",
+          padding: "28px",
+          borderRadius: "14px",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.06)",
+          border: `1px solid ${colors.lightGray}`,
+        }}
+      >
+        <h3 style={{ fontSize: "20px", fontWeight: "700", color: colors.purple }}>
+          Responder
+        </h3>
+        <p style={{ color: "#4b5563", marginTop: "12px", lineHeight: "1.55" }}>
+          Fast, confident replies for customers and clients.
+        </p>
+      </div>
 
-    {/* Sentiment */}
-    <div className="fancy-card"
-      style={{
-        background: "white",
-        padding: "28px",
-        borderRadius: "14px",
-        boxShadow: "0 8px 24px rgba(0,0,0,0.06)",
-        border: `1px solid ${colors.lightGray}`,
-      }}
-    >
-      <h3 style={{ fontSize: "20px", fontWeight: "700", color: colors.darkSlate }}>
-        Sentiment
-      </h3>
-      <p style={{ color: "#4b5563", marginTop: "12px", lineHeight: "1.55" }}>
-        Quick breakdowns of positive, negative, and neutral feedback.
-      </p>
-    </div>
+      {/* Apology */}
+      <div className="fancy-card"
+        style={{
+          background: "white",
+          padding: "28px",
+          borderRadius: "14px",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.06)",
+          border: `1px solid ${colors.lightGray}`,
+        }}
+      >
+        <h3 style={{ fontSize: "20px", fontWeight: "700", color: colors.orange }}>
+          Apology
+        </h3>
+        <p style={{ color: "#4b5563", marginTop: "12px", lineHeight: "1.55" }}>
+          Clear, respectful messages for tough situations.
+        </p>
+      </div>
 
-    {/* PO Generator */}
-    <div className="fancy-card"
-      style={{
-        background: "white",
-        padding: "28px",
-        borderRadius: "14px",
-        boxShadow: "0 8px 24px rgba(0,0,0,0.06)",
-        border: `1px solid ${colors.lightGray}`,
-      }}
-    >
-      <h3 style={{ fontSize: "20px", fontWeight: "700", color: colors.poGreen }}>
-        PO Generator
-      </h3>
-      <p style={{ color: "#4b5563", marginTop: "12px", lineHeight: "1.55" }}>
-        Ready‑to‑send purchase orders in seconds.
-      </p>
-    </div>
+      {/* Sentiment */}
+      <div className="fancy-card"
+        style={{
+          background: "white",
+          padding: "28px",
+          borderRadius: "14px",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.06)",
+          border: `1px solid ${colors.lightGray}`,
+        }}
+      >
+        <h3 style={{ fontSize: "20px", fontWeight: "700", color: colors.darkSlate }}>
+          Sentiment
+        </h3>
+        <p style={{ color: "#4b5563", marginTop: "12px", lineHeight: "1.55" }}>
+          Quick breakdowns of positive, negative, and neutral feedback.
+        </p>
+      </div>
 
-    {/* Contracts */}
-    <div className="fancy-card"
-      style={{
-        background: "white",
-        padding: "28px",
-        borderRadius: "14px",
-        boxShadow: "0 8px 24px rgba(0,0,0,0.06)",
-        border: `1px solid ${colors.lightGray}`,
-      }}
-    >
-      <h3 style={{ fontSize: "20px", fontWeight: "700", color: colors.deepBlue }}>
-        Contracts
-      </h3>
-      <p style={{ color: "#4b5563", marginTop: "12px", lineHeight: "1.55" }}>
-        Clear, simple agreements for everyday business.
-      </p>
-    </div>
+      {/* PO Generator */}
+      <div className="fancy-card"
+        style={{
+          background: "white",
+          padding: "28px",
+          borderRadius: "14px",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.06)",
+          border: `1px solid ${colors.lightGray}`,
+        }}
+      >
+        <h3 style={{ fontSize: "20px", fontWeight: "700", color: colors.poGreen }}>
+          PO Generator
+        </h3>
+        <p style={{ color: "#4b5563", marginTop: "12px", lineHeight: "1.55" }}>
+          Ready‑to‑send purchase orders in seconds.
+        </p>
+      </div>
 
-    {/* Policies */}
-    <div className="fancy-card"
-      style={{
-        background: "white",
-        padding: "28px",
-        borderRadius: "14px",
-        boxShadow: "0 8px 24px rgba(0,0,0,0.06)",
-        border: `1px solid ${colors.lightGray}`,
-      }}
-    >
-      <h3 style={{ fontSize: "20px", fontWeight: "700", color: colors.orange }}>
-        Policies
-      </h3>
-      <p style={{ color: "#4b5563", marginTop: "12px", lineHeight: "1.55" }}>
-        Refund, warranty, and compliance policies written professionally.
-      </p>
+      {/* Contracts */}
+      <div className="fancy-card"
+        style={{
+          background: "white",
+          padding: "28px",
+          borderRadius: "14px",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.06)",
+          border: `1px solid ${colors.lightGray}`,
+        }}
+      >
+        <h3 style={{ fontSize: "20px", fontWeight: "700", color: colors.deepBlue }}>
+          Contracts
+        </h3>
+        <p style={{ color: "#4b5563", marginTop: "12px", lineHeight: "1.55" }}>
+          Clear, simple agreements for everyday business.
+        </p>
+      </div>
+
+      {/* Policies */}
+      <div className="fancy-card"
+        style={{
+          background: "white",
+          padding: "28px",
+          borderRadius: "14px",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.06)",
+          border: `1px solid ${colors.lightGray}`,
+        }}
+      >
+        <h3 style={{ fontSize: "20px", fontWeight: "700", color: colors.orange }}>
+          Policies
+        </h3>
+        <p style={{ color: "#4b5563", marginTop: "12px", lineHeight: "1.55" }}>
+          Refund, warranty, and compliance policies written professionally.
+        </p>
+      </div>
     </div>
-  </div>
-</section>
+  </section>
+)}
 {/* END FEATURE GRID SECTION */}
+
 {/* TRUSTED BY SECTION — only show to public visitors 
 
 {!user && (
@@ -2371,95 +2380,12 @@ window.generateSnap = generate;
 
 
 {/* HOW IT WORKS — only show to non‑subscribed users */}
-{(!user || !isSubscribed) && (
-  <section
-    style={{
-      width: "100%",
-      maxWidth: 1100,
-      padding: "60px 20px",
-      margin: "0 auto",
-      textAlign: "center"
-    }}
-  >
-    <h2
-      style={{
-        fontSize: "32px",
-        fontWeight: "800",
-        color: "#1f2937",
-        marginBottom: "40px"
-      }}
-    >
-      How SnapCopy Works
-    </h2>
 
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-        gap: "30px",
-        marginTop: "20px"
-      }}
-    >
-      {/* Step 1 */}
-      <div className="fancy-card"
-        style={{
-          background: "white",
-          padding: "25px",
-          borderRadius: "15px",
-          boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
-          border: `1px solid ${colors.lightGray}`
-        }}
-      >
-        <h3 style={{ fontSize: "22px", fontWeight: "700", color: colors.deepBlue }}>
-          1. Choose a Snap
-        </h3>
-        <p style={{ color: "#4b5563", marginTop: "10px", lineHeight: "1.6" }}>
-          Pick the writing tool you need — About Us, Responder, Apology, Policies, and more.
-        </p>
-      </div>
-
-      {/* Step 2 */}
-      <div className="fancy-card"
-        style={{
-          background: "white",
-          padding: "25px",
-          borderRadius: "15px",
-          boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
-          border: `1px solid ${colors.lightGray}`
-        }}
-      >
-        <h3 style={{ fontSize: "22px", fontWeight: "700", color: colors.purple }}>
-          2. Fill Out a Few Details
-        </h3>
-        <p style={{ color: "#4b5563", marginTop: "10px", lineHeight: "1.6" }}>
-          Enter the key information about your business or situation — nothing complicated.
-        </p>
-      </div>
-
-      {/* Step 3 */}
-      <div className="fancy-card"
-        style={{
-          background: "white",
-          padding: "25px",
-          borderRadius: "15px",
-          boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
-          border: `1px solid ${colors.lightGray}`
-        }}
-      >
-        <h3 style={{ fontSize: "22px", fontWeight: "700", color: colors.orange }}>
-          3. Generate Clean, Professional Writing
-        </h3>
-        <p style={{ color: "#4b5563", marginTop: "10px", lineHeight: "1.6" }}>
-          SnapCopy instantly creates polished, ready‑to‑use content you can copy, send, or save.
-        </p>
-      </div>
-    </div>
-  </section>
-)}
 {/* END HOW IT WORKS — only show to non‑subscribed users */}
 
 {/* FAQ SECTION — only show to non‑subscribed users */}
-{(!user || !isSubscribed) && (
+
+  {profile?.plan !== "pro" && (
   <section
     style={{
       width: "100%",
@@ -2578,8 +2504,9 @@ window.generateSnap = generate;
 )}
 
 
+
 {/* FINAL CTA — only show to public (non‑subscribed) users */}
-{!user && (
+{profile?.plan !== "pro" && !user && (
   <section
     style={{
       width: "100%",
@@ -2713,6 +2640,11 @@ export default function App() {
           <Route
             path="/snaps/:id"
             element={<ProtectedRoute><SnapDetail /></ProtectedRoute>}
+          />
+
+          <Route
+            path="/settings"
+            element={<ProtectedRoute><SettingsHome /></ProtectedRoute>}
           />
         </Routes>
       </Layout>

@@ -32,6 +32,9 @@ export default function SnapDetail() {
   const [editingTitle, setEditingTitle] = useState(false);
   const [title, setTitle] = useState("");
 
+  // ⭐ NEW — editable output state
+  const [editedOutput, setEditedOutput] = useState("");
+
   // Load snap on mount
   useEffect(() => {
     const loadSnap = async () => {
@@ -45,6 +48,7 @@ export default function SnapDetail() {
         const data = snapDoc.data();
         setSnap(data);
         setTitle(data.title || "");
+        setEditedOutput(data.output || ""); // ⭐ initialize editable output
       } else {
         navigate("/mysnaps");
       }
@@ -54,6 +58,20 @@ export default function SnapDetail() {
 
     loadSnap();
   }, [id, navigate]);
+
+  // ⭐ NEW — Save edited output
+  const saveOutput = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    await updateDoc(doc(db, "users", user.uid, "snaps", id), {
+      output: editedOutput,
+      updatedAt: serverTimestamp()
+    });
+
+    setSnap((prev) => ({ ...prev, output: editedOutput }));
+    alert("Changes saved!");
+  };
 
   // Delete snap
   const handleDelete = async () => {
@@ -126,6 +144,7 @@ export default function SnapDetail() {
       });
 
       setSnap((prev) => ({ ...prev, output: newOutput }));
+      setEditedOutput(newOutput); // ⭐ keep editor in sync
     } catch (err) {
       console.error("Regenerate error:", err);
       alert("Failed to regenerate snap.");
@@ -133,7 +152,18 @@ export default function SnapDetail() {
   };
 
   if (loading) {
-    return <div style={{ padding: 40 }}>Loading snap...</div>;
+    return (
+      <div
+        style={{
+          padding: 40,
+          textAlign: "center",
+          fontSize: "18px",
+          color: "#6b7280"
+        }}
+      >
+        Loading snap…
+      </div>
+    );
   }
 
   // PDF Download Router
@@ -142,7 +172,7 @@ export default function SnapDetail() {
 
     const mode = snap.mode;
     const input = snap.input;
-    const output = snap.output;
+    const output = editedOutput; // ⭐ use edited version
 
     switch (mode) {
       case "about":
@@ -175,34 +205,48 @@ export default function SnapDetail() {
   };
 
   return (
-    <div style={{ padding: 40, maxWidth: 900, margin: "0 auto" }}>
+    <div
+      style={{
+        padding: "40px 20px",
+        maxWidth: 900,
+        margin: "0 auto",
+        animation: "fadePage 0.6s ease"
+      }}
+    >
+      {/* Back Button */}
       <button
         onClick={() => navigate("/mysnaps")}
         style={{
-          marginBottom: 20,
-          padding: "8px 16px",
-          background: "#6c757d",
+          marginBottom: 25,
+          padding: "10px 18px",
+          background: "#4b5563",
           color: "white",
-          borderRadius: 6,
-          cursor: "pointer"
+          borderRadius: 8,
+          cursor: "pointer",
+          border: "none",
+          fontSize: "15px",
+          transition: "0.25s ease"
         }}
+        onMouseEnter={(e) => (e.target.style.opacity = "0.85")}
+        onMouseLeave={(e) => (e.target.style.opacity = "1")}
       >
         ← Back to My Snaps
       </button>
 
       {/* Editable Title */}
       {editingTitle ? (
-        <div style={{ marginBottom: 20 }}>
+        <div style={{ marginBottom: 25 }}>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             autoFocus
             style={{
-              fontSize: "28px",
-              padding: "8px",
+              fontSize: "30px",
+              padding: "10px",
               width: "100%",
-              border: "1px solid #ccc",
-              borderRadius: 6
+              border: "1px solid #d1d5db",
+              borderRadius: 8,
+              marginBottom: 10
             }}
           />
 
@@ -215,12 +259,13 @@ export default function SnapDetail() {
               setEditingTitle(false);
             }}
             style={{
-              marginTop: 10,
-              padding: "8px 16px",
-              background: "#4a5568",
+              padding: "10px 18px",
+              background: "#4b2aad",
               color: "white",
-              borderRadius: 6,
-              cursor: "pointer"
+              borderRadius: 8,
+              cursor: "pointer",
+              border: "none",
+              fontSize: "15px"
             }}
           >
             Save Title
@@ -229,47 +274,81 @@ export default function SnapDetail() {
       ) : (
         <h1
           onClick={() => setEditingTitle(true)}
-          style={{ cursor: "pointer", marginBottom: 20 }}
+          style={{
+            cursor: "pointer",
+            marginBottom: 10,
+            fontSize: "32px",
+            fontWeight: "800",
+            color: "#d2d8e0"
+          }}
           title="Click to edit title"
         >
           {title || "Untitled Snap"}
         </h1>
       )}
 
-      <p style={{ opacity: 0.7 }}>{snap.mode}</p>
+      <p style={{ opacity: 0.7, marginBottom: 20, fontSize: "15px" }}>
+        {snap.mode}
+      </p>
 
-      <div
+      {/* ⭐ Editable Output Box */}
+      <textarea
+        value={editedOutput}
+        onChange={(e) => setEditedOutput(e.target.value)}
         style={{
-          marginTop: 20,
-          padding: 20,
+          marginTop: 10,
+          padding: "24px",
           background: "white",
-          borderRadius: 8,
-          border: "1px solid #e2e8f0",
+          borderRadius: 12,
+          border: "1px solid #e5e7eb",
+          boxShadow: "0 6px 20px rgba(0,0,0,0.06)",
+          width: "100%",
+          minHeight: "300px",
+          fontSize: "16px",
+          lineHeight: 1.65,
           whiteSpace: "pre-wrap",
-          lineHeight: 1.6
+          fontFamily: "inherit",
+          resize: "vertical",
+          color: "#374151"
         }}
-      >
-        {snap.output}
-      </div>
+      />
 
       {/* ACTION BUTTON ROW */}
       <div
         style={{
           display: "flex",
-          gap: "10px",
-          marginTop: 20,
+          gap: "12px",
+          marginTop: 25,
           flexWrap: "wrap"
         }}
       >
+        {/* ⭐ Save Changes */}
+        <button
+          onClick={saveOutput}
+          style={{
+            padding: "12px 20px",
+            background: "#4b2aad",
+            color: "white",
+            borderRadius: 8,
+            cursor: "pointer",
+            border: "none",
+            fontSize: "15px"
+          }}
+        >
+          Save Changes
+        </button>
+
         {/* Regenerate */}
         <button
           onClick={regenerateSnap}
           style={{
-            padding: "10px 20px",
+            padding: "12px 20px",
             background: "#0d6efd",
             color: "white",
-            borderRadius: 6,
-            cursor: "pointer"
+            borderRadius: 8,
+            cursor: "pointer",
+            border: "none",
+            fontSize: "15px"
           }}
         >
           Regenerate Snap
@@ -279,11 +358,13 @@ export default function SnapDetail() {
         <button
           onClick={duplicateSnap}
           style={{
-            padding: "10px 20px",
-            background: "#4a5568",
+            padding: "12px 20px",
+            background: "#4b5563",
             color: "white",
-            borderRadius: 6,
-            cursor: "pointer"
+            borderRadius: 8,
+            cursor: "pointer",
+            border: "none",
+            fontSize: "15px"
           }}
         >
           Duplicate Snap
@@ -293,11 +374,13 @@ export default function SnapDetail() {
         <button
           onClick={handleDelete}
           style={{
-            padding: "10px 20px",
+            padding: "12px 20px",
             background: "#dc3545",
             color: "white",
-            borderRadius: 6,
-            cursor: "pointer"
+            borderRadius: 8,
+            cursor: "pointer",
+            border: "none",
+            fontSize: "15px"
           }}
         >
           Delete Snap
@@ -307,11 +390,13 @@ export default function SnapDetail() {
         <button
           onClick={downloadPDF}
           style={{
-            padding: "10px 20px",
+            padding: "12px 20px",
             background: "#198754",
             color: "white",
-            borderRadius: 6,
-            cursor: "pointer"
+            borderRadius: 8,
+            cursor: "pointer",
+            border: "none",
+            fontSize: "15px"
           }}
         >
           Download PDF

@@ -70,11 +70,7 @@ function Auth() {
       const profile = snap.exists() ? snap.data() : { plan: "free" };
 
       // Redirect based on plan
-      if (profile.plan === "pro") {
-        navigate("/dashboard");
-      } else {
-        navigate(redirectPath || "/upgrade");
-      }
+      navigate("/dashboard");
 
       setCheckingProfile(false);
     });
