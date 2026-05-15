@@ -222,6 +222,7 @@ const handlePoliciesDownload = () => {
   const fileName = `${businessName.replace(/\s+/g, '_')}_${policyType.replace(/\s+/g, '_')}.pdf`;
   doc.save(fileName);
 };
+//-------------------------------------------end Policies pdf download handler-----------------------------------//
 //--------------------------------------------about us ------------------------------------------//
 const handleAboutDownload = () => {
   const doc = new jsPDF();
@@ -367,6 +368,9 @@ const handleResponderDownload = () => {
 
   doc.save(`${businessName || "Social"}_Response.pdf`);
 };
+
+
+
 //---------------------------------------end of policies pdf download handler-----------------------------------//
 //----------------------------------------sentiment--------------------------------------------------------------//
 // 5. SENTIMENT ANALYSIS HANDLER

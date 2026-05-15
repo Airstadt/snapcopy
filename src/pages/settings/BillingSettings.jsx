@@ -61,6 +61,28 @@ export default function BillingSettings() {
         margin: "0 auto"
       }}
     >
+
+      {/* ⭐ Back to Dashboard (moved above title) */}
+      <button
+        onClick={() => navigate("/dashboard")}
+        style={{
+          padding: "10px 18px",
+          background: "#6c757d",
+          color: "white",
+          borderRadius: 8,
+          cursor: "pointer",
+          border: "none",
+          fontSize: "14px",
+          marginBottom: "20px",
+          fontWeight: "500",
+          transition: "0.2s"
+        }}
+        onMouseOver={(e) => (e.target.style.background = "#5a6268")}
+        onMouseOut={(e) => (e.target.style.background = "#6c757d")}
+      >
+        ← Back to Dashboard
+      </button>
+
       <h1
         style={{
           fontSize: "34px",
@@ -71,26 +93,6 @@ export default function BillingSettings() {
       >
         Billing & Subscription
       </h1>
-
-        <button
-          onClick={() => navigate("/dashboard")}
-          style={{
-            padding: "10px 18px",
-            background: "#6c757d",
-            color: "white",
-            borderRadius: 8,
-            cursor: "pointer",
-            border: "none",
-            fontSize: "14px",
-            marginBottom: "20px",
-            fontWeight: "500",
-            transition: "0.2s"
-          }}
-          onMouseOver={(e) => (e.target.style.background = "#5a6268")}
-          onMouseOut={(e) => (e.target.style.background = "#6c757d")}
-        >
-          ← Back to Dashboard
-        </button>
 
       <div
         style={{
