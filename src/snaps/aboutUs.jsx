@@ -52,7 +52,7 @@ const AboutUs = ({
         type="text"
         value={companyName}
         onChange={(e) => setCompanyName(e.target.value)}
-        placeholder="e.g. Ric's Tech Solutions"
+        placeholder="e.g. Plumbers Inc."
         style={inputStyle}
       />
 
@@ -74,7 +74,7 @@ const AboutUs = ({
         type="text"
         value={city}
         onChange={(e) => setCity(e.target.value)}
-        placeholder="e.g. Mechanicsville, VA"
+        placeholder="e.g. Virginia Beach, VA"
         style={inputStyle}
       />
 
