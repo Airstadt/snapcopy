@@ -118,7 +118,7 @@ export default function ProfileSettings() {
               type="text"
               value={businessName}
               onChange={(e) => setBusinessName(e.target.value)}
-              placeholder="e.g. Ric’s Tech Solutions"
+              placeholder="e.g. John Doe's Plumbing Inc."
               style={inputStyle}
             />
           </label>
