@@ -58,6 +58,10 @@ function HomePage() {
   const [issueType, setIssueType] = useState("");
   const [apologyContext, setApologyContext] = useState("");
   const [rawComments, setRawComments] = useState("");
+
+  const [policyType, setPolicyType] = useState("");
+  const [details, setDetails] = useState("");
+  const [businessName, setBusinessName] = useState("");
   const { user, profile } = useAuth();
 
   const [contractType, setContractType] = useState("");
