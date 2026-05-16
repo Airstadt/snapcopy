@@ -1670,6 +1670,32 @@ window.generateSnap = generate;
 )}
 {/* END VALUE PROPOSITION SECTION */}
 
+<section 
+  id="demo"
+  className="w-full min-h-screen flex items-center justify-center bg-[#0d0d0d] px-6"
+>
+  <div className="max-w-4xl w-full text-center">
+    
+    <h2 className="text-4xl font-semibold text-white mb-4">
+      See SnapCopy in Action
+    </h2>
+
+    <p className="text-gray-300 text-lg mb-10">
+      A 45‑second demo showing how fast you can generate professional business content.
+    </p>
+
+    <div className="relative w-full aspect-video rounded-xl overflow-hidden shadow-2xl border border-white/10 bg-black">
+      {/* Replace src with your video URL */}
+      <video 
+        src="/demo.mp4"
+        controls
+        className="w-full h-full object-cover"
+      />
+    </div>
+
+  </div>
+</section>
+
 
 {/* FEATURE GRID SECTION */}
 {profile?.plan !== "pro" && (
