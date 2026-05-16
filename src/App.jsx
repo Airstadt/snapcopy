@@ -43,7 +43,7 @@ import "jspdf-autotable";
 function HomePage() {
   // --- STATE MANAGEMENT ---
   const navigate = useNavigate();
-
+  const [companyName, setCompanyName] = useState("");
   const [mode, setMode] = useState("about");
   const [industry, setIndustry] = useState("");
   const [city, setCity] = useState("");
@@ -1172,6 +1172,7 @@ async function generate() {
         }
       : {
           mode,
+          companyName,
           industry,
           city,
           years,
@@ -2113,23 +2114,24 @@ window.generateSnap = generate;
           {/* About Us Snap */}
           {mode === "about" && (
             <AboutUs
-              industry={industry}
-              setIndustry={setIndustry}
-              city={city}
-              setCity={setCity}
-              years={years}
-              setYears={setYears}
-              businessType={businessType}
-              setBusinessType={setBusinessType}
-              customBusinessType={customBusinessType}
-              setCustomBusinessType={setCustomBusinessType}
-              tone={tone}
-              setTone={setTone}
-              description={aboutDescription}          // ← NEW
-              setDescription={setAboutDescription}    // ← NEW
-              inputStyle={inputStyle}
-              
-            />
+            companyName={companyName}
+            setCompanyName={setCompanyName}
+            industry={industry}
+            setIndustry={setIndustry}
+            city={city}
+            setCity={setCity}
+            years={years}
+            setYears={setYears}
+            businessType={businessType}
+            setBusinessType={setBusinessType}
+            customBusinessType={customBusinessType}
+            setCustomBusinessType={setCustomBusinessType}
+            tone={tone}
+            setTone={setTone}
+            description={aboutDescription}
+            setDescription={setAboutDescription}
+            inputStyle={inputStyle}
+          />
           )}
 
           {/* Responder Snap */}

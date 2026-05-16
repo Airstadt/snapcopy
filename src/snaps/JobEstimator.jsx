@@ -369,9 +369,15 @@ function RemoveButton({ onClick, color }) {
         color: "white",
         border: "none",
         borderRadius: "6px",
-        padding: "10px",
+        padding: "4px 8px",
         cursor: "pointer",
-        width: "100%"
+        fontSize: "14px",
+        width: "100px",
+        height: "32px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        lineHeight: 1
       }}
     >
       ×
