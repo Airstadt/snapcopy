@@ -1670,31 +1670,47 @@ window.generateSnap = generate;
 )}
 {/* END VALUE PROPOSITION SECTION */}
 
-<section 
-  id="demo"
-  className="w-full min-h-screen flex items-center justify-center bg-[#0d0d0d] px-6"
->
+{/* VIDEO DEMO SECTION */}
+<section id="demo" className="w-full min-h-screen flex items-center justify-center bg-[#0d0d0d] px-6 py-20">
   <div className="max-w-4xl w-full text-center">
-    
-    <h2 className="text-4xl font-semibold text-white mb-4">
+    <h2 className="text-4xl font-semibold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent mb-4">
       See SnapCopy in Action
     </h2>
-
     <p className="text-gray-300 text-lg mb-10">
-      A 45‑second demo showing how fast you can generate professional business content.
+      A 32‑second demo showing how fast you can generate professional content.
     </p>
 
-    <div className="relative w-full aspect-video rounded-xl overflow-hidden shadow-2xl border border-white/10 bg-black">
-      {/* Replace src with your video URL */}
-      <video 
-        src="/demo.mp4"
+    {/* Video Container: inline styles force 50% of viewport, capped at 576px (max-w-xl) */}
+    <div
+      style={{
+        width: '75vw',
+        maxWidth: '960px',
+        margin: '0 auto',
+        aspectRatio: '16/9',
+        borderRadius: '0.75rem',
+        overflow: 'hidden',
+        boxShadow: '0 25px 50px rgba(0,0,0,0.6)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        background: '#000'
+      }}
+    >
+      <video
+        src="/snapcopy demo aboutus.mp4"
         controls
-        className="w-full h-full object-cover"
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'block',
+          objectFit: 'cover'
+        }}
       />
     </div>
-
   </div>
 </section>
+{/* END VIDEO DEMO SECTION */}
+
+
+
 
 
 {/* FEATURE GRID SECTION */}
