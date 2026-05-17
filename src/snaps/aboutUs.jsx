@@ -1,36 +1,64 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { auth } from "../firebase";
 
-const AboutUs = ({ 
-  colors, 
-  inputStyle, 
-  companyName,      // Added prop
-  setCompanyName,   // Added prop
-  industry, 
-  setIndustry, 
-  city, 
-  setCity, 
-  years, 
-  setYears, 
-  businessType, 
-  setBusinessType, 
-  customBusinessType, 
-  setCustomBusinessType, 
-  description, 
-  setDescription 
+const AboutUs = ({
+  colors,
+  inputStyle,
+  companyName,
+  setCompanyName,
+  industry,
+  setIndustry,
+  city,
+  setCity,
+  years,
+  setYears,
+  businessType,
+  setBusinessType,
+  customBusinessType,
+  setCustomBusinessType,
+  description,
+  setDescription
 }) => {
+  const [user, setUser] = useState(null);
+
+  // Safe Firebase auth listener
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((u) => {
+      setUser(u);
+    });
+    return unsubscribe;
+  }, []);
+
   return (
     <>
-      {/* New Company Name Field */}
-      <label style={{ fontSize: "14px", fontWeight: "600", color: "#4a5568" }}>Company Name</label>
+      {/* PUBLIC MARKETING CONTENT — only show when NOT logged in */}
+      {!user && (
+        <>
+          <p style={{ marginBottom: "20px", color: "#4a5568" }}>
+            Tell us your industry, location, and experience level. We will generate a
+            professional, SEO‑optimized “About Us” story that builds trust with your
+            local customers.
+          </p>
+
+          
+        </>
+      )}
+
+      {/* FORM FIELDS — unchanged, still controlled by App.jsx */}
+      <label style={{ fontSize: "14px", fontWeight: "600", color: "#4a5568" }}>
+        Company Name
+      </label>
       <input
         type="text"
         value={companyName}
         onChange={(e) => setCompanyName(e.target.value)}
-        placeholder="e.g. Ric's Tech Solutions"
+        placeholder="e.g. Plumbers Inc."
         style={inputStyle}
       />
 
-      <label style={{ fontSize: "14px", fontWeight: "600", color: "#4a5568" }}>Industry</label>
+      <label style={{ fontSize: "14px", fontWeight: "600", color: "#4a5568" }}>
+        Industry
+      </label>
       <input
         type="text"
         value={industry}
@@ -39,16 +67,20 @@ const AboutUs = ({
         style={inputStyle}
       />
 
-      <label style={{ fontSize: "14px", fontWeight: "600", color: "#4a5568" }}>City/Service Area</label>
+      <label style={{ fontSize: "14px", fontWeight: "600", color: "#4a5568" }}>
+        City/Service Area
+      </label>
       <input
         type="text"
         value={city}
         onChange={(e) => setCity(e.target.value)}
-        placeholder="e.g. Mechanicsville, VA"
+        placeholder="e.g. Virginia Beach, VA"
         style={inputStyle}
       />
 
-      <label style={{ fontSize: "14px", fontWeight: "600", color: "#4a5568" }}>Years in Business</label>
+      <label style={{ fontSize: "14px", fontWeight: "600", color: "#4a5568" }}>
+        Years in Business
+      </label>
       <input
         type="number"
         value={years}
@@ -57,7 +89,9 @@ const AboutUs = ({
         style={inputStyle}
       />
 
-      <label style={{ fontSize: "14px", fontWeight: "600", color: "#4a5568" }}>Business Type</label>
+      <label style={{ fontSize: "14px", fontWeight: "600", color: "#4a5568" }}>
+        Business Type
+      </label>
       <select
         value={businessType}
         onChange={(e) => setBusinessType(e.target.value)}
@@ -82,7 +116,9 @@ const AboutUs = ({
         />
       )}
 
-      <label style={{ fontSize: "14px", fontWeight: "600", color: "#4a5568" }}>Key Selling Points / Description</label>
+      <label style={{ fontSize: "14px", fontWeight: "600", color: "#4a5568" }}>
+        Key Selling Points / Description
+      </label>
       <textarea
         value={description}
         onChange={(e) => setDescription(e.target.value)}

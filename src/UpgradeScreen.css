@@ -1,0 +1,35 @@
+/* Page fade-in */
+@keyframes fadePage {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Hero float-up */
+@keyframes floatUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Benefits slide-up */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ⭐ Continuous Glow Effect */
+@keyframes pulseGlow {
+  0% { box-shadow: 0 0 0px rgba(138,43,226,0.4); }
+  50% { box-shadow: 0 0 22px rgba(65, 9, 117, 0.9); }
+  100% { box-shadow: 0 0 0px rgba(138,43,226,0.4); }
+}
+
+/* Apply glow to button */
+.glowButton {
+  animation: pulseGlow 2.4s infinite ease-in-out;
+}
+
+.glowHero {
+  animation: pulseGlow 3s infinite ease-in-out;
+  border-radius: 20px;
+  box-shadow: 0 10px 28px rgba(221, 4, 4, 0.18); /* moved from inline */
+}

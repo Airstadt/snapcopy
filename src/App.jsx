@@ -1,14 +1,33 @@
-import { useSearchParams } from "react-router-dom";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Link, useSearchParams } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
+import { auth } from "./firebase";
 import { jsPDF } from "jspdf";
+import { db } from "./firebase";
+import { doc, setDoc, collection, serverTimestamp } from "firebase/firestore";
+import { useAuth } from "./hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+import UpgradeScreen from "./UpgradeScreen";
+
+
+
 
 import snapcopyLogo from "./assets/snapcopyLogo.png";
 import airStadtLogo from "./assets/AirStadtLogo.png";
 
-import InterestForm from "./pages/InterestForm";
+import MarketingHome from "./pages/MarketingHome";
+import SnapWorkspace from "./components/SnapWorkspace";
 
-// --- IMPORT SNAPS ---
+import InterestForm from "./pages/InterestForm";
+import Auth from "./pages/Auth";
+import Dashboard from "./pages/Dashboard";
+import ProtectedRoute from "./components/ProtectedRoute";
+import ProfileSettings from "./pages/settings/ProfileSettings";
+import BillingSettings from "./pages/settings/BillingSettings";
+import SecuritySettings from "./pages/settings/SecuritySettings";
+import SettingsHome from "./pages/settings/SettingsHome";
+import SnapDetail from "./pages/SnapDetail";
+
+
 import JobEstimator from "./snaps/jobEstimator";
 import AboutUs from "./snaps/AboutUs";
 import Responder from "./snaps/Responder";
@@ -17,12 +36,15 @@ import Sentiment from "./snaps/Sentiment";
 import PoGenerator from "./snaps/PoGenerator";
 import Contracts from "./snaps/Contracts";
 import PoliciesCompliance from "./snaps/Policies.jsx";
+import MySnaps from "./pages/MySnaps";
 import "jspdf-autotable";
+
 
 function HomePage() {
   // --- STATE MANAGEMENT ---
+  const navigate = useNavigate();
+  const [companyName, setCompanyName] = useState("");
   const [mode, setMode] = useState("about");
-
   const [industry, setIndustry] = useState("");
   const [city, setCity] = useState("");
   const [years, setYears] = useState("");
@@ -37,18 +59,21 @@ function HomePage() {
   const [apologyContext, setApologyContext] = useState("");
   const [rawComments, setRawComments] = useState("");
 
+  const [policyType, setPolicyType] = useState("");
+  const [details, setDetails] = useState("");
+  const [businessName, setBusinessName] = useState("");
+  const { user, profile } = useAuth();
+
   const [contractType, setContractType] = useState("");
   const [partyA, setPartyA] = useState("");
   const [partyB, setPartyB] = useState("");
   const [scope, setScope] = useState("");
   const [terms, setTerms] = useState("");
   const [specialClauses, setSpecialClauses] = useState("");
- 
 
-  // POLICIES SNAP STATE
-  const [policyType, setPolicyType] = useState("");
-  const [businessName, setBusinessName] = useState("");
-  const [details, setDetails] = useState("");
+  // ... all your other state + helpers ...
+
+  
 
 // --- JOB ESTIMATOR LOGIC (App.jsx) ---
 
@@ -83,6 +108,7 @@ const [financials, setFinancials] = useState({
   taxRate: 8,
   terms: "Due on Receipt"
 });
+
 
 
 // 2. UPDATE HELPERS
@@ -150,6 +176,8 @@ const calculateTotal = () => {
   const afterDiscount = subtotal - parseFloat(financials.discount || 0);
   const tax = afterDiscount * (parseFloat(financials.taxRate || 0) / 100);
 
+    
+
   return (afterDiscount + tax).toFixed(2);
 };
 //--------------------------------------------------------About us--------------------------------//
@@ -198,6 +226,7 @@ const handlePoliciesDownload = () => {
   const fileName = `${businessName.replace(/\s+/g, '_')}_${policyType.replace(/\s+/g, '_')}.pdf`;
   doc.save(fileName);
 };
+//-------------------------------------------end Policies pdf download handler-----------------------------------//
 //--------------------------------------------about us ------------------------------------------//
 const handleAboutDownload = () => {
   const doc = new jsPDF();
@@ -343,6 +372,9 @@ const handleResponderDownload = () => {
 
   doc.save(`${businessName || "Social"}_Response.pdf`);
 };
+
+
+
 //---------------------------------------end of policies pdf download handler-----------------------------------//
 //----------------------------------------sentiment--------------------------------------------------------------//
 // 5. SENTIMENT ANALYSIS HANDLER
@@ -1048,14 +1080,16 @@ if (yPos > 250) {
   };
 
   const inputStyle = {
-    width: "100%",
-    padding: "12px",
-    marginTop: "6px",
-    borderRadius: "8px",
-    border: `1px solid ${colors.lightGray}`,
-    fontSize: "15px",
-    outline: "none",
-    boxSizing: "border-box"
+     width: "100%",
+  padding: "12px 14px",
+  borderRadius: "10px",
+  border: "1px solid #d1d5db",
+  background: "white",
+  color: "#1f2937",
+  fontSize: "15px",
+  marginBottom: "16px",
+  outline: "none",
+  transition: "0.2s ease"
   };
 
   const getInputStyle = (isFocused) => ({
@@ -1093,51 +1127,52 @@ if (yPos > 250) {
   // ---------------------------------------------------------
   // GENERATE FUNCTION
   // ---------------------------------------------------------
-  async function generate() {
-    setOutput("");
-    setError("");
-    setLoading(true);
+  // ---------------------- GENERATE FUNCTION ----------------------
+async function generate() {
+  setOutput("");
+  setError("");
+  setLoading(true);
 
-    const payload =
-      mode === "po"
-        ? {
-            mode,
-            buyer: buyerInfo,
-            vendor: vendorInfo,
-            details: poDetails,
-            items: poItems,
-            totals: poTotals
-          }
-        : mode === "contracts"
-        ? {
-            mode,
-            contractType,
-            partyA,
-            partyB,
-            scope,
-            terms,
-            specialClauses
-          }
-        : mode === "policies"
-        ? {
-            mode,
-            policyType,
-            businessName,
-            details,
-          }
-        : mode === "estimator"
+  const payload =
+    mode === "po"
       ? {
           mode,
-          header,      // Sent as an object containing jobTitle, customerName, etc.
-          tasks,       // Sent as an array of task objects
-          materials,   // Sent as an array of material objects
+          buyer: buyerInfo,
+          vendor: vendorInfo,
+          details: poDetails,
+          items: poItems,
+          totals: poTotals
+        }
+      : mode === "contracts"
+      ? {
+          mode,
+          contractType,
+          partyA,
+          partyB,
+          scope,
+          terms,
+          specialClauses
+        }
+      : mode === "policies"
+      ? {
+          mode,
+          policyType,
+          businessName,
+          details
+        }
+      : mode === "estimator"
+      ? {
+          mode,
+          header,
+          tasks,
+          materials,
           fees,
           financials,
-          total: calculateTotal(), // Invokes your total calculation helper
+          total: calculateTotal()
         }
       : {
-          // Default/Legacy modes (About Us, Responder, etc.)
           mode,
+          companyName,
           industry,
           city,
           years,
@@ -1145,417 +1180,962 @@ if (yPos > 250) {
           customBusinessType,
           tone,
           description:
-                mode === "about"
-                  ? aboutDescription
-                : mode === "responder"
-                  ? responderMessage
-                : description,
+            mode === "about"
+              ? aboutDescription
+              : mode === "responder"
+              ? responderMessage
+              : description,
           issueType,
           apologyContext,
-          rawComments,
+          rawComments
         };
 
-    try {
-      const response = await fetch("https://api.snapcopy.online/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
+  try {
+    const response = await fetch("https://api.snapcopy.online/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
 
-      const data = await response.json();
+    const data = await response.json();
 
-      if (!response.ok) throw new Error(data.error || "Server error");
+    if (!response.ok) throw new Error(data.error || "Server error");
 
-      const result =
-        data.about ||
-        data.reply ||
-        data.apology ||
-        data.sentiment ||
-        data.po ||
-        data.contract ||
-        data.policy ||
-        data.estimate ||
-        JSON.stringify(data, null, 2);
+    const result =
+      data.about ||
+      data.reply ||
+      data.apology ||
+      data.sentiment ||
+      data.po ||
+      data.contract ||
+      data.policy ||
+      data.estimate ||
+      JSON.stringify(data, null, 2);
 
-      setOutput(
-        typeof result === "string" ? result : JSON.stringify(result, null, 2)
-      );
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+    setOutput(typeof result === "string" ? result : JSON.stringify(result, null, 2));
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+}
+
+
+// ---------------------- SAVE SNAP FUNCTION ----------------------
+async function saveSnap() {
+  console.log("saveSnap() fired");
+
+  // 1. Check user
+  if (!auth.currentUser) {
+    console.log("❌ No user logged in");
+    alert("You must be logged in to save snaps.");
+    return;
   }
 
-  // Make generate() callable from Snaps
-  window.generateSnap = generate;
+  // 2. Check plan
+  if (profile?.plan !== "pro") {
+    console.log("❌ User is not Pro. plan =", profile?.plan);
+    alert("Saving snaps is a Pro feature. Upgrade to unlock unlimited saves.");
+    return;
+  }
+
+  // 3. Check output
+  if (!output) {
+    console.log("❌ No output to save");
+    alert("Generate a Snap before saving.");
+    return;
+  }
+
+  const uid = auth.currentUser.uid;
+  console.log("✔ User:", uid);
+
+  // Build input payload
+  const inputData =
+    mode === "po"
+      ? { buyerInfo, vendorInfo, poDetails, poItems, poTotals }
+      : mode === "contracts"
+      ? { contractType, partyA, partyB, scope, terms, specialClauses }
+      : mode === "policies"
+      ? { policyType, businessName, details }
+      : mode === "estimator"
+      ? { header, tasks, materials, fees, financials }
+      : mode === "about"
+      ? { industry, city, years, businessType, customBusinessType, aboutDescription }
+      : mode === "responder"
+      ? { businessType, customBusinessType, tone, responderMessage }
+      : mode === "apology"
+      ? { issueType, apologyContext }
+      : mode === "sentiment"
+      ? { rawComments }
+      : {};
+
+  // Auto title
+  const title =
+    mode === "about"
+      ? `${industry || "Business"} About Us`
+      : mode === "responder"
+      ? `Response (${tone || "Neutral"})`
+      : mode === "apology"
+      ? `Apology – ${issueType || "General"}`
+      : mode === "sentiment"
+      ? `Sentiment Analysis`
+      : mode === "contracts"
+      ? `${contractType || "Contract"}`
+      : mode === "policies"
+      ? `${policyType || "Policy"}`
+      : mode === "po"
+      ? `Purchase Order ${poDetails.poNumber || ""}`
+      : mode === "estimator"
+      ? `Estimate – ${header.jobTitle || "Untitled"}`
+      : "Snap";
+
+  const snapDoc = {
+    mode,
+    title,
+    input: inputData,
+    output,
+    createdAt: serverTimestamp()
+  };
+
+  try {
+    console.log("📡 Writing to Firestore...");
+    const snapRef = doc(collection(db, "users", uid, "snaps"));
+    await setDoc(snapRef, snapDoc);
+    console.log("✅ Firestore write success");
+    alert("Snap saved successfully!");
+  } catch (err) {
+    console.error("🔥 Firestore Save Error:", err);
+    alert("Failed to save snap. Check console for details.");
+  }
+}
+
+
+// Make generate() callable from Snaps
+window.generateSnap = generate;
+
 
   // ---------------------------------------------------------
   // RETURN UI
   // ---------------------------------------------------------
   return (
-    <main
+  <main
+    style={{
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      minHeight: "100vh",
+      width: "100vw",
+      background: "#f0f2f5",
+      padding: "20px",
+      boxSizing: "border-box",
+      fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+    }}
+    
+  >
+
+    
+    {/* SHOW ONLY FOR LOGGED-IN USERS */}
+{auth.currentUser && (
+  <button
+    onClick={() => navigate("/dashboard")}
+    style={{
+      marginBottom: "20px",
+      padding: "10px 20px",
+      background: "#6c757d",
+      color: "white",
+      borderRadius: "6px",
+      cursor: "pointer"
+    }}
+  >
+    Dashboard
+  </button>
+)}
+
+    {/* ============================================================
+        HERO SECTION — Logo, headline, subtext, CTA button
+       ============================================================ */}
+  <MarketingHome>
+    {!user && (
+  <>
+  
+    {/* HERO SECTION */}
+    {/* HERO SECTION */}
+{/* HERO SECTION */}
+<section 
+  style={{
+    maxWidth: 1000,
+    textAlign: "center",
+    padding: "80px 20px 70px",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center"
+  }}
+>
+  
+  <img
+    src={snapcopyLogo}
+    alt="SnapCopy Logo"
+    style={{
+      width: 160,
+      height: 160,
+      borderRadius: "50%",
+      marginBottom: 25,
+      boxShadow: "0 8px 25px rgba(0,0,0,0.08)"
+    }}
+  />
+
+  <h1
+    style={{
+      fontSize: "48px",
+      fontWeight: "800",
+      color: "#111827",
+      marginBottom: "18px",
+      lineHeight: "1.15",
+      maxWidth: "800px"
+    }}
+  >
+    Write Better. Respond Faster. Look Instantly Professional.
+  </h1>
+
+  <p
+    style={{
+      fontSize: "22px",
+      color: "#4b5563",
+      maxWidth: "720px",
+      margin: "0 auto 40px auto",
+      lineHeight: "1.55"
+    }}
+  >
+    AI writing tools built for small business owners who don’t have time to write.  
+    Clean, confident, ready‑to‑send writing — every single time.
+  </p>
+
+  {/* CTA BUTTONS */}
+  <div style={{ display: "flex", justifyContent: "center", gap: "16px" }}>
+    <button className="fancy-card"
+      onClick={scrollToForm}
       style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        minHeight: "100vh",
-        width: "100vw",
-        background: "#f0f2f5",
-        padding: "20px",
-        boxSizing: "border-box",
-        fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+        padding: "16px 32px",
+        borderRadius: "12px",
+        background: `linear-gradient(135deg, ${colors.deepBlue}, ${colors.deepBlue}CC)`,
+        color: "white",
+        fontSize: "17px",
+        fontWeight: "700",
+        border: "none",
+        cursor: "pointer",
+        transition: "0.25s ease"
+      }}
+      onMouseEnter={(e) => {
+        e.target.style.transform = "translateY(-3px)";
+        e.target.style.boxShadow = "0 8px 25px rgba(0,0,0,0.25)";
+      }}
+      onMouseLeave={(e) => {
+        e.target.style.transform = "translateY(0)";
+        e.target.style.boxShadow = "none";
       }}
     >
-      {/* HERO SECTION */}
-      <section
+      Start Free — No Login Required
+    </button>
+
+    
+  </div>
+</section>
+
+
+
+  </>
+)}
+
+
+
+
+{/* TESTIMONIAL SECTION — only show to public visitors & non‑Pro */}
+{profile?.plan !== "pro" && !user && (
+  <section 
+    style={{
+      width: "100%",
+      maxWidth: 1000,
+      padding: "80px 20px",
+      margin: "0 auto",
+      textAlign: "center"
+    }}
+  >
+    <h2
+      style={{
+        fontSize: "34px",
+        fontWeight: "800",
+        color: "#1f2937",
+        marginBottom: "50px",
+        lineHeight: "1.2"
+      }}
+    >
+      What People Are Saying
+    </h2>
+
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+        gap: "30px",
+        maxWidth: "900px",
+        margin: "0 auto"
+      }}
+    >
+
+      {/* Ric */}
+      <div
+        className="fancy-card"
         style={{
-          maxWidth: 1000,
-          textAlign: "center",
-          padding: "60px 20px",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center"
+          background: "white",
+          padding: "28px",
+          borderRadius: "14px",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.06)",
+          border: `1px solid ${colors.lightGray}`,
+          textAlign: "center"
         }}
       >
-        <img
-          src={snapcopyLogo}
-          alt="SnapCopy Logo"
-          style={{
-            width: 180,
-            height: 180,
-            borderRadius: "50%",
-            marginBottom: 20
-          }}
-        />
-
-        <h1
-          style={{
-            fontSize: "48px",
-            fontWeight: "800",
-            background: "linear-gradient(to right, #860aa5, #390b64)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            color: "transparent",
-            lineHeight: "1.4"
-          }}
-        >
-          The Complete AI Content Toolkit for Growing Businesses
-        </h1>
+        <div style={{ marginBottom: "12px", fontSize: "18px", color: "#fbbf24" }}>
+          ★★★★★
+        </div>
 
         <p
           style={{
-            color: "#4a5568",
-            fontSize: "18px",
-            marginTop: "14px",
-            maxWidth: "700px",
-            lineHeight: "1.6"
+            fontSize: "16px",
+            color: "#4b5563",
+            lineHeight: "1.6",
+            marginBottom: "18px"
           }}
         >
-          From professional "About Us" bios to social media management and
-          sentiment analysis. SnapCopy is your all-in-one suite for high-impact
-          content.
+          “This works great — straightforward instructions, targeted tasks, and clean responses. Need more!”
         </p>
 
-        <button
-          onClick={scrollToForm}
+        <h4
           style={{
-            padding: "16px 32px",
-            background: colors.deepBlue,
-            color: "white",
-            border: "none",
-            borderRadius: "50px",
-            fontWeight: "bold",
-            fontSize: "18px",
-            cursor: "pointer",
-            marginTop: "30px",
-            boxShadow: "0 10px 20px rgba(134, 10, 165, 0.2)"
+            fontSize: "15px",
+            fontWeight: "700",
+            color: colors.deepBlue
           }}
         >
-          Explore Tools
-        </button>
-      </section>
+          — Ric
+        </h4>
+      </div>
 
-      {/* TOOLKIT SECTION */}
-      <section
+      {/* Christa */}
+      <div
+        className="fancy-card"
         style={{
-          width: "100%",
-          maxWidth: 1000,
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-          gap: "40px",
-          padding: "40px 20px",
-          marginBottom: "40px"
+          background: "white",
+          padding: "28px",
+          borderRadius: "14px",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.06)",
+          border: `1px solid ${colors.lightGray}`,
+          textAlign: "center"
         }}
       >
-        <div>
-          <h2 style={{ color: colors.purple, fontSize: "24px" }}>
-            The SnapCopy Toolkit
-          </h2>
-          <p style={{ color: "#4a5568", lineHeight: "1.6" }}>
-            We provide a growing ecosystem of AI tools designed for service
-            businesses. Whether you're building a brand bio or analyzing
-            customer feedback, we turn complex tasks into "Snaps."
-          </p>
+        <div style={{ marginBottom: "12px", fontSize: "18px", color: "#fbbf24" }}>
+          ★★★★★
         </div>
 
-        <div
+        <p
           style={{
-            background: "white",
-            padding: "25px",
-            borderRadius: "15px",
-            boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
-            border: `1px solid ${colors.lightGray}`
+            fontSize: "16px",
+            color: "#4b5563",
+            lineHeight: "1.6",
+            marginBottom: "18px"
           }}
         >
-          <h3
-            style={{
-              fontSize: "14px",
-              color: colors.deepBlue,
-              textTransform: "uppercase",
-              marginBottom: "15px"
-            }}
-          >
-            Current Capabilities
-          </h3>
+          “Perfect for mom and pop shops — people that don’t know how to use AI.”
+        </p>
 
-          <ul
-            style={{
-              color: "#4a5568",
-              fontSize: "15px",
-              paddingLeft: "20px",
-              lineHeight: "2"
-            }}
-          >
-            <li>
-              <b>About Us:</b> SEO-ready business bios.
-            </li>
-            <li>
-              <b>Responder:</b> Engaging social media captions.
-            </li>
-            <li>
-              <b>Apology:</b> Polished customer resolution writing.
-            </li>
-            <li>
-              <b>Sentiment:</b> Deep emotional feedback analysis.
-            </li>
-            <li>
-              <b>Contracts & Agreements:</b> Service agreements, NDAs,
-              subcontractor contracts, and more.
-            </li>
-            <li>
-              <b>Policies & Compliance:</b> Refund, Warranty, Privacy, and Terms
-              of Service policies.
-            </li>
-            <li>
-              <b style={{ color: colors.poGreen }}>PO Generator:</b> Instant PDF
-              Purchase Orders.
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      {/* FORM SECTION */}
-      <div ref={formRef} style={{ width: "100%", maxWidth: 900 }}>
-        <Link
-          to="/interest"
+        <h4
           style={{
-            textDecoration: "none",
-            marginBottom: "20px",
-            display: "block"
+            fontSize: "15px",
+            fontWeight: "700",
+            color: colors.deepBlue
           }}
         >
+          — Christa
+        </h4>
+      </div>
+
+    </div>
+  </section>
+)}
+
+
+{/* VALUE PROPOSITION SECTION */}
+
+{profile?.plan !== "pro" && (
+  <section 
+    style={{
+      width: "100%",
+      maxWidth: 1000,
+      padding: "60px 20px",
+      margin: "0 auto",
+      textAlign: "center"
+    }}
+  >
+    <h2
+      style={{
+        fontSize: "36px",
+        fontWeight: "800",
+        color: "#1f2937",
+        marginBottom: "40px",
+        lineHeight: "1.2"
+      }}
+    >
+      What Makes SnapCopy Different
+    </h2>
+
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+        gap: "40px",
+        marginTop: "20px"
+      }}
+    >
+      {/* 1. Save Hours */}
+      <div style={{ padding: "10px 20px" }}>
+        <h3
+          style={{
+            fontSize: "22px",
+            fontWeight: "700",
+            color: colors.deepBlue,
+            marginBottom: "12px"
+          }}
+        >
+          Save Hours Every Week
+        </h3>
+        <p style={{ color: "#4b5563", lineHeight: "1.65", fontSize: "16px" }}>
+          Stop wasting time writing emails, bios, policies, and customer replies.  
+          SnapCopy handles the writing so you can stay focused on running your business.
+        </p>
+      </div>
+
+      {/* 2. Look More Professional */}
+      <div style={{ padding: "10px 20px" }}>
+        <h3
+          style={{
+            fontSize: "22px",
+            fontWeight: "700",
+            color: colors.purple,
+            marginBottom: "12px"
+          }}
+        >
+          Look More Professional
+        </h3>
+        <p style={{ color: "#4b5563", lineHeight: "1.65", fontSize: "16px" }}>
+          Every message comes out clean, confident, and polished — even if writing isn’t your thing.
+        </p>
+      </div>
+
+      {/* 3. Win More Jobs */}
+      <div style={{ padding: "10px 20px" }}>
+        <h3
+          style={{
+            fontSize: "22px",
+            fontWeight: "700",
+            color: colors.orange,
+            marginBottom: "12px"
+          }}
+        >
+          Win More Jobs
+        </h3>
+        <p style={{ color: "#4b5563", lineHeight: "1.65", fontSize: "16px" }}>
+          Better communication builds trust. Trust closes deals.  
+          SnapCopy helps you sound sharp and stay ahead of competitors.
+        </p>
+      </div>
+
+      {/* 4. Tools That Grow With You */}
+      <div style={{ padding: "10px 20px" }}>
+        <h3
+          style={{
+            fontSize: "22px",
+            fontWeight: "700",
+            color: colors.darkSlate,
+            marginBottom: "12px"
+          }}
+        >
+          Tools That Grow With You
+        </h3>
+        <p style={{ color: "#4b5563", lineHeight: "1.65", fontSize: "16px" }}>
+          From About Us pages to contracts and purchase orders, SnapCopy keeps expanding  
+          to support your business as it grows.
+        </p>
+      </div>
+    </div>
+  </section>
+)}
+{/* END VALUE PROPOSITION SECTION */}
+
+{/* VIDEO DEMO SECTION */}
+<section id="demo" className="w-full min-h-screen flex items-center justify-center bg-[#0d0d0d] px-6 py-20">
+  <div className="max-w-4xl w-full text-center">
+    <h2 className="text-4xl font-semibold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent mb-4">
+      See SnapCopy in Action
+    </h2>
+    <p className="text-gray-300 text-lg mb-10">
+      A 32‑second demo showing how fast you can generate professional content.
+    </p>
+
+    {/* Video Container: inline styles force 50% of viewport, capped at 576px (max-w-xl) */}
+    <div
+      style={{
+        width: '75vw',
+        maxWidth: '960px',
+        margin: '0 auto',
+        aspectRatio: '16/9',
+        borderRadius: '0.75rem',
+        overflow: 'hidden',
+        boxShadow: '0 25px 50px rgba(0,0,0,0.6)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        background: '#000'
+      }}
+    >
+      <video
+        src="/snapcopy demo aboutus.mp4"
+        controls
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'block',
+          objectFit: 'cover'
+        }}
+      />
+    </div>
+  </div>
+</section>
+{/* END VIDEO DEMO SECTION */}
+
+
+
+
+
+{/* FEATURE GRID SECTION */}
+{profile?.plan !== "pro" && (
+  <section 
+    style={{
+      width: "100%",
+      maxWidth: 1100,
+      padding: "70px 20px",
+      margin: "0 auto",
+    }}
+  >
+    <h2 
+      style={{
+        fontSize: "34px",
+        fontWeight: "800",
+        color: "#1f2937",
+        textAlign: "center",
+        marginBottom: "50px",
+        lineHeight: "1.2",
+      }}
+    >
+      What You Can Create
+    </h2>
+
+    <div 
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+        gap: "35px",
+      }}
+    >
+      {/* About Us */}
+      <div className="fancy-card"
+        style={{
+          background: "white",
+          padding: "28px",
+          borderRadius: "14px",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.06)",
+          border: `1px solid ${colors.lightGray}`,
+        }}
+      >
+        <h3 style={{ fontSize: "20px", fontWeight: "700", color: colors.deepBlue }}>
+          About Us
+        </h3>
+        <p style={{ color: "#4b5563", marginTop: "12px", lineHeight: "1.55" }}>
+          Clean, simple business bios that build trust.
+        </p>
+      </div>
+
+      {/* Responder */}
+      <div className="fancy-card"
+        style={{
+          background: "white",
+          padding: "28px",
+          borderRadius: "14px",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.06)",
+          border: `1px solid ${colors.lightGray}`,
+        }}
+      >
+        <h3 style={{ fontSize: "20px", fontWeight: "700", color: colors.purple }}>
+          Responder
+        </h3>
+        <p style={{ color: "#4b5563", marginTop: "12px", lineHeight: "1.55" }}>
+          Fast, confident replies for customers and clients.
+        </p>
+      </div>
+
+      {/* Apology */}
+      <div className="fancy-card"
+        style={{
+          background: "white",
+          padding: "28px",
+          borderRadius: "14px",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.06)",
+          border: `1px solid ${colors.lightGray}`,
+        }}
+      >
+        <h3 style={{ fontSize: "20px", fontWeight: "700", color: colors.orange }}>
+          Apology
+        </h3>
+        <p style={{ color: "#4b5563", marginTop: "12px", lineHeight: "1.55" }}>
+          Clear, respectful messages for tough situations.
+        </p>
+      </div>
+
+      {/* Sentiment */}
+      <div className="fancy-card"
+        style={{
+          background: "white",
+          padding: "28px",
+          borderRadius: "14px",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.06)",
+          border: `1px solid ${colors.lightGray}`,
+        }}
+      >
+        <h3 style={{ fontSize: "20px", fontWeight: "700", color: colors.darkSlate }}>
+          Sentiment
+        </h3>
+        <p style={{ color: "#4b5563", marginTop: "12px", lineHeight: "1.55" }}>
+          Quick breakdowns of positive, negative, and neutral feedback.
+        </p>
+      </div>
+
+      {/* PO Generator */}
+      <div className="fancy-card"
+        style={{
+          background: "white",
+          padding: "28px",
+          borderRadius: "14px",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.06)",
+          border: `1px solid ${colors.lightGray}`,
+        }}
+      >
+        <h3 style={{ fontSize: "20px", fontWeight: "700", color: colors.poGreen }}>
+          PO Generator
+        </h3>
+        <p style={{ color: "#4b5563", marginTop: "12px", lineHeight: "1.55" }}>
+          Ready‑to‑send purchase orders in seconds.
+        </p>
+      </div>
+
+      {/* Contracts */}
+      <div className="fancy-card"
+        style={{
+          background: "white",
+          padding: "28px",
+          borderRadius: "14px",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.06)",
+          border: `1px solid ${colors.lightGray}`,
+        }}
+      >
+        <h3 style={{ fontSize: "20px", fontWeight: "700", color: colors.deepBlue }}>
+          Contracts
+        </h3>
+        <p style={{ color: "#4b5563", marginTop: "12px", lineHeight: "1.55" }}>
+          Clear, simple agreements for everyday business.
+        </p>
+      </div>
+
+      {/* Policies */}
+      <div className="fancy-card"
+        style={{
+          background: "white",
+          padding: "28px",
+          borderRadius: "14px",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.06)",
+          border: `1px solid ${colors.lightGray}`,
+        }}
+      >
+        <h3 style={{ fontSize: "20px", fontWeight: "700", color: colors.orange }}>
+          Policies
+        </h3>
+        <p style={{ color: "#4b5563", marginTop: "12px", lineHeight: "1.55" }}>
+          Refund, warranty, and compliance policies written professionally.
+        </p>
+      </div>
+    </div>
+  </section>
+)}
+{/* END FEATURE GRID SECTION */}
+
+{/* TRUSTED BY SECTION — only show to public visitors 
+
+{!user && (
+  <section
+    style={{
+      width: "100%",
+      padding: "30px 20px",
+      margin: "0 auto",
+      textAlign: "center",
+      opacity: 0.95
+    }}
+  >
+    <p
+      style={{
+        fontSize: "18px",
+        color: "#4b5563",
+        fontWeight: "500",
+        marginBottom: "20px"
+      }}
+    >
+      Trusted by small business owners across the U.S.
+    </p>
+
+<div style={{ display: "flex", gap: "40px", flexWrap: "wrap", justifyContent: "center" }}>
+*/}
+
+
+  {/* Logo 1 — Angular Tech Mark 
+  <svg width="80" height="40" viewBox="0 0 80 40">
+    <path d="M20 28 L35 12 L50 28" stroke="#111" strokeWidth="4" fill="none" strokeLinecap="round"/>
+  </svg>
+*/}
+
+  {/* Logo 2 — Split Hexagon 
+  <svg width="80" height="40" viewBox="0 0 80 40">
+    <polygon points="30,10 50,10 60,20 50,30 30,30 20,20" fill="none" stroke="#111" strokeWidth="4"/>
+  </svg>
+*/}
+
+  {/* Logo 3 — Circle Slash 
+  <svg width="80" height="40" viewBox="0 0 80 40">
+    <circle cx="40" cy="20" r="12" stroke="#111" strokeWidth="4" fill="none"/>
+    <line x1="32" y1="12" x2="48" y2="28" stroke="#111" strokeWidth="4"/>
+  </svg>
+*/}
+
+  {/* Logo 4 — Stacked Tech Bars 
+  <svg width="80" height="40" viewBox="0 0 80 40">
+    <rect x="25" y="10" width="30" height="6" rx="2" fill="#111"/>
+    <rect x="25" y="18" width="30" height="6" rx="2" fill="#111"/>
+    <rect x="25" y="26" width="30" height="6" rx="2" fill="#111"/>
+  </svg>
+*/}
+
+  {/* Logo 5 — Intersecting Lines 
+  <svg width="80" height="40" viewBox="0 0 80 40">
+    <path d="M25 12 L55 28 M55 12 L25 28" stroke="#111" strokeWidth="4" strokeLinecap="round"/>
+  </svg>
+*/}
+
+  {/* Logo 6 — Minimal Arc Mark 
+  <svg width="80" height="40" viewBox="0 0 80 40">
+    <path d="M20 25 Q40 5 60 25" stroke="#111" strokeWidth="4" fill="none" strokeLinecap="round"/>
+  </svg>
+
+</div>
+  </section>
+)}
+  */}
+
+{/* END TRUSTED BY SECTION — only show to public visitors */}
+
+</MarketingHome>
+<SnapWorkspace>
+  <div
+    ref={formRef}
+    style={{
+      width: "100%",
+      maxWidth: "900px",
+      margin: "0 auto",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center"
+    }}
+  >
+
+    {/* NAV BUTTONS */}
+    <nav
+      style={{
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        gap: "var(--space-3)",
+        marginBottom: "var(--space-6)",
+        alignItems: "center",
+        justifyContent: "center"
+      }}
+    >
+      {/* ROW 1 */}
+      <div
+        style={{
+          display: "flex",
+          gap: "10px",
+          flexWrap: "wrap",
+          justifyContent: "center",
+          width: "100%"
+        }}
+      >
+        {[
+          { key: "about", label: "About Us", color: colors.deepBlue },
+          { key: "responder", label: "Responder", color: colors.deepBlue },
+          { key: "apology", label: "Apology", color: colors.deepBlue },
+          { key: "sentiment", label: "Sentiment", color: colors.deepBlue }
+        ].map((btn) => (
           <button
+            key={btn.key}
+            onClick={() => handleModeSwitch(btn.key)}
             style={{
-              width: "100%",
-              padding: "12px",
-              background: "white",
-              color: colors.deepBlue,
-              border: `2px solid ${colors.deepBlue}`,
-              borderRadius: "8px",
-              fontWeight: "bold",
-              cursor: "pointer"
+              padding: "10px 18px",
+              borderRadius: "10px",
+              fontWeight: 600,
+              fontSize: "14px",
+              background:
+                mode === btn.key
+                  ? `linear-gradient(135deg, ${btn.color}, ${btn.color}CC)`
+                  : "rgba(17, 16, 16, 0.15)",
+              color: "#00040a",
+              border: "1px solid rgba(255,255,255,0.25)",
+              backdropFilter: "blur(6px)",
+              cursor: "pointer",
+              transition: "0.25s ease",
+              minWidth: "140px"
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.transform = "translateY(-2px)";
+              e.target.style.boxShadow = "0 6px 20px rgba(0,0,0,0.25)";
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.transform = "translateY(0)";
+              e.target.style.boxShadow = "none";
             }}
           >
-            Interested in SnapCopy or SnapMatrix? Join the waitlist today.
+            {btn.label}
           </button>
-        </Link>
+        ))}
+      </div>
 
-        {/* NAV BUTTONS */}
-        <nav
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "10px",
-            marginBottom: "25px"
-          }}
-        >
-          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-            <button
-              onClick={() => handleModeSwitch("about")}
-              style={{
-                flex: 1,
-                minWidth: "120px",
-                padding: "12px",
-                background:
-                  mode === "about" ? colors.deepBlue : "#bda4c9",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                fontWeight: "600",
-                cursor: "pointer"
-              }}
-            >
-              About Us
-            </button>
 
-            <button
-              onClick={() => handleModeSwitch("responder")}
-              style={{
-                flex: 1,
-                minWidth: "120px",
-                padding: "12px",
-                background:
-                  mode === "responder" ? colors.purple : "#bda4c9",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                fontWeight: "600",
-                cursor: "pointer"
-              }}
-            >
-              Responder
-            </button>
 
-            <button
-              onClick={() => handleModeSwitch("apology")}
-              style={{
-                flex: 1,
-                minWidth: "120px",
-                padding: "12px",
-                background:
-                  mode === "apology" ? colors.orange : "#bda4c9",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                fontWeight: "600",
-                cursor: "pointer"
-              }}
-            >
-              Apology
-            </button>
 
-            <button
-              onClick={() => handleModeSwitch("sentiment")}
-              style={{
-                flex: 1,
-                minWidth: "120px",
-                padding: "12px",
-                background:
-                  mode === "sentiment" ? colors.darkSlate : "#bda4c9",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                fontWeight: "600",
-                cursor: "pointer"
-              }}
-            >
-              Sentiment
-            </button>
-          </div>
+      {/* ROW 2 */}
+      <div
+        style={{
+          display: "flex",
+          gap: "10px",
+          flexWrap: "wrap",
+          justifyContent: "center",
+          width: "100%"
+        }}
+      >
+        {[
+          { key: "po", label: "PO Generator", color: colors.orange  },
+          { key: "estimator", label: "Job Estimator", color: colors.orange  },
+          { key: "contracts", label: "Contracts", color: colors.orange  },
+          { key: "policies", label: "Policies", color: colors.orange  }
+        ].map((btn) => (
+          <button
+            key={btn.key}
+            onClick={() => handleModeSwitch(btn.key)}
+            style={{
+              padding: "10px 18px",
+              borderRadius: "10px",
+              fontWeight: 600,
+              fontSize: "14px",
+              background:
+                mode === btn.key
+                  ? `linear-gradient(135deg, ${btn.color}, ${btn.color}CC)`
+                  : "rgba(17, 16, 16, 0.15)",
+              color: "#00040a",
+              border: "1px solid rgba(255,255,255,0.25)",
+              backdropFilter: "blur(6px)",
+              cursor: "pointer",
+              transition: "0.25s ease",
+              minWidth: "140px"
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.transform = "translateY(-2px)";
+              e.target.style.boxShadow = "0 6px 20px rgba(0,0,0,0.25)";
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.transform = "translateY(0)";
+              e.target.style.boxShadow = "none";
+            }}
+          >
+            {btn.label}
+          </button>
+        ))}
+      </div>
+    </nav>
 
-          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-            <button
-              onClick={() => handleModeSwitch("po")}
-              style={{
-                flex: 1,
-                minWidth: "120px",
-                padding: "12px",
-                background:
-                  mode === "po" ? colors.poGreen : "#bda4c9",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                fontWeight: "600",
-                cursor: "pointer"
-              }}
-            >
-              PO Generator
-            </button>
+    {/* TOOL CONTENT */}
+    <div
+      style={{
+        background: "rgba(255, 255, 255, 0.12)",
+        backdropFilter: "blur(18px)",
+        WebkitBackdropFilter: "blur(18px)",
+        borderRadius: "24px",
+        padding: "var(--space-8)",
+        border: "1px solid rgba(255, 255, 255, 0.18)",
+        boxShadow: "0 20px 60px rgba(0, 0, 0, 0.25)",
+        width: "100%",
+        marginBottom: "var(--space-7)",
+        position: "relative",
+        zIndex: 2
+      }}
+    >
+      {/* your tool content goes here */}
+<button
+  onClick={() => window.location.reload()}
+  style={{
+    marginTop: "10px",
+    padding: "10px 22px",
+    borderRadius: "10px",
+    fontWeight: 700,
+    fontSize: "14px",
+    background: "#ef4444",
+    color: "white",
+    border: "none",
+    cursor: "pointer",
+    transition: "0.25s ease",
+  }}
+  onMouseEnter={(e) => {
+    e.target.style.transform = "translateY(-2px)";
+    e.target.style.boxShadow = "0 6px 20px rgba(0,0,0,0.25)";
+  }}
+  onMouseLeave={(e) => {
+    e.target.style.transform = "translateY(0)";
+    e.target.style.boxShadow = "none";
+  }}
+>
+  Clear Form
+</button>
 
-            <button
-              onClick={() => handleModeSwitch("estimator")}
-              style={{
-                flex: 1,
-                minWidth: "120px",
-                padding: "12px",
-                background:
-                mode === "estimator" ? colors.deepBlue : "#bda4c9",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                fontWeight: "600",
-                cursor: "pointer"
-              }}
-            >
-              Job Estimator
-            </button>
-
-            <button
-              onClick={() => handleModeSwitch("contracts")}
-              style={{
-                flex: 1,
-                minWidth: "120px",
-                padding: "12px",
-                background:
-                  mode === "contracts" ? colors.purple : "#bda4c9",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                fontWeight: "600",
-                cursor: "pointer"
-              }}
-            >
-              Contracts
-            </button>
-
-            <button
-              onClick={() => handleModeSwitch("policies")}
-              style={{
-                flex: 1,
-                minWidth: "120px",
-                padding: "12px",
-                background:
-                  mode === "policies" ? colors.orange : "#bda4c9",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                fontWeight: "600",
-                cursor: "pointer"
-              }}
-            >
-              Policies
-            </button>
-          </div>
-        </nav>
-
-        {/* TOOL CONTENT */}
-        <div
-          style={{
-            background: "white",
-            padding: "40px",
-            borderRadius: "20px",
-            boxShadow: "0 20px 40px rgba(0,0,0,0.1)",
-            border: `1px solid ${colors.lightGray}`,
-            marginBottom: "40px"
-          }}
-        >
+          
           <header style={{ textAlign: "center", marginBottom: "30px" }}>
-            <h2 key={mode} style={{ 
-              fontSize: "28px", margin: 0, fontWeight: "800", display: "inline-block",
-              background: mode === "po" ? "linear-gradient(to right, #2d6a4f, #38a169)" : "linear-gradient(to right, #860aa5, #390b64)", 
-              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", color: "transparent" 
-            }}>
+            <h2
+    key={mode}
+    style={{
+      fontSize: "32px",
+      margin: 0,
+      fontWeight: "800",
+      letterSpacing: "-0.5px",
+      background:
+        mode === "po"
+          ? "linear-gradient(135deg, #2d6a4f, #38a169)"
+          : "linear-gradient(135deg, #7c3aed, #4c1d95)",
+      WebkitBackgroundClip: "text",
+      WebkitTextFillColor: "transparent",
+      color: "transparent",
+      display: "inline-block",
+      padding: "var(--space-2) var(--space-3)",
+      borderRadius: "12px",
+    }}>
               {mode === "about" ? "About Us Snap" : 
                mode === "responder" ? "Responder Snap" : 
                mode === "apology" ? "Apology Snap" : 
@@ -1567,18 +2147,7 @@ if (yPos > 250) {
             </h2>
           </header>
 
-          <div style={{ ...instructionStyle, borderLeftColor: mode === "po" ? colors.poGreen : colors.deepBlue }}>
-            <strong>Instructions:</strong> {
-              mode === "about" ? "Tell us your industry, location, and experience level. We will generate a professional, SEO-optimized 'About Us' story that builds trust with your local customers." :
-              mode === "responder" ? "Choose your business type and a brand voice. We'll craft engaging social media captions, replies, or calls-to-action that resonate with your target audience." :
-              mode === "apology" ? "Select the specific issue and provide a brief summary of what happened. Our AI will draft a sincere, de-escalating response to help maintain your professional reputation." :
-              mode === "sentiment" ? "Paste raw customer reviews or comments below. We'll analyze the emotional tone and provide a summary of whether the feedback is positive, negative, or neutral." :
-              mode === "po" ? "Provide the SKU, vendor, and pricing details. We'll format this into a professional Purchase Order data structure ready to be exported as a high-quality PDF document." :
-              mode === "contracts" ? "Enter the details for both parties and the specific scope of work. We will generate a structured legal agreement tailored to your service or partnership needs." :
-              mode === "policies" ? "Specify the policy type and your business rules. We'll draft a comprehensive compliance document, such as a Privacy Policy or Terms of Service, for your operations." :
-              "Fill out the labor, materials, and fees. Our AI will help classify tasks and suggest a professional job summary for your customer."
-            }
-          </div>
+          
 
           {/* ==========================================
               1. RENDER SNAPS - TOOL-SPECIFIC INPUTS
@@ -1587,23 +2156,24 @@ if (yPos > 250) {
           {/* About Us Snap */}
           {mode === "about" && (
             <AboutUs
-              industry={industry}
-              setIndustry={setIndustry}
-              city={city}
-              setCity={setCity}
-              years={years}
-              setYears={setYears}
-              businessType={businessType}
-              setBusinessType={setBusinessType}
-              customBusinessType={customBusinessType}
-              setCustomBusinessType={setCustomBusinessType}
-              tone={tone}
-              setTone={setTone}
-              description={aboutDescription}          // ← NEW
-              setDescription={setAboutDescription}    // ← NEW
-              inputStyle={inputStyle}
-              
-            />
+            companyName={companyName}
+            setCompanyName={setCompanyName}
+            industry={industry}
+            setIndustry={setIndustry}
+            city={city}
+            setCity={setCity}
+            years={years}
+            setYears={setYears}
+            businessType={businessType}
+            setBusinessType={setBusinessType}
+            customBusinessType={customBusinessType}
+            setCustomBusinessType={setCustomBusinessType}
+            tone={tone}
+            setTone={setTone}
+            description={aboutDescription}
+            setDescription={setAboutDescription}
+            inputStyle={inputStyle}
+          />
           )}
 
           {/* Responder Snap */}
@@ -1787,27 +2357,33 @@ if (yPos > 250) {
             )}
 
             {/* SAVE BUTTON: Placeholder with Subscriber subtext */}
-            <button 
-              disabled
-              style={{
-                flex: 1,
-                padding: "12px 8px",
-                background: "#f1f5f9", 
-                color: "#94a3b8",      
-                border: "1px solid #cbd5e1",
-                borderRadius: "10px",
-                cursor: "not-allowed",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "2px"
-              }}
-            >
-              <span style={{ fontWeight: "bold", fontSize: "16px" }}>Save</span>
-              <span style={{ fontSize: "10px", fontWeight: "normal", opacity: 0.8 }}>
-                Subscribers save to DB
+            <button
+            onClick={saveSnap}
+            disabled={!output || loading}
+            style={{
+              flex: 1,
+              padding: "12px 8px",
+              background: output ? colors.deepBlue : "#f1f5f9",
+              color: output ? "white" : "#94a3b8",
+              border: output ? "none" : "1px solid #cbd5e1",
+              borderRadius: "10px",
+              cursor: output ? "pointer" : "not-allowed",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "2px",
+              transition: "0.2s"
+            }}
+          >
+                  <span style={{ fontWeight: "bold", fontSize: "16px" }}>
+                  Save
+                  </span>
+                  <span style={{ fontSize: "10px", opacity: 0.8 }}>
+                    {profile?.plan === "pro" ? "Save to Dashboard" : "Pro Feature"}
               </span>
+              
+
             </button>
           </div>
 
@@ -1843,7 +2419,7 @@ if (yPos > 250) {
               <div
                 style={{
                   background: "#f8fafc",
-                  padding: "20px",
+                  padding: "var(--space-5)",
                   borderRadius: "10px",
                   border: `1px solid ${colors.lightGray}`,
                   whiteSpace: "pre-wrap",
@@ -1856,28 +2432,283 @@ if (yPos > 250) {
                 {output}
               </div>
             </div>
+            
           )}
         </div> {/* End of main white container card */}
+        </div>
+          </SnapWorkspace>
 
+
+{/* HOW IT WORKS — only show to non‑subscribed users */}
+
+{/* END HOW IT WORKS — only show to non‑subscribed users */}
+
+{/* FAQ SECTION — only show to non‑subscribed users */}
+
+  {profile?.plan !== "pro" && (
+  <section
+    style={{
+      width: "100%",
+      maxWidth: 900,
+      padding: "90px 20px",
+      margin: "0 auto",
+    }}
+  >
+    <h2
+      style={{
+        fontSize: "36px",
+        fontWeight: "800",
+        color: "#1f2937",
+        textAlign: "center",
+        marginBottom: "50px",
+        lineHeight: "1.2"
+      }}
+    >
+      Frequently Asked Questions
+    </h2>
+
+    <div style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
+
+      {/* Q1 */}
+      <div className="fancy-card"
+        style={{
+          background: "white",
+          padding: "26px",
+          borderRadius: "14px",
+          border: `1px solid ${colors.lightGray}`,
+          boxShadow: "0 8px 24px rgba(0,0,0,0.05)"
+        }}
+      >
+        <h3 style={{ fontSize: "20px", fontWeight: "700", color: colors.deepBlue }}>
+          Do I need an account to use SnapCopy?
+        </h3>
+        <p style={{ marginTop: "10px", color: "#4b5563", lineHeight: "1.65", fontSize: "16px" }}>
+          No. You can generate Snaps instantly without creating an account. Accounts are only needed if you want to save your Snaps or upgrade to Pro.
+        </p>
+      </div>
+
+      {/* Q2 */}
+      <div className="fancy-card"
+        style={{
+          background: "white",
+          padding: "26px",
+          borderRadius: "14px",
+          border: `1px solid ${colors.lightGray}`,
+          boxShadow: "0 8px 24px rgba(0,0,0,0.05)"
+        }}
+      >
+        <h3 style={{ fontSize: "20px", fontWeight: "700", color: colors.purple }}>
+          Is SnapCopy really free?
+        </h3>
+        <p style={{ marginTop: "10px", color: "#4b5563", lineHeight: "1.65", fontSize: "16px" }}>
+          Yes. All core Snaps are free to use. SnapCopy Pro will offer advanced tools, unlimited saves, and more.
+        </p>
+      </div>
+
+      {/* Q3 */}
+      <div className="fancy-card"
+        style={{
+          background: "white",
+          padding: "26px",
+          borderRadius: "14px",
+          border: `1px solid ${colors.lightGray}`,
+          boxShadow: "0 8px 24px rgba(0,0,0,0.05)"
+        }}
+      >
+        <h3 style={{ fontSize: "20px", fontWeight: "700", color: colors.orange }}>
+          What can I create with SnapCopy?
+        </h3>
+        <p style={{ marginTop: "10px", color: "#4b5563", lineHeight: "1.65", fontSize: "16px" }}>
+          Business bios, customer replies, apologies, policies, contracts, purchase orders, sentiment analysis, and more.
+        </p>
+      </div>
+
+      {/* Q4 */}
+      <div className="fancy-card"
+        style={{
+          background: "white",
+          padding: "26px",
+          borderRadius: "14px",
+          border: `1px solid ${colors.lightGray}`,
+          boxShadow: "0 8px 24px rgba(0,0,0,0.05)"
+        }}
+      >
+        <h3 style={{ fontSize: "20px", fontWeight: "700", color: colors.darkSlate }}>
+          Who is SnapCopy for?
+        </h3>
+        <p style={{ marginTop: "10px", color: "#4b5563", lineHeight: "1.65", fontSize: "16px" }}>
+          Small businesses, contractors, freelancers, and anyone who wants to look more professional without spending hours writing.
+        </p>
+      </div>
+
+      {/* Q5 */}
+      <div className="fancy-card"
+        style={{
+          background: "white",
+          padding: "26px",
+          borderRadius: "14px",
+          border: `1px solid ${colors.lightGray}`,
+          boxShadow: "0 8px 24px rgba(0,0,0,0.05)"
+        }}
+      >
+        <h3 style={{ fontSize: "20px", fontWeight: "700", color: colors.poGreen }}>
+          What is SnapCopy Pro?
+        </h3>
+        <p style={{ marginTop: "10px", color: "#4b5563", lineHeight: "1.65", fontSize: "16px" }}>
+          A premium version coming soon with unlimited saves, advanced tools, and priority features.
+        </p>
+      </div>
+
+    </div>
+  </section>
+)}
+
+
+
+{/* FINAL CTA — only show to public (non‑subscribed) users */}
+{profile?.plan !== "pro" && !user && (
+  <section
+    style={{
+      width: "100%",
+      maxWidth: 900,
+      padding: "90px 20px",
+      margin: "0 auto",
+      textAlign: "center"
+    }}
+  >
+    <h2
+      style={{
+        fontSize: "36px",
+        fontWeight: "800",
+        color: "#1f2937",
+        marginBottom: "22px",
+        lineHeight: "1.2"
+      }}
+    >
+      Ready to Look More Professional?
+    </h2>
+
+    <p
+      style={{
+        fontSize: "20px",
+        color: "#4b5563",
+        maxWidth: "620px",
+        margin: "0 auto 40px auto",
+        lineHeight: "1.6"
+      }}
+    >
+      Start writing better emails, bios, policies, and customer replies in minutes —  
+      no account or credit card required.
+    </p>
+
+    <button
+      onClick={scrollToForm}
+      style={{
+        padding: "18px 36px",
+        borderRadius: "12px",
+        background: `linear-gradient(135deg, ${colors.deepBlue}, ${colors.deepBlue}CC)`,
+        color: "white",
+        fontSize: "18px",
+        fontWeight: "700",
+        border: "none",
+        cursor: "pointer",
+        transition: "0.25s ease"
+      }}
+      onMouseEnter={(e) => {
+        e.target.style.transform = "translateY(-3px)";
+        e.target.style.boxShadow = "0 8px 25px rgba(0,0,0,0.25)";
+      }}
+      onMouseLeave={(e) => {
+        e.target.style.transform = "translateY(0)";
+        e.target.style.boxShadow = "none";
+      }}
+    >
+      Start Free — No Account Needed
+    </button>
+
+    <p
+      style={{
+        marginTop: "18px",
+        fontSize: "14px",
+        color: "#9ca3af"
+      }}
+    >
+      No credit card required. Cancel anytime.
+    </p>
+  </section>
+)}
+
+
+          
         {/* FOOTER */}
-        <footer style={{ textAlign: "center", padding: "40px 0", borderTop: `1px solid ${colors.lightGray}` }}>
+        <footer style={{ textAlign: "center", padding: "50px 0", borderTop: `1px solid ${colors.lightGray}` }}>
           <img src={airStadtLogo} alt="AirStadt Logo" style={{ height: 40, opacity: 0.8, marginBottom: 15 }} />
           <p style={{ color: colors.footerText, fontSize: "14px" }}>
             &copy; {new Date().getFullYear()} SnapCopy by AirStadt. All rights reserved.
           </p>
         </footer>
-      </div>
+      
     </main>
   );
 }
 
+
+import Layout from "./Layout";
+
+
+import SuccessPage from "./pages/SuccessPage"; // Make sure to create this file!
+
 export default function App() {
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/interest" element={<InterestForm />} />
-      </Routes>
+      <Layout>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/interest" element={<InterestForm />} />
+          <Route path="/auth" element={<Auth />} />
+
+          {/* New Success Route - Handles the redirect from Stripe */}
+          <Route path="/success" element={<SuccessPage />} />
+
+          <Route
+            path="/dashboard"
+            element={<ProtectedRoute><Dashboard /></ProtectedRoute>}
+          />
+
+          <Route
+            path="/settings/profile"
+            element={<ProtectedRoute><ProfileSettings /></ProtectedRoute>}
+          />
+
+          <Route
+            path="/settings/billing"
+            element={<ProtectedRoute><BillingSettings /></ProtectedRoute>}
+          />
+
+          <Route
+            path="/settings/security"
+            element={<ProtectedRoute><SecuritySettings /></ProtectedRoute>}
+          />
+
+          <Route
+            path="/mysnaps"
+            element={<ProtectedRoute><MySnaps /></ProtectedRoute>}
+          />
+
+          <Route path="/upgrade" element={<UpgradeScreen />} />
+
+          <Route
+            path="/snaps/:id"
+            element={<ProtectedRoute><SnapDetail /></ProtectedRoute>}
+          />
+
+          <Route
+            path="/settings"
+            element={<ProtectedRoute><SettingsHome /></ProtectedRoute>}
+          />
+        </Routes>
+      </Layout>
     </Router>
   );
 }
+

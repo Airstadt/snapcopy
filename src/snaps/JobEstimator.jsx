@@ -1,10 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { auth } from "../firebase";
 
-/**
- * JobEstimator Component
- * Updated to integrate with the shared action bar in App.jsx.
- * All internal fields, logic, and custom unit-of-measure functionality are preserved.
- */
 export default function JobEstimator({
   colors,
   inputStyle,
@@ -29,246 +25,417 @@ export default function JobEstimator({
   financials,
   setFinancials,
 
-  calculateTotal,
-  // onDownload is now handled by the parent App.jsx shared button
+  calculateTotal
 }) {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((u) => setUser(u));
+    return unsubscribe;
+  }, []);
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-      
-      {/* 1. HEADER DETAILS - Preserving all fields */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px" }}>
-        <div>
-          <label style={{ fontSize: "10px", fontWeight: "bold" }}>Job Title / Project</label>
-          <input 
-            type="text" 
-            placeholder="Kitchen Remodel" 
-            style={inputStyle} 
-            value={header.jobTitle} 
-            onChange={e => setHeader({ ...header, jobTitle: e.target.value })} 
-          />
-        </div>
-        <div>
-          <label style={{ fontSize: "10px", fontWeight: "bold" }}>Customer Name</label>
-          <input 
-            type="text" 
-            placeholder="John Doe" 
-            style={inputStyle} 
-            value={header.customerName} 
-            onChange={e => setHeader({ ...header, customerName: e.target.value })} 
-          />
-        </div>
-      </div>
+    <div style={{ display: "flex", flexDirection: "column", gap: "30px" }}>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px" }}>
-        <div>
-          <label style={{ fontSize: "10px", fontWeight: "bold" }}>Location</label>
-          <input 
-            type="text" 
-            placeholder="Richmond, VA" 
-            style={inputStyle} 
-            value={header.location} 
-            onChange={e => setHeader({ ...header, location: e.target.value })} 
-          />
-        </div>
-        <div>
-          <label style={{ fontSize: "10px", fontWeight: "bold" }}>Due Date / Expected Start</label>
-          <input 
-            type="date" 
-            style={inputStyle} 
-            value={header.dueDate} 
-            onChange={e => setHeader({ ...header, dueDate: e.target.value })} 
-          />
-        </div>
-      </div>
+      {!user && (
+        <p style={{ marginBottom: "10px", color: "#4a5568" }}>
+          Build a professional job estimate with labor, materials, fees, and
+          automatic total calculation.
+        </p>
+      )}
 
-      {/* 2. LABOR / TASKS - Full logic retained */}
-      <div style={{ border: `1px solid ${colors.lightGray}`, padding: "15px", borderRadius: "10px" }}>
-        <h4 style={{ fontSize: "14px", color: colors.deepBlue, marginBottom: "10px" }}>Labor & Tasks</h4>
+      {/* ============================
+          1. HEADER DETAILS
+      ============================ */}
+      <SectionCard title="Job Details" color={colors.deepBlue}>
+        <TwoCol>
+          <LabeledInput
+            label="Job Title / Project"
+            placeholder="Kitchen Remodel"
+            value={header.jobTitle}
+            onChange={(v) => setHeader({ ...header, jobTitle: v })}
+            inputStyle={inputStyle}
+          />
+
+          <LabeledInput
+            label="Customer Name"
+            placeholder="John Doe"
+            value={header.customerName}
+            onChange={(v) => setHeader({ ...header, customerName: v })}
+            inputStyle={inputStyle}
+          />
+        </TwoCol>
+
+        <TwoCol>
+          <LabeledInput
+            label="Location"
+            placeholder="Richmond, VA"
+            value={header.location}
+            onChange={(v) => setHeader({ ...header, location: v })}
+            inputStyle={inputStyle}
+          />
+
+          <LabeledInput
+            label="Due Date / Expected Start"
+            type="date"
+            value={header.dueDate}
+            onChange={(v) => setHeader({ ...header, dueDate: v })}
+            inputStyle={inputStyle}
+          />
+        </TwoCol>
+      </SectionCard>
+
+      {/* ============================
+          2. LABOR / TASKS
+      ============================ */}
+      <SectionCard title="Labor & Tasks" color={colors.deepBlue}>
         {tasks.map((task, i) => (
-          <div 
-            key={i} 
-            style={{ display: "grid", gridTemplateColumns: "2fr 1fr 0.8fr 1fr 40px", gap: "10px", marginBottom: "10px" }}
-          >
-            <input 
-              type="text" 
-              placeholder="Task description" 
-              style={inputStyle} 
-              value={task.desc} 
-              onChange={e => updateTask(i, "desc", e.target.value)} 
-            />
-            <select 
-              style={inputStyle} 
-              value={task.type} 
-              onChange={e => updateTask(i, "type", e.target.value)}
-            >
-              <option>Hourly</option>
-              <option>Flat Rate</option>
-            </select>
-            <input 
-              type="number" 
-              placeholder="Rate" 
-              style={inputStyle} 
-              value={task.rate} 
-              onChange={e => updateTask(i, "rate", e.target.value)} 
-            />
-            <input 
-              type="number" 
-              placeholder="Qty/Hrs" 
-              style={inputStyle} 
-              value={task.qty} 
-              onChange={e => updateTask(i, "qty", e.target.value)} 
-            />
-            <button 
-              onClick={() => removeTask(i)} 
-              style={{ background: colors.errorRed, color: "white", border: "none", borderRadius: "5px", cursor: "pointer" }}
-            >
-              ×
-            </button>
+          <div key={i} style={{ marginBottom: "20px" }}>
+            <ThreeCol>
+              <LabeledInput
+                label="Task Description"
+                placeholder="Describe the task"
+                value={task.desc}
+                onChange={(v) => updateTask(i, "desc", v)}
+                inputStyle={inputStyle}
+              />
+
+              <LabeledSelect
+                label="Type"
+                value={task.type}
+                onChange={(v) => updateTask(i, "type", v)}
+                inputStyle={inputStyle}
+                options={["Hourly", "Flat Rate"]}
+              />
+
+              <LabeledInput
+                label="Rate"
+                type="number"
+                value={task.rate}
+                onChange={(v) => updateTask(i, "rate", v)}
+                inputStyle={inputStyle}
+              />
+            </ThreeCol>
+
+            <TwoCol>
+              <LabeledInput
+                label="Qty / Hours"
+                type="number"
+                value={task.qty}
+                onChange={(v) => updateTask(i, "qty", v)}
+                inputStyle={inputStyle}
+              />
+
+              <RemoveButton
+                onClick={() => removeTask(i)}
+                color={colors.errorRed}
+              />
+            </TwoCol>
           </div>
         ))}
-        <button 
-          onClick={addTask} 
-          style={{ background: colors.deepBlue, color: "white", border: "none", padding: "5px 15px", borderRadius: "5px", fontSize: "12px", cursor: "pointer" }}
-        >
-          + Add Task
-        </button>
-      </div>
 
-      {/* 3. MATERIALS - Custom UOM Logic preserved */}
-      <div style={{ border: `1px solid ${colors.lightGray}`, padding: "15px", borderRadius: "10px" }}>
-        <h4 style={{ fontSize: "14px", color: colors.deepBlue, marginBottom: "10px" }}>Materials</h4>
+        <AddButton label="+ Add Task" onClick={addTask} color={colors.deepBlue} />
+      </SectionCard>
+
+      {/* ============================
+          3. MATERIALS
+      ============================ */}
+      <SectionCard title="Materials" color={colors.deepBlue}>
         {materials.map((mat, i) => (
-          <div key={i} style={{ marginBottom: "15px", borderBottom: "1px solid #eee", pb: "10px" }}>
-            <div 
-              style={{ 
-                display: "grid", 
-                gridTemplateColumns: "2fr 1fr 0.8fr 1fr 40px", 
-                gap: "10px" 
-              }}
-            >
-              <input 
-                type="text" 
-                placeholder="Material item" 
-                style={inputStyle} 
-                value={mat.desc} 
-                onChange={e => updateMaterial(i, "desc", e.target.value)} 
+          <div key={i} style={{ marginBottom: "20px" }}>
+            <ThreeCol>
+              <LabeledInput
+                label="Material Item"
+                value={mat.desc}
+                onChange={(v) => updateMaterial(i, "desc", v)}
+                inputStyle={inputStyle}
               />
 
-              <select 
-                style={inputStyle} 
-                value={["pcs", "lbs", "ft", "sqft", "gal", "hr"].includes(mat.uom) ? mat.uom : "Custom..."}
-                onChange={e => {
-                  const val = e.target.value;
-                  updateMaterial(i, "uom", val === "Custom..." ? "" : val);
-                }}
-              >
-                <option value="pcs">pcs (Pieces)</option>
-                <option value="lbs">lbs (Pounds)</option>
-                <option value="ft">ft (Linear Feet)</option>
-                <option value="sqft">sqft (Square Feet)</option>
-                <option value="gal">gal (Gallons)</option>
-                <option value="hr">hr (Hours)</option>
-                <option value="Custom...">Custom...</option>
-              </select>
-
-              <input 
-                type="number" 
-                placeholder="Qty" 
-                style={inputStyle} 
-                value={mat.qty} 
-                onChange={e => updateMaterial(i, "qty", e.target.value)} 
+              <LabeledSelect
+                label="Unit"
+                value={
+                  ["pcs", "lbs", "ft", "sqft", "gal", "hr"].includes(mat.uom)
+                    ? mat.uom
+                    : "Custom..."
+                }
+                onChange={(v) =>
+                  updateMaterial(i, "uom", v === "Custom..." ? "" : v)
+                }
+                inputStyle={inputStyle}
+                options={[
+                  "pcs",
+                  "lbs",
+                  "ft",
+                  "sqft",
+                  "gal",
+                  "hr",
+                  "Custom..."
+                ]}
               />
 
-              <input 
-                type="number" 
-                placeholder="Cost" 
-                style={inputStyle} 
-                value={mat.cost} 
-                onChange={e => updateMaterial(i, "cost", e.target.value)} 
+              <LabeledInput
+                label="Qty"
+                type="number"
+                value={mat.qty}
+                onChange={(v) => updateMaterial(i, "qty", v)}
+                inputStyle={inputStyle}
+              />
+            </ThreeCol>
+
+            <TwoCol>
+              <LabeledInput
+                label="Cost"
+                type="number"
+                value={mat.cost}
+                onChange={(v) => updateMaterial(i, "cost", v)}
+                inputStyle={inputStyle}
               />
 
-              <button 
-                onClick={() => removeMaterial(i)} 
-                style={{ background: colors.errorRed, color: "white", border: "none", borderRadius: "5px", cursor: "pointer" }}
-              >
-                ×
-              </button>
-            </div>
+              <RemoveButton
+                onClick={() => removeMaterial(i)}
+                color={colors.errorRed}
+              />
+            </TwoCol>
 
-            {/* Custom Input: Appears if value isn't standard */}
             {!["pcs", "lbs", "ft", "sqft", "gal", "hr"].includes(mat.uom) && (
-              <input 
-                type="text" 
-                placeholder="Enter custom unit (e.g. bags, boxes, rolls)" 
-                style={{ ...inputStyle, marginTop: "8px", fontSize: "13px", borderColor: colors.deepBlue }} 
-                value={mat.uom} 
-                onChange={e => updateMaterial(i, "uom", e.target.value)} 
+              <LabeledInput
+                label="Custom Unit"
+                placeholder="bags, boxes, rolls..."
+                value={mat.uom}
+                onChange={(v) => updateMaterial(i, "uom", v)}
+                inputStyle={{
+                  ...inputStyle,
+                  borderColor: colors.deepBlue
+                }}
               />
             )}
           </div>
         ))}
-        <button 
-          onClick={addMaterial} 
-          style={{ background: colors.deepBlue, color: "white", border: "none", padding: "5px 15px", borderRadius: "5px", fontSize: "12px", cursor: "pointer" }}
-        >
-          + Add Material
-        </button>
-      </div>
 
-      {/* 4. TOTALS SECTION */}
-      <div style={{ background: colors.lightGray, padding: "20px", borderRadius: "10px", marginTop: "10px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "15px", marginBottom: "15px" }}>
-          <div>
-            <label style={{ fontSize: "10px", fontWeight: "bold" }}>Discount ($)</label>
-            <input 
-              type="number" 
-              style={inputStyle} 
-              value={financials.discount} 
-              onChange={e => setFinancials({ ...financials, discount: e.target.value })} 
-            />
-          </div>
-          <div>
-            <label style={{ fontSize: "10px", fontWeight: "bold" }}>Tax Rate (%)</label>
-            <input 
-              type="number" 
-              style={inputStyle} 
-              value={financials.taxRate} 
-              onChange={e => setFinancials({ ...financials, taxRate: e.target.value })} 
-            />
-          </div>
-          <div>
-            <label style={{ fontSize: "10px", fontWeight: "bold" }}>Payment Terms</label>
-            <select 
-              style={inputStyle} 
-              value={financials.terms} 
-              onChange={e => setFinancials({ ...financials, terms: e.target.value })}
-            >
-              <option>Due on Receipt</option>
-              <option>Net 7</option>
-              <option>Net 15</option>
-              <option>Net 30</option>
-            </select>
-          </div>
-        </div>
-        
-        {/* FOOTER: Total Display only */}
-        <div 
-          style={{ 
-            display: "flex", 
-            justifyContent: "flex-end", 
-            alignItems: "center", 
-            borderTop: `1px solid rgba(0,0,0,0.1)`, 
-            paddingTop: "15px" 
+        <AddButton
+          label="+ Add Material"
+          onClick={addMaterial}
+          color={colors.deepBlue}
+        />
+      </SectionCard>
+
+      {/* ============================
+          4. TOTALS
+      ============================ */}
+      <SectionCard title="Totals & Summary" color={colors.deepBlue}>
+        <ThreeCol>
+          <LabeledInput
+            label="Discount ($)"
+            type="number"
+            value={financials.discount}
+            onChange={(v) => setFinancials({ ...financials, discount: v })}
+            inputStyle={inputStyle}
+          />
+
+          <LabeledInput
+            label="Tax Rate (%)"
+            type="number"
+            value={financials.taxRate}
+            onChange={(v) => setFinancials({ ...financials, taxRate: v })}
+            inputStyle={inputStyle}
+          />
+
+          <LabeledSelect
+            label="Payment Terms"
+            value={financials.terms}
+            onChange={(v) => setFinancials({ ...financials, terms: v })}
+            inputStyle={inputStyle}
+            options={["Due on Receipt", "Net 7", "Net 15", "Net 30"]}
+          />
+        </ThreeCol>
+
+        <div
+          style={{
+            marginTop: "20px",
+            display: "flex",
+            justifyContent: "flex-end"
           }}
         >
           <div style={{ textAlign: "right" }}>
-            <span style={{ fontSize: "14px", fontWeight: "bold", color: colors.textDark }}>Estimated Total: </span>
-            <span style={{ fontSize: "24px", fontWeight: "900", color: colors.deepBlue }}>
+            <span style={{ fontSize: "14px", fontWeight: "bold" }}>
+              Estimated Total:
+            </span>
+            <span
+              style={{
+                fontSize: "24px",
+                fontWeight: "900",
+                color: colors.deepBlue,
+                marginLeft: "8px"
+              }}
+            >
               ${calculateTotal()}
             </span>
           </div>
         </div>
-      </div>
+      </SectionCard>
+    </div>
+  );
+}
+
+/* ============================
+   REUSABLE COMPONENTS
+============================ */
+
+function SectionCard({ title, color, children }) {
+  return (
+    <div
+      style={{
+        background: "#f8fafc",
+        borderRadius: "12px",
+        border: "1px solid #e2e8f0",
+        padding: "20px",
+        display: "flex",
+        flexDirection: "column",
+        gap: "15px",
+        width: "100%",
+        maxWidth: "100%",
+        boxSizing: "border-box"
+      }}
+    >
+      <h4
+        style={{
+          color,
+          marginBottom: "5px",
+          borderBottom: `2px solid ${color}`,
+          display: "inline-block",
+          paddingBottom: "4px"
+        }}
+      >
+        {title}
+      </h4>
+
+      {children}
+    </div>
+  );
+}
+
+function LabeledInput({ label, inputStyle, onChange, ...props }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+      <label style={{ fontWeight: 600, fontSize: "13px", color: "#4a5568" }}>
+        {label}
+      </label>
+      <input
+        {...props}
+        onChange={(e) => onChange(e.target.value)}
+        style={{
+          ...inputStyle,
+          width: "100%",
+          maxWidth: "100%",
+          boxSizing: "border-box"
+        }}
+      />
+    </div>
+  );
+}
+
+
+function LabeledSelect({ label, options, inputStyle, onChange, ...props }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+      <label style={{ fontWeight: 600, fontSize: "13px", color: "#4a5568" }}>
+        {label}
+      </label>
+      <select
+        {...props}
+        onChange={(e) => onChange(e.target.value)}
+        style={{
+          ...inputStyle,
+          width: "100%",
+          maxWidth: "100%",
+          boxSizing: "border-box"
+        }}
+      >
+        {options.map((o) => (
+          <option key={o}>{o}</option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+
+function RemoveButton({ onClick, color }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        background: color,
+        color: "white",
+        border: "none",
+        borderRadius: "6px",
+        padding: "4px 8px",
+        cursor: "pointer",
+        fontSize: "14px",
+        width: "100px",
+        height: "32px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        lineHeight: 1
+      }}
+    >
+      ×
+    </button>
+  );
+}
+
+function AddButton({ label, onClick, color }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        background: color,
+        color: "white",
+        border: "none",
+        padding: "10px 20px",
+        borderRadius: "8px",
+        fontWeight: "bold",
+        cursor: "pointer",
+        marginTop: "10px",
+        width: "fit-content"
+      }}
+    >
+      {label}
+    </button>
+  );
+}
+
+function TwoCol({ children }) {
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr",
+        gap: "15px",
+        width: "100%",
+        maxWidth: "100%",
+        boxSizing: "border-box"
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function ThreeCol({ children }) {
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr 1fr",
+        gap: "15px",
+        width: "100%",
+        maxWidth: "100%",
+        boxSizing: "border-box"
+      }}
+    >
+      {children}
     </div>
   );
 }

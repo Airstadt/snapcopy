@@ -1,11 +1,30 @@
-// src/snaps/Policies.jsx
-import React from "react";
-
 /**
- * Policies Component
- * Focuses purely on data input fields. 
- * Action buttons are now handled by the parent App.jsx for UI consistency.
+ * Policies.jsx — SnapCopy Component
+ * ---------------------------------
+ * This component renders the input fields for generating business policies:
+ * - Policy type (Refund, Warranty, Privacy, Terms of Service)
+ * - Business name
+ * - Key details / rules / exclusions
+ *
+ * Behavior:
+ * - PUBLIC VISITORS (not logged in):
+ *      • See marketing text + CTA banner
+ *      • See the full policy form
+ *      • Cannot save snaps (handled in App.jsx)
+ *
+ * - LOGGED-IN USERS:
+ *      • Do NOT see marketing text or CTA
+ *      • See a clean, app-only version of the form
+ *
+ * Notes:
+ * - All logic (state, generation, saving) lives in App.jsx.
+ * - This file ONLY handles UI and conditional rendering.
+ * - Safe Firebase auth listener prevents blank screens.
  */
+
+import React, { useEffect, useState } from "react";
+import { auth } from "../firebase";
+
 export default function Policies({
   policyType,
   setPolicyType,
@@ -16,12 +35,35 @@ export default function Policies({
   colors,
   inputStyle
 }) {
+  const [user, setUser] = useState(null);
+
+  // Safe Firebase auth listener — prevents crashes on first render
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((u) => setUser(u));
+    return unsubscribe;
+  }, []);
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-      
+
+      {/* PUBLIC MARKETING CONTENT — only visible when NOT logged in */}
+      {!user && (
+        <>
+          <p style={{ marginBottom: "20px", color: "#4a5568" }}>
+            Generate professional business policies tailored to your company.
+            Choose a policy type, enter your business name, and add key details.
+          </p>
+
+          
+        </>
+      )}
+
       {/* 1. Policy Type Selection */}
       <div>
-        <label style={{ fontWeight: "600", color: colors.textDark }}>Policy Type</label>
+        <label style={{ fontWeight: "600", color: colors.textDark }}>
+          Policy Type
+        </label>
+
         <select
           value={policyType}
           onChange={(e) => setPolicyType(e.target.value)}
@@ -37,7 +79,10 @@ export default function Policies({
 
       {/* 2. Business Name Input */}
       <div>
-        <label style={{ fontWeight: "600", color: colors.textDark }}>Business Name</label>
+        <label style={{ fontWeight: "600", color: colors.textDark }}>
+          Business Name
+        </label>
+
         <input
           value={businessName}
           onChange={(e) => setBusinessName(e.target.value)}
@@ -48,7 +93,10 @@ export default function Policies({
 
       {/* 3. Key Details Textarea */}
       <div>
-        <label style={{ fontWeight: "600", color: colors.textDark }}>Key Details</label>
+        <label style={{ fontWeight: "600", color: colors.textDark }}>
+          Key Details
+        </label>
+
         <textarea
           value={details}
           onChange={(e) => setDetails(e.target.value)}
@@ -58,9 +106,10 @@ export default function Policies({
       </div>
 
       {/* 
-          NOTE: Generate, Download, and Save buttons have been removed from here.
-          They are now rendered by the Shared Action Buttons section in App.jsx 
-          to ensure a uniform look across all Snaps.[cite: 3, 5]
+        NOTE:
+        Generate, Download, and Save buttons are NOT included here.
+        They are rendered by the Shared Action Bar in App.jsx
+        to maintain consistent UI across all Snaps.
       */}
     </div>
   );
