@@ -1671,6 +1671,7 @@ window.generateSnap = generate;
 {/* END VALUE PROPOSITION SECTION */}
 
 {/* VIDEO DEMO SECTION */}
+{profile?.plan !== "pro" && (
 <section id="demo" className="w-full min-h-screen flex items-center justify-center bg-[#0d0d0d] px-6 py-20">
   <div className="max-w-4xl w-full text-center">
     <h2 className="text-4xl font-semibold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent mb-4">
@@ -1707,6 +1708,7 @@ window.generateSnap = generate;
     </div>
   </div>
 </section>
+)}
 {/* END VIDEO DEMO SECTION */}
 
 
