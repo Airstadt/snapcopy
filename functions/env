@@ -1,0 +1,15 @@
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
+// Inside your checkout / session creation function:
+const session = await stripe.checkout.sessions.create({
+  payment_method_types: ['card'],
+  line_items: [
+    {
+      price: process.env.STRIPE_PRICE_ID, // <-- Reads directly from your .env file
+      quantity: 1,
+    },
+  ],
+  mode: 'subscription',
+  success_url: 'https://snapcopy.online/success',
+  cancel_url: 'https://snapcopy.online/cancel',
+});

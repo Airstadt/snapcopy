@@ -3,7 +3,7 @@
     {
       "source": "functions",
       "codebase": "default",
-      "runtime": "nodejs20",
+      "runtime": "nodejs22",
       "secrets": [
         "STRIPE_SECRET_KEY",
         "STRIPE_WEBHOOK_SECRET",

@@ -2,7 +2,7 @@ const { onCall, onRequest, HttpsError } = require("firebase-functions/v2/https")
 const { defineSecret } = require("firebase-functions/params");
 const admin = require("firebase-admin");
 admin.initializeApp();
-
+// force redeploy
 const STRIPE_SECRET_KEY = defineSecret("STRIPE_SECRET_KEY");
 const STRIPE_WEBHOOK_SECRET = defineSecret("STRIPE_WEBHOOK_SECRET");
 const MONTHLY_PRICE_ID = defineSecret("MONTHLY_PRICE_ID");

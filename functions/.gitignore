@@ -1,2 +1,31 @@
+# Local Environment Variables (CRUCIAL: Keeps your Stripe Live Keys safe)
+.env
+.env.*
+.env.local
+.env.production
+.env.development
+
+# Node Dependencies (Never push this to GitHub, it's rebuilt on deploy)
 node_modules/
-*.local
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Firebase runtime and local cache configs
+.firebase/
+.runtimeconfig.json
+firebase-debug.log
+ui-debug.log
+
+# TypeScript build output (If you are using TypeScript, this prevents compiled code duplication)
+lib/
+
+# Miscellaneous / OS files
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
