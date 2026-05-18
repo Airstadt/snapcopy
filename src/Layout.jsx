@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { auth } from "./firebase"; 
+import { auth } from "./firebase";
 
 export default function Layout({ children }) {
   const location = useLocation();
@@ -8,75 +8,91 @@ export default function Layout({ children }) {
   const isAuthPage = location.pathname === "/auth";
   const isUpgradePage = location.pathname === "/upgrade";
   const isDashboard = location.pathname === "/dashboard";
-
-  // ⭐ Detect the Profile page
   const isProfilePage = location.pathname === "/settings/profile";
+
+  const showLoginButton = !user && location.pathname === "/";
 
   return (
     <div style={{ width: "100%" }}>
       <header
-       style={{
-            width: "100%",
-            padding: "28px 24px",   // ⭐ Increased vertical padding
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            borderBottom: "1px solid #eee",
-            boxSizing: "border-box", // ⭐ Ensures padding behaves correctly
-          }}
->
+        style={{
+          width: "100%",
+          padding: "20px 32px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          borderBottom: "1px solid #eee",
+          background: "#fff",
+          position: "sticky",
+          top: 0,
+          zIndex: 10,
+        }}
+      >
+        {/* Logo */}
         <img
           src="/snapcopy_logo.png"
           alt="SnapCopy"
-          style={{ height: 40 }}
+          style={{ height: 42 }}
         />
 
+        {/* RIGHT SIDE BUTTONS */}
+        <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
 
-{/* ⭐ Login button for returning users on Home page */}
-{!user && location.pathname === "/" && (
-  <Link
-    to="/auth?mode=login"
-    style={{
-      textDecoration: "none",
-      color: "#8a2be2",
-      fontWeight: "bold",
-    }}
-  >
-    Log in
-  </Link>
-)}
+          {/* ⭐ Login button (clean pill style) */}
+          {showLoginButton && (
+            <Link
+              to="/auth?mode=login"
+              style={{
+                padding: "8px 18px",
+                borderRadius: "20px",
+                background: "#f5f0ff",
+                color: "#8a2be2",
+                fontWeight: "600",
+                textDecoration: "none",
+                fontSize: "14px",
+                border: "1px solid #e5d9ff",
+              }}
+            >
+              Log in
+            </Link>
+          )}
 
-        
-
-        {/* Existing logic for other pages */}
-        {!isDashboard && !isProfilePage && !user ? (
-          <Link
-            to={(isAuthPage || isUpgradePage) ? "/" : "/auth?redirect=/upgrade"}
-            style={{
-              textDecoration: "none",
-              color: "#8a2be2",
-              fontWeight: "bold",
-            }}
-          >
-            {(isAuthPage || isUpgradePage) ? "Back Home" : "Sign up for pro"}
-          </Link>
-        ) : (!isProfilePage && (isAuthPage || isUpgradePage)) ? (
-          <Link
-            to="/"
-            style={{
-              textDecoration: "none",
-              color: "#8a2be2",
-              fontWeight: "bold",
-            }}
-          >
-            Back Home
-          </Link>
-        ) : null}
+          {/* ⭐ Sign up for Pro / Back Home logic */}
+          {!isDashboard && !isProfilePage && !user ? (
+            <Link
+              to={(isAuthPage || isUpgradePage) ? "/" : "/auth?redirect=/upgrade"}
+              style={{
+                padding: "8px 18px",
+                borderRadius: "20px",
+                background: "#8a2be2",
+                color: "white",
+                fontWeight: "600",
+                textDecoration: "none",
+                fontSize: "14px",
+              }}
+            >
+              {(isAuthPage || isUpgradePage) ? "Back Home" : "Sign up for Pro"}
+            </Link>
+          ) : (!isProfilePage && (isAuthPage || isUpgradePage)) ? (
+            <Link
+              to="/"
+              style={{
+                padding: "8px 18px",
+                borderRadius: "20px",
+                background: "#8a2be2",
+                color: "white",
+                fontWeight: "600",
+                textDecoration: "none",
+                fontSize: "14px",
+              }}
+            >
+              Back Home
+            </Link>
+          ) : null}
+        </div>
       </header>
 
-      <main style={{ paddingTop: "20px" }}>
-        {children}
-      </main>
+      <main style={{ paddingTop: "20px" }}>{children}</main>
     </div>
   );
 }
