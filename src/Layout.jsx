@@ -36,7 +36,7 @@ export default function Layout({ children }) {
         />
 
         {/* RIGHT SIDE BUTTONS */}
-        <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
+        <div style={{ display: "flex", gap: "16px", alignItems: "center", paddingRight: "50px" }}>
 
           {/* ⭐ Login button (clean pill style) */}
           {showLoginButton && (
