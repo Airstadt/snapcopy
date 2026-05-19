@@ -7,6 +7,7 @@ import { doc, setDoc, collection, serverTimestamp } from "firebase/firestore";
 import { useAuth } from "./hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import UpgradeScreen from "./UpgradeScreen";
+import { gsap } from "gsap";
 
 
 
@@ -70,6 +71,40 @@ function HomePage() {
   const [scope, setScope] = useState("");
   const [terms, setTerms] = useState("");
   const [specialClauses, setSpecialClauses] = useState("");
+
+useEffect(() => {
+  const wrapper = document.querySelector(".meter-wrapper");
+  const wave = document.querySelector(".meter-wave");
+
+  if (!wrapper || !wave) return;
+
+  const wrapperWidth = wrapper.offsetWidth;
+  const waveWidth = wave.offsetWidth;
+
+  gsap.fromTo(
+    wave,
+    { x: -waveWidth, scaleY: 0.3 },
+    {
+      x: wrapperWidth,
+      scaleY: 2,
+      duration: 2.5,
+      ease: "power2.inOut",
+      repeat: -1,
+    }
+  );
+}, []);
+
+
+
+
+
+
+
+
+
+
+
+  // ⬆️ END — this is the ONLY correct place
 
   // ... all your other state + helpers ...
 
@@ -1005,6 +1040,9 @@ if (yPos > 250) {
         );
       }, 0);
 
+
+
+
       const discPercent = parseFloat(poTotals.discountRate) || 0;
       const calculatedDiscount = itemsSubtotal * (discPercent / 100);
       const finalDiscount =
@@ -1313,7 +1351,115 @@ async function saveSnap() {
 // Make generate() callable from Snaps
 window.generateSnap = generate;
 
+// subtitle rotation component for hero section
+function RotatingHeroText() {
+  const messages = [
+    "AI writing tools made for busy small business owners. Clear, confident, ready to send every time.",
+    "Built for small business owners who don’t have hours to spend writing. Get clean, confident content the moment you need it.",
+    "For small business owners who move fast. Get polished, professional writing without slowing down."
+  ];
 
+  const [index, setIndex] = useState(0);
+  const [animState, setAnimState] = useState("in"); // "in" or "out"
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setAnimState("out");
+
+      setTimeout(() => {
+        setIndex((prev) => (prev + 1) % messages.length);
+        setAnimState("in");
+      }, 600); // slide-out duration
+    }, 5500); // total duration per message
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Inject keyframes once
+  useEffect(() => {
+    const style = document.createElement("style");
+    style.innerHTML = `
+      @keyframes glassPulse {
+        0% { background: rgba(210, 180, 255, 0.35); }
+        50% { background: rgba(230, 200, 255, 0.55); }
+        100% { background: rgba(210, 180, 255, 0.35); }
+      }
+
+      @keyframes shimmerMove {
+        0% { transform: translateX(-20%); opacity: 0.15; }
+        50% { transform: translateX(20%); opacity: 0.25; }
+        100% { transform: translateX(-20%); opacity: 0.15; }
+      }
+
+      @keyframes slideIn {
+        0% { opacity: 0; transform: translateY(18px); }
+        100% { opacity: 1; transform: translateY(0); }
+      }
+
+      @keyframes slideOut {
+        0% { opacity: 1; transform: translateY(0); }
+        100% { opacity: 0; transform: translateY(-18px); }
+      }
+    `;
+    document.head.appendChild(style);
+    return () => document.head.removeChild(style);
+  }, []);
+
+  return (
+    <div
+      style={{
+        position: "relative",
+        overflow: "hidden",
+        maxWidth: "780px",
+        margin: "0 auto 40px auto",
+        padding: "40px 50px",
+        borderRadius: "18px",
+        backdropFilter: "blur(14px)",
+        animation: "glassPulse 6s ease-in-out infinite",
+        border: "1px solid rgba(255, 255, 255, 0.45)",
+        boxShadow: "0 12px 45px rgba(120, 60, 200, 0.18)",
+        textAlign: "center",
+      }}
+    >
+
+      {/* Shimmer layer */}
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: "-50%",
+          width: "200%",
+          height: "100%",
+          background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent)",
+          animation: "shimmerMove 7s ease-in-out infinite",
+          pointerEvents: "none",
+        }}
+      />
+
+      <p
+        style={{
+          position: "relative",
+          fontSize: "22px",
+          color: "#4b5563",
+          lineHeight: "1.55",
+          margin: 0,
+          minHeight: "70px",
+          animation: animState === "in"
+            ? "slideIn 0.6s ease forwards"
+            : "slideOut 0.6s ease forwards",
+        }}
+      >
+        {messages[index]}
+      </p>
+    </div>
+  );
+}
+
+
+
+
+
+// end subtitle rotation component for hero section
   // ---------------------------------------------------------
   // RETURN UI
   // ---------------------------------------------------------
@@ -1361,17 +1507,38 @@ window.generateSnap = generate;
     {/* HERO SECTION */}
     {/* HERO SECTION */}
 {/* HERO SECTION */}
-<section 
-  style={{
-    maxWidth: 1000,
-    textAlign: "center",
-    padding: "80px 20px 70px",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center"
-  }}
->
+ <section 
+      style={{
+        maxWidth: 1000,
+        textAlign: "center",
+        padding: "80px 20px 70px",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center"
+      }}
+    >
+      
+   <div style={{ position: "relative", marginBottom: 25, width: 160, height: 160 }}>
   
+  {/* Swirling glow */}
+  <div
+    style={{
+      position: "absolute",
+      top: "50%",
+      left: "50%",
+      width: 260,
+      height: 260,
+      transform: "translate(-50%, -50%)",
+      borderRadius: "50%",
+      background: "conic-gradient(from 0deg, rgba(150, 80, 255, 0.25), rgba(200, 150, 255, 0.15), rgba(150, 80, 255, 0.25))",
+      filter: "blur(45px)",
+      animation: "swirlGlow 12s linear infinite",
+      pointerEvents: "none",
+      zIndex: 0,
+    }}
+  />
+
+  {/* Actual logo */}
   <img
     src={snapcopyLogo}
     alt="SnapCopy Logo"
@@ -1379,67 +1546,59 @@ window.generateSnap = generate;
       width: 160,
       height: 160,
       borderRadius: "50%",
-      marginBottom: 25,
-      boxShadow: "0 8px 25px rgba(0,0,0,0.08)"
+      position: "relative",
+      zIndex: 2,
+      boxShadow: "0 8px 25px rgba(0,0,0,0.08)",
     }}
   />
+</div>
 
-  <h1
-    style={{
-      fontSize: "48px",
-      fontWeight: "800",
-      color: "#111827",
-      marginBottom: "18px",
-      lineHeight: "1.15",
-      maxWidth: "800px"
-    }}
-  >
-    Write Better. Respond Faster. Look Instantly Professional.
-  </h1>
 
-  <p
-    style={{
-      fontSize: "22px",
-      color: "#4b5563",
-      maxWidth: "720px",
-      margin: "0 auto 40px auto",
-      lineHeight: "1.55"
-    }}
-  >
-    AI writing tools built for small business owners who don’t have time to write.  
-    Clean, confident, ready‑to‑send writing — every single time.
-  </p>
 
-  {/* CTA BUTTONS */}
-  <div style={{ display: "flex", justifyContent: "center", gap: "16px" }}>
-    <button className="fancy-card"
-      onClick={scrollToForm}
-      style={{
-        padding: "16px 32px",
-        borderRadius: "12px",
-        background: `linear-gradient(135deg, ${colors.deepBlue}, ${colors.deepBlue}CC)`,
-        color: "white",
-        fontSize: "17px",
-        fontWeight: "700",
-        border: "none",
-        cursor: "pointer",
-        transition: "0.25s ease"
-      }}
-      onMouseEnter={(e) => {
-        e.target.style.transform = "translateY(-3px)";
-        e.target.style.boxShadow = "0 8px 25px rgba(0,0,0,0.25)";
-      }}
-      onMouseLeave={(e) => {
-        e.target.style.transform = "translateY(0)";
-        e.target.style.boxShadow = "none";
-      }}
-    >
-      Start Free — No Login Required
-    </button>
+      <h1
+        style={{
+          fontSize: "48px",
+          fontWeight: "800",
+          color: "#111827",
+          marginBottom: "18px",
+          lineHeight: "1.15",
+          maxWidth: "800px"
+        }}
+      >
+        Write Better. Respond Faster. Look Instantly Professional.
+      </h1>
 
-    
-  </div>
-</section>
+      {/* ⭐ NEW ROTATING GLOSSY TEXT */}
+      <RotatingHeroText />
+
+      {/* CTA BUTTONS */}
+      <div style={{ display: "flex", justifyContent: "center", gap: "16px" }}>
+        <button className="fancy-card"
+          onClick={scrollToForm}
+          style={{
+            padding: "16px 32px",
+            borderRadius: "12px",
+            background: `linear-gradient(135deg, ${colors.deepBlue}, ${colors.deepBlue}CC)`,
+            color: "white",
+            fontSize: "17px",
+            fontWeight: "700",
+            border: "none",
+            cursor: "pointer",
+            transition: "0.25s ease"
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.transform = "translateY(-3px)";
+            e.target.style.boxShadow = "0 8px 25px rgba(0,0,0,0.25)";
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.transform = "translateY(0)";
+            e.target.style.boxShadow = "none";
+          }}
+        >
+          Start Free — No Login Required
+        </button>
+      </div>
+    </section>
 
 
 
@@ -1506,7 +1665,7 @@ window.generateSnap = generate;
             marginBottom: "18px"
           }}
         >
-          “This works great — straightforward instructions, targeted tasks, and clean responses. Need more!”
+          “This works great. It's straightforward instructions, targeted tasks, and clean responses. Need more!”
         </p>
 
         <h4
@@ -1516,7 +1675,7 @@ window.generateSnap = generate;
             color: colors.deepBlue
           }}
         >
-          — Ric
+          — Rick
         </h4>
       </div>
 
@@ -1544,7 +1703,7 @@ window.generateSnap = generate;
             marginBottom: "18px"
           }}
         >
-          “Perfect for mom and pop shops — people that don’t know how to use AI.”
+          “Perfect for mom and pop shops. For people that don’t know how to use AI.”
         </p>
 
         <h4
@@ -1554,7 +1713,7 @@ window.generateSnap = generate;
             color: colors.deepBlue
           }}
         >
-          — Christa
+          — Anita
         </h4>
       </div>
 
@@ -1565,108 +1724,151 @@ window.generateSnap = generate;
 
 {/* VALUE PROPOSITION SECTION */}
 
+
 {profile?.plan !== "pro" && (
+  
   <section 
+  style={{
+    width: "100%",
+    maxWidth: 1000,
+    padding: "60px 20px",
+    margin: "0 auto",
+    textAlign: "center",
+    position: "relative"
+  }}
+>
+  <h2
     style={{
-      width: "100%",
-      maxWidth: 1000,
-      padding: "60px 20px",
-      margin: "0 auto",
-      textAlign: "center"
+      fontSize: "36px",
+      fontWeight: "800",
+      color: "#1f2937",
+      marginBottom: "40px",
+      lineHeight: "1.2"
     }}
   >
-    <h2
-      style={{
-        fontSize: "36px",
-        fontWeight: "800",
-        color: "#1f2937",
-        marginBottom: "40px",
-        lineHeight: "1.2"
-      }}
-    >
-      What Makes SnapCopy Different
-    </h2>
+    What Makes SnapCopy Different
+  </h2>
 
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-        gap: "40px",
-        marginTop: "20px"
-      }}
-    >
-      {/* 1. Save Hours */}
-      <div style={{ padding: "10px 20px" }}>
-        <h3
-          style={{
-            fontSize: "22px",
-            fontWeight: "700",
-            color: colors.deepBlue,
-            marginBottom: "12px"
-          }}
-        >
-          Save Hours Every Week
-        </h3>
-        <p style={{ color: "#4b5563", lineHeight: "1.65", fontSize: "16px" }}>
-          Stop wasting time writing emails, bios, policies, and customer replies.  
-          SnapCopy handles the writing so you can stay focused on running your business.
-        </p>
-      </div>
+  {/* Animated connecting line */}
+  {/* Animated connecting line */}
+<div
+  className="meter-wrapper"
+  style={{
+    position: "absolute",
+    top: 150,
+    left: "5%",
+    width: "90%",
+    height: 3,
+    background: "rgba(138,43,226,0.4)",
+    overflow: "hidden",
+    borderRadius: 2,
+  }}
+>
+  <div
+    className="meter-wave"
+    style={{
+      position: "absolute",
+      left: 0,
+      top: 0,
+      width: "100%",
+      height: "100%",
+      background: "rgba(138,43,226,1)",
+      transformOrigin: "center",
+      borderRadius: 10,
+    }}
+  />
+</div>
 
-      {/* 2. Look More Professional */}
-      <div style={{ padding: "10px 20px" }}>
-        <h3
-          style={{
-            fontSize: "22px",
-            fontWeight: "700",
-            color: colors.purple,
-            marginBottom: "12px"
-          }}
-        >
-          Look More Professional
-        </h3>
-        <p style={{ color: "#4b5563", lineHeight: "1.65", fontSize: "16px" }}>
-          Every message comes out clean, confident, and polished — even if writing isn’t your thing.
-        </p>
-      </div>
+{/* Animated connecting line */}
 
-      {/* 3. Win More Jobs */}
-      <div style={{ padding: "10px 20px" }}>
-        <h3
-          style={{
-            fontSize: "22px",
-            fontWeight: "700",
-            color: colors.orange,
-            marginBottom: "12px"
-          }}
-        >
-          Win More Jobs
-        </h3>
-        <p style={{ color: "#4b5563", lineHeight: "1.65", fontSize: "16px" }}>
-          Better communication builds trust. Trust closes deals.  
-          SnapCopy helps you sound sharp and stay ahead of competitors.
-        </p>
-      </div>
 
-      {/* 4. Tools That Grow With You */}
-      <div style={{ padding: "10px 20px" }}>
-        <h3
-          style={{
-            fontSize: "22px",
-            fontWeight: "700",
-            color: colors.darkSlate,
-            marginBottom: "12px"
-          }}
-        >
-          Tools That Grow With You
-        </h3>
-        <p style={{ color: "#4b5563", lineHeight: "1.65", fontSize: "16px" }}>
-          From About Us pages to contracts and purchase orders, SnapCopy keeps expanding  
-          to support your business as it grows.
-        </p>
-      </div>
+
+
+
+
+  <div
+    style={{
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+      gap: "40px",
+      marginTop: "20px",
+      position: "relative",
+      zIndex: 2
+    }}
+  >
+    {/* 1. Save Hours */}
+    <div style={{ padding: "10px 20px", position: "relative" }}>
+      <h3
+        style={{
+          fontSize: "22px",
+          fontWeight: "700",
+          color: colors.deepBlue,
+          marginBottom: "12px"
+        }}
+      >
+        Save Hours Every Week
+      </h3>
+      <p style={{ color: "#4b5563", lineHeight: "1.65", fontSize: "16px" }}>
+        Stop wasting time writing emails, bios, policies, and customer replies.  
+        SnapCopy handles the writing so you can stay focused on running your business.
+      </p>
     </div>
-  </section>
+
+    {/* 2. Look More Professional */}
+    <div style={{ padding: "10px 20px", position: "relative" }}>
+      <h3
+        style={{
+          fontSize: "22px",
+          fontWeight: "700",
+          color: colors.purple,
+          marginBottom: "12px"
+        }}
+      >
+        Look More Professional
+      </h3>
+      <p style={{ color: "#4b5563", lineHeight: "1.65", fontSize: "16px" }}>
+        Every message comes out clean, confident, and polished — even if writing isn’t your thing.
+      </p>
+    </div>
+
+    {/* 3. Win More Jobs */}
+    <div style={{ padding: "10px 20px", position: "relative" }}>
+      <h3
+        style={{
+          fontSize: "22px",
+          fontWeight: "700",
+          color: colors.orange,
+          marginBottom: "12px"
+        }}
+      >
+        Win More Jobs
+      </h3>
+      <p style={{ color: "#4b5563", lineHeight: "1.65", fontSize: "16px" }}>
+        Better communication builds trust. Trust closes deals.  
+        SnapCopy helps you sound sharp and stay ahead of competitors.
+      </p>
+    </div>
+
+    {/* 4. Tools That Grow With You */}
+    <div style={{ padding: "10px 20px", position: "relative" }}>
+      <h3
+        style={{
+          fontSize: "22px",
+          fontWeight: "700",
+          color: colors.darkSlate,
+          marginBottom: "12px"
+        }}
+      >
+        Tools That Grow With You
+      </h3>
+      <p style={{ color: "#4b5563", lineHeight: "1.65", fontSize: "16px" }}>
+        From About Us pages to contracts and purchase orders, SnapCopy keeps expanding  
+        to support your business as it grows.
+      </p>
+    </div>
+  </div>
+</section>
+
 )}
 {/* END VALUE PROPOSITION SECTION */}
 
@@ -2653,6 +2855,8 @@ window.generateSnap = generate;
     </main>
   );
 }
+
+
 
 
 import Layout from "./Layout";

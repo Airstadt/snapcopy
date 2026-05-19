@@ -28,17 +28,10 @@ export default function Layout({ children }) {
           zIndex: 10,
         }}
       >
-        {/* Logo */}
-        <img
-          src="/snapcopy_logo.png"
-          alt="SnapCopy"
-          style={{ height: 42 }}
-        />
 
         {/* RIGHT SIDE BUTTONS */}
         <div style={{ display: "flex", gap: "16px", alignItems: "center", paddingRight: "50px" }}>
 
-          {/* ⭐ Login button (clean pill style) */}
           {showLoginButton && (
             <Link
               to="/auth?mode=login"
@@ -57,7 +50,6 @@ export default function Layout({ children }) {
             </Link>
           )}
 
-          {/* ⭐ Sign up for Pro / Back Home logic */}
           {!isDashboard && !isProfilePage && !user ? (
             <Link
               to={(isAuthPage || isUpgradePage) ? "/" : "/auth?redirect=/upgrade"}
