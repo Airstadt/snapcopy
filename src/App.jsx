@@ -1400,6 +1400,19 @@ function RotatingHeroText() {
         0% { opacity: 1; transform: translateY(0); }
         100% { opacity: 0; transform: translateY(-18px); }
       }
+        
+            @keyframes movingPurpleGradient {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
     `;
     document.head.appendChild(style);
     return () => document.head.removeChild(style);
@@ -1415,7 +1428,9 @@ function RotatingHeroText() {
         padding: "40px 50px",
         borderRadius: "18px",
         backdropFilter: "blur(14px)",
-        animation: "glassPulse 6s ease-in-out infinite",
+        background: "linear-gradient(90deg, #d8b4fe, #c084fc, #a855f7, #c084fc, #d8b4fe)",
+        backgroundSize: "300% 300%",
+        animation: "movingPurpleGradient 12s ease-in-out infinite",
         border: "1px solid rgba(255, 255, 255, 0.45)",
         boxShadow: "0 12px 45px rgba(120, 60, 200, 0.18)",
         textAlign: "center",
@@ -1440,7 +1455,7 @@ function RotatingHeroText() {
         style={{
           position: "relative",
           fontSize: "22px",
-          color: "#4b5563",
+          color: "#ffffff",
           lineHeight: "1.55",
           margin: 0,
           minHeight: "70px",
@@ -1526,13 +1541,13 @@ function RotatingHeroText() {
       position: "absolute",
       top: "50%",
       left: "50%",
-      width: 260,
-      height: 260,
+      width: 150,
+      height: 150,
       transform: "translate(-50%, -50%)",
       borderRadius: "50%",
-      background: "conic-gradient(from 0deg, rgba(150, 80, 255, 0.25), rgba(200, 150, 255, 0.15), rgba(150, 80, 255, 0.25))",
-      filter: "blur(45px)",
-      animation: "swirlGlow 12s linear infinite",
+      background: "conic-gradient(from 0deg, rgba(150, 80, 255, 0.25), rgba(93, 68, 119, 0.15), rgba(150, 80, 255, 0.25))",
+      filter: "blur(40px)",
+      animation: "swirlGlow 14s linear infinite",
       pointerEvents: "none",
       zIndex: 0,
     }}
@@ -1654,20 +1669,20 @@ function RotatingHeroText() {
         }}
       >
         <div style={{ marginBottom: "12px", fontSize: "18px", color: "#fbbf24" }}>
-          ★★★★★
+          ★★★★
         </div>
 
         <p
           style={{
             fontSize: "16px",
-            color: "#4b5563",
+            color: "#113970",
             lineHeight: "1.6",
             marginBottom: "18px"
           }}
         >
           “This works great. It's straightforward instructions, targeted tasks, and clean responses. Need more!”
         </p>
-
+   
         <h4
           style={{
             fontSize: "15px",
@@ -1675,7 +1690,7 @@ function RotatingHeroText() {
             color: colors.deepBlue
           }}
         >
-          — Rick
+          Rick
         </h4>
       </div>
 
@@ -1713,7 +1728,7 @@ function RotatingHeroText() {
             color: colors.deepBlue
           }}
         >
-          — Anita
+          Anita
         </h4>
       </div>
 
@@ -1781,11 +1796,6 @@ function RotatingHeroText() {
 
 {/* Animated connecting line */}
 
-
-
-
-
-
   <div
     style={{
       display: "grid",
@@ -1802,7 +1812,7 @@ function RotatingHeroText() {
         style={{
           fontSize: "22px",
           fontWeight: "700",
-          color: colors.deepBlue,
+          color: colors.orange,
           marginBottom: "12px"
         }}
       >
