@@ -1696,7 +1696,7 @@ window.generateSnap = generate;
       }}
     >
       <video
-        src="/snapcopy demo aboutus.mp4"
+        src="https://pub-352990407c2f4e93846989d725d4526a.r2.dev/snapcopy%20demo%20aboutus.mp4"
         controls
         style={{
           width: '100%',
