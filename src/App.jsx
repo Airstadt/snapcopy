@@ -1912,7 +1912,7 @@ function RotatingHeroText() {
 </section>
 
 )}
-{/* END VALUE PROPOSITION SECTION */}
+{/* END VALUE PROPOSITION SECTION a note*/}
 
 {/* VIDEO DEMO SECTION */}
 {profile?.plan !== "pro" && (
