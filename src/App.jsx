@@ -1530,9 +1530,33 @@ function RotatingHeroText() {
         display: "flex",
         flexDirection: "column",
         alignItems: "center"
+        
       }}
     >
       
+      <div
+  style={{
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "8px",
+    padding: "6px 14px",
+    borderRadius: "20px",
+    background: "rgba(255,255,255,0.55)",
+    backdropFilter: "blur(10px)",
+    WebkitBackdropFilter: "blur(10px)",
+    border: "1px solid rgba(255,255,255,0.4)",
+    fontSize: "14px",
+    fontWeight: "600",
+    color: "#4b5563",
+    marginBottom: "18px",
+    boxShadow: "0 4px 18px rgba(0,0,0,0.08)",
+  }}
+>
+  <span style={{ color: colors.deepBlue, fontWeight: "700" }}>⚡ AI powered</span>
+  <span style={{ opacity: 0.6 }}>•</span>
+  <span>built for business</span>
+</div>
+
    <div style={{ position: "relative", marginBottom: 25, width: 160, height: 160 }}>
   
   {/* Swirling glow */}
@@ -1614,9 +1638,6 @@ function RotatingHeroText() {
         </button>
       </div>
     </section>
-
-
-
   </>
 )}
 
@@ -2777,6 +2798,142 @@ function RotatingHeroText() {
   </section>
 )}
 
+<section
+  style={{
+    width: "100%",
+    maxWidth: 900,
+    margin: "80px auto 120px",
+    padding: "40px 20px",
+    textAlign: "center",
+    position: "relative",
+  }}
+>
+
+  {/* Section Title */}
+  <h2
+    style={{
+      fontSize: "34px",
+      fontWeight: "800",
+      color: "#1f2937",
+      marginBottom: "40px",
+    }}
+  >
+   Pro Plan
+  </h2>
+
+  {/* Pricing Card Container */}
+  <div
+    style={{
+      maxWidth: 420,
+      margin: "0 auto",
+      padding: "32px",
+      borderRadius: "20px",
+
+      // ⭐ Glass effect
+      background: "rgba(255,255,255,0.55)",
+      backdropFilter: "blur(18px)",
+      WebkitBackdropFilter: "blur(18px)",
+      border: "1px solid rgba(255,255,255,0.35)",
+      boxShadow: "0 12px 40px rgba(0,0,0,0.08)",
+
+      position: "relative",
+    }}
+  >
+
+    {/* MOST POPULAR TAG */}
+    <div
+      style={{
+        position: "absolute",
+        top: "-14px",
+        left: "50%",
+        transform: "translateX(-50%)",
+        background: colors.deepBlue,
+        color: "white",
+        padding: "6px 16px",
+        borderRadius: "20px",
+        fontSize: "13px",
+        fontWeight: "700",
+        letterSpacing: "0.5px",
+        boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+      }}
+    >
+      MOST POPULAR
+    </div>
+
+    {/* Plan Title */}
+    <h3
+      style={{
+        fontSize: "24px",
+        fontWeight: "800",
+        color: colors.deepBlue,
+        marginBottom: "10px",
+        marginTop: "10px",
+      }}
+    >
+      One price. Everytime all the time!
+    </h3>
+
+    {/* Price */}
+    <div
+      style={{
+        fontSize: "42px",
+        fontWeight: "800",
+        color: "#111827",
+        marginBottom: "20px",
+      }}
+    >
+      $19.99 <span style={{ fontSize: "18px", color: "#6b7280" }}>/month</span>
+    </div>
+
+    {/* Feature List */}
+    <ul
+      style={{
+        listStyle: "none",
+        padding: 0,
+        margin: "0 0 30px 0",
+        textAlign: "left",
+        lineHeight: "1.7",
+        color: "#374151",
+        fontSize: "16px",
+      }}
+    >
+      <li>✔ No tokens per month</li>
+      <li>✔ AI‑powered insights</li>
+      <li>✔ Every feature included</li>
+      <li>✔ Save content</li>
+      <li>✔ Edit saved content</li>
+      <li>✔ Download pdf, or clip for emails</li>
+    </ul>
+
+    {/* CTA Button */}
+    <button
+      onClick={scrollToForm}
+      style={{
+        width: "100%",
+        padding: "14px 0",
+        background: colors.deepBlue,
+        color: "white",
+        fontSize: "17px",
+        fontWeight: "700",
+        borderRadius: "12px",
+        border: "none",
+        cursor: "pointer",
+        transition: "0.25s ease",
+      }}
+      onMouseEnter={(e) => {
+        e.target.style.transform = "translateY(-3px)";
+        e.target.style.boxShadow = "0 8px 25px rgba(0,0,0,0.25)";
+      }}
+      onMouseLeave={(e) => {
+        e.target.style.transform = "translateY(0)";
+        e.target.style.boxShadow = "none";
+      }}
+    >
+      Choose
+    </button>
+
+  </div>
+</section>
 
 
 {/* FINAL CTA — only show to public (non‑subscribed) users */}

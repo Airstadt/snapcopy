@@ -12,6 +12,17 @@ export default function Layout({ children }) {
 
   const showLoginButton = !user && location.pathname === "/";
 
+  // ⭐ Smooth scroll helpers
+  const scrollToVideo = () => {
+    const el = document.getElementById("demo-video-section");
+    if (el) el.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const scrollToPricing = () => {
+    const el = document.getElementById("pricing-section");
+    if (el) el.scrollIntoView({ behavior: "smooth" });
+  };
+
   return (
     <div style={{ width: "100%" }}>
       <header
@@ -28,6 +39,45 @@ export default function Layout({ children }) {
           zIndex: 10,
         }}
       >
+
+        {/* LEFT SIDE — Demo Video + Pricing */}
+        <div style={{ display: "flex", gap: "14px", alignItems: "center" }}>
+          
+          {/* ⭐ Demo Video Button */}
+          <button
+            onClick={scrollToVideo}
+            style={{
+              padding: "8px 16px",
+              borderRadius: "20px",
+              background: "#f3f0ff",
+              color: "#6b21a8",
+              fontWeight: "600",
+              border: "1px solid #e5d9ff",
+              fontSize: "14px",
+              cursor: "pointer",
+            }}
+          >
+            🎬 Demo Video
+          </button>
+
+          {/* ⭐ Pricing Button */}
+          <button
+            onClick={scrollToPricing}
+            style={{
+              padding: "8px 16px",
+              borderRadius: "20px",
+              background: "#e0e7ff",
+              color: "#1e3a8a",
+              fontWeight: "600",
+              border: "1px solid #c7d2fe",
+              fontSize: "14px",
+              cursor: "pointer",
+            }}
+          >
+             Pricing
+          </button>
+
+        </div>
 
         {/* RIGHT SIDE BUTTONS */}
         <div style={{ display: "flex", gap: "16px", alignItems: "center", paddingRight: "50px" }}>
