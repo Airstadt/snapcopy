@@ -5,12 +5,13 @@ export default function Layout({ children }) {
   const location = useLocation();
   const user = auth.currentUser;
 
+  const isLandingPage = location.pathname === "/";
   const isAuthPage = location.pathname === "/auth";
   const isUpgradePage = location.pathname === "/upgrade";
   const isDashboard = location.pathname === "/dashboard";
   const isProfilePage = location.pathname === "/settings/profile";
 
-  const showLoginButton = !user && location.pathname === "/";
+  const showLoginButton = !user && isLandingPage;
 
   // ⭐ Smooth scroll helpers
   const scrollToVideo = () => {
@@ -21,6 +22,11 @@ export default function Layout({ children }) {
   const scrollToPricing = () => {
     const el = document.getElementById("pricing-section");
     if (el) el.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // ⭐ Scroll to top
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
@@ -40,48 +46,70 @@ export default function Layout({ children }) {
         }}
       >
 
-        {/* LEFT SIDE — Demo Video + Pricing */}
-        <div style={{ display: "flex", gap: "14px", alignItems: "center" }}>
-          
-          {/* ⭐ Demo Video Button */}
-          <button
-            onClick={scrollToVideo}
-            style={{
-              padding: "8px 16px",
-              borderRadius: "20px",
-              background: "#f3f0ff",
-              color: "#6b21a8",
-              fontWeight: "600",
-              border: "1px solid #e5d9ff",
-              fontSize: "14px",
-              cursor: "pointer",
-            }}
-          >
-            🎬 Demo Video
-          </button>
+        {/* LEFT SIDE — ONLY on Landing Page */}
+        {isLandingPage ? (
+          <div style={{ display: "flex", gap: "14px", alignItems: "center" }}>
 
-          {/* ⭐ Pricing Button */}
-          <button
-            onClick={scrollToPricing}
-            style={{
-              padding: "8px 16px",
-              borderRadius: "20px",
-              background: "#e0e7ff",
-              color: "#1e3a8a",
-              fontWeight: "600",
-              border: "1px solid #c7d2fe",
-              fontSize: "14px",
-              cursor: "pointer",
-            }}
-          >
-             Pricing
-          </button>
+            {/* ⭐ Home Button */}
+            <button
+              onClick={scrollToTop}
+              style={{
+                padding: "8px 16px",
+                borderRadius: "20px",
+                background: "#f0f9ff",
+                color: "#0369a1",
+                fontWeight: "600",
+                border: "1px solid #bae6fd",
+                fontSize: "14px",
+                cursor: "pointer",
+              }}
+            >
+              ⬆️ Home
+            </button>
 
-        </div>
+            {/* ⭐ Demo Video Button */}
+            <button
+              onClick={scrollToVideo}
+              style={{
+                padding: "8px 16px",
+                borderRadius: "20px",
+                background: "#f3f0ff",
+                color: "#6b21a8",
+                fontWeight: "600",
+                border: "1px solid #e5d9ff",
+                fontSize: "14px",
+                cursor: "pointer",
+              }}
+            >
+              🎬 Demo Video
+            </button>
+
+            {/* ⭐ Pricing Button */}
+            <button
+              onClick={scrollToPricing}
+              style={{
+                padding: "8px 16px",
+                borderRadius: "20px",
+                background: "#e0e7ff",
+                color: "#1e3a8a",
+                fontWeight: "600",
+                border: "1px solid #c7d2fe",
+                fontSize: "14px",
+                cursor: "pointer",
+              }}
+            >
+              🏷️ Pricing
+            </button>
+
+          </div>
+        ) : (
+          <div></div>
+        )}
 
         {/* RIGHT SIDE BUTTONS */}
         <div style={{ display: "flex", gap: "16px", alignItems: "center", paddingRight: "50px" }}>
 
+          {/* Log in button ONLY on landing page */}
           {showLoginButton && (
             <Link
               to="/auth?mode=login"
@@ -96,10 +124,11 @@ export default function Layout({ children }) {
                 border: "1px solid #e5d9ff",
               }}
             >
-              Log in
+              ➡️ Log in
             </Link>
           )}
 
+          {/* Sign up for Pro OR Back Home logic */}
           {!isDashboard && !isProfilePage && !user ? (
             <Link
               to={(isAuthPage || isUpgradePage) ? "/" : "/auth?redirect=/upgrade"}
@@ -113,7 +142,7 @@ export default function Layout({ children }) {
                 fontSize: "14px",
               }}
             >
-              {(isAuthPage || isUpgradePage) ? "Back Home" : "Sign up for Pro"}
+              {(isAuthPage || isUpgradePage) ? "Back Home" : "💎 Sign up for Pro"}
             </Link>
           ) : (!isProfilePage && (isAuthPage || isUpgradePage)) ? (
             <Link
@@ -131,6 +160,7 @@ export default function Layout({ children }) {
               Back Home
             </Link>
           ) : null}
+
         </div>
       </header>
 
