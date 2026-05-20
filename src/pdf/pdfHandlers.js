@@ -574,7 +574,7 @@ export function handlePoPDF({ input, customColors }) {
   };
 
   // HEADER
-  doc.setFillColor(245, 245, 245);
+ 
   doc.rect(0, 0, doc.internal.pageSize.width, 28, "F");
   doc.setDrawColor(colors.poGreen);
   doc.setLineWidth(1);
@@ -600,7 +600,7 @@ export function handlePoPDF({ input, customColors }) {
   const boxHeight = 70;
   const halfWidth = pageWidth / 2 - 8;
 
-  doc.setFillColor(245, 245, 245);
+
   doc.roundedRect(margin, y, halfWidth, boxHeight, 4, 4, "F");
   doc.roundedRect(margin + halfWidth + 16, y, halfWidth, boxHeight, 4, 4, "F");
 
