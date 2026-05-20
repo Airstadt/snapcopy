@@ -72,6 +72,17 @@ function HomePage() {
   const [terms, setTerms] = useState("");
   const [specialClauses, setSpecialClauses] = useState("");
 
+  const scrollToVideo = () => {
+  const el = document.getElementById("demo-video-section");
+  if (el) el.scrollIntoView({ behavior: "smooth" });
+};
+
+const scrollToPricing = () => {
+  const el = document.getElementById("pricing-section");
+  if (el) el.scrollIntoView({ behavior: "smooth" });
+};
+
+
 useEffect(() => {
   const wrapper = document.querySelector(".meter-wrapper");
   const wave = document.querySelector(".meter-wave");
@@ -1905,17 +1916,22 @@ function RotatingHeroText() {
 
 {/* VIDEO DEMO SECTION */}
 {profile?.plan !== "pro" && (
-<section id="demo" className="w-full min-h-screen flex items-center justify-center bg-[#0d0d0d] px-6 py-20">
+<section  
+  id="demo-video-section"
+  className="w-full min-h-screen flex items-center justify-center bg-[#0d0d0d] px-6 py-20 scroll-mt-40"
+>
   <div className="max-w-4xl w-full text-center">
+
     <h2 className="text-4xl font-semibold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent mb-4">
       See SnapCopy in Action
     </h2>
+
     <p className="text-gray-300 text-lg mb-10">
       A 32‑second demo showing how fast you can generate professional content.
     </p>
 
-    {/* Video Container: inline styles force 50% of viewport, capped at 576px (max-w-xl) */}
-    <div
+    {/* Video Container */}
+    <div 
       style={{
         width: '75vw',
         maxWidth: '960px',
@@ -1939,8 +1955,10 @@ function RotatingHeroText() {
         }}
       />
     </div>
+
   </div>
 </section>
+
 )}
 {/* END VIDEO DEMO SECTION */}
 
@@ -2823,22 +2841,25 @@ function RotatingHeroText() {
 
   {/* Pricing Card Container */}
   <div
-    style={{
-      maxWidth: 420,
-      margin: "0 auto",
-      padding: "32px",
-      borderRadius: "20px",
+  id="pricing-section"
+  style={{
+    scrollMarginTop: "200px",   // ⭐ now it works
+    maxWidth: 420,
+    margin: "0 auto",
+    padding: "32px",
+    borderRadius: "20px",
 
-      // ⭐ Glass effect
-      background: "rgba(255,255,255,0.55)",
-      backdropFilter: "blur(18px)",
-      WebkitBackdropFilter: "blur(18px)",
-      border: "1px solid rgba(255,255,255,0.35)",
-      boxShadow: "0 12px 40px rgba(0,0,0,0.08)",
+    // ⭐ Glass effect
+    background: "rgba(255,255,255,0.55)",
+    backdropFilter: "blur(18px)",
+    WebkitBackdropFilter: "blur(18px)",
+    border: "1px solid rgba(255,255,255,0.35)",
+    boxShadow: "0 12px 40px rgba(0,0,0,0.08)",
 
-      position: "relative",
-    }}
-  >
+    position: "relative",
+  }}
+>
+
 
     {/* MOST POPULAR TAG */}
     <div
