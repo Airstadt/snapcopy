@@ -5,14 +5,15 @@ export default function Layout({ children }) {
   const location = useLocation();
   const user = auth.currentUser;
 
+  const isLandingPage = location.pathname === "/";
   const isAuthPage = location.pathname === "/auth";
   const isUpgradePage = location.pathname === "/upgrade";
   const isDashboard = location.pathname === "/dashboard";
   const isProfilePage = location.pathname === "/settings/profile";
 
-  const showLoginButton = !user && location.pathname === "/";
+  const showLoginButton = !user && isLandingPage;
 
-  // ⭐ Smooth scroll helpers
+  // Smooth scroll helpers
   const scrollToVideo = () => {
     const el = document.getElementById("demo-video-section");
     if (el) el.scrollIntoView({ behavior: "smooth" });
@@ -23,7 +24,6 @@ export default function Layout({ children }) {
     if (el) el.scrollIntoView({ behavior: "smooth" });
   };
 
-  // ⭐ NEW: Scroll to top
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -45,65 +45,74 @@ export default function Layout({ children }) {
         }}
       >
 
-        {/* LEFT SIDE — Home + Demo Video + Pricing */}
-        <div style={{ display: "flex", gap: "14px", alignItems: "center" }}>
+        {/* LEFT SIDE — Only show on landing page */}
+        {isLandingPage ? (
+          <div style={{ display: "flex", gap: "14px", alignItems: "center" }}>
+            {/* Home Button */}
+            <button
+              onClick={scrollToTop}
+              style={{
+                padding: "8px 16px",
+                borderRadius: "20px",
+                background: "#f0f9ff",
+                color: "#0369a1",
+                fontWeight: "600",
+                border: "1px solid #bae6fd",
+                fontSize: "14px",
+                cursor: "pointer",
+              }}
+            >
+              ⬆️ Home
+            </button>
 
-          {/* ⭐ Home Button */}
-          <button
-            onClick={scrollToTop}
-            style={{
-              padding: "8px 16px",
-              borderRadius: "20px",
-              background: "#f0f9ff",
-              color: "#0369a1",
-              fontWeight: "600",
-              border: "1px solid #bae6fd",
-              fontSize: "14px",
-              cursor: "pointer",
-            }}
-          >
-            ⬆️ Home
-          </button>
+            {/* Demo Video Button */}
+            <button
+              onClick={scrollToVideo}
+              style={{
+                padding: "8px 16px",
+                borderRadius: "20px",
+                background: "#f3f0ff",
+                color: "#6b21a8",
+                fontWeight: "600",
+                border: "1px solid #e5d9ff",
+                fontSize: "14px",
+                cursor: "pointer",
+              }}
+            >
+              🎬 Demo Video
+            </button>
 
-          {/* ⭐ Demo Video Button */}
-          <button
-            onClick={scrollToVideo}
-            style={{
-              padding: "8px 16px",
-              borderRadius: "20px",
-              background: "#f3f0ff",
-              color: "#6b21a8",
-              fontWeight: "600",
-              border: "1px solid #e5d9ff",
-              fontSize: "14px",
-              cursor: "pointer",
-            }}
-          >
-            🎬 Demo Video
-          </button>
-
-          {/* ⭐ Pricing Button */}
-          <button
-            onClick={scrollToPricing}
-            style={{
-              padding: "8px 16px",
-              borderRadius: "20px",
-              background: "#e0e7ff",
-              color: "#1e3a8a",
-              fontWeight: "600",
-              border: "1px solid #c7d2fe",
-              fontSize: "14px",
-              cursor: "pointer",
-            }}
-          >
-            🏷️ Pricing
-          </button>
-
-        </div>
+            {/* Pricing Button */}
+            <button
+              onClick={scrollToPricing}
+              style={{
+                padding: "8px 16px",
+                borderRadius: "20px",
+                background: "#e0e7ff",
+                color: "#1e3a8a",
+                fontWeight: "600",
+                border: "1px solid #c7d2fe",
+                fontSize: "14px",
+                cursor: "pointer",
+              }}
+            >
+              🏷️ Pricing
+            </button>
+          </div>
+        ) : (
+          <div></div>
+        )}
 
         {/* RIGHT SIDE BUTTONS */}
-        <div style={{ display: "flex", gap: "16px", alignItems: "center", paddingRight: "50px" }}>
-
+        <div
+          style={{
+            display: "flex",
+            gap: "16px",
+            alignItems: "center",
+            paddingRight: "50px",
+          }}
+        >
+          {/* Login button only on landing page */}
           {showLoginButton && (
             <Link
               to="/auth?mode=login"
@@ -122,9 +131,14 @@ export default function Layout({ children }) {
             </Link>
           )}
 
+          {/* Sign up for Pro OR Back Home */}
           {!isDashboard && !isProfilePage && !user ? (
             <Link
-              to={(isAuthPage || isUpgradePage) ? "/" : "/auth?redirect=/upgrade"}
+              to={
+                isAuthPage || isUpgradePage
+                  ? "/"
+                  : "/auth?redirect=/upgrade"
+              }
               style={{
                 padding: "8px 18px",
                 borderRadius: "20px",
@@ -135,9 +149,9 @@ export default function Layout({ children }) {
                 fontSize: "14px",
               }}
             >
-              {(isAuthPage || isUpgradePage) ? "Back Home" : "💎 Sign up for Pro"}
+              {isAuthPage || isUpgradePage ? "Back Home" : "💎 Sign up for Pro"}
             </Link>
-          ) : (!isProfilePage && (isAuthPage || isUpgradePage)) ? (
+          ) : !isProfilePage && (isAuthPage || isUpgradePage) ? (
             <Link
               to="/"
               style={{
