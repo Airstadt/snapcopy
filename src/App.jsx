@@ -1877,7 +1877,7 @@ function RotatingHeroText() {
         Look More Professional
       </h3>
       <p style={{ color: "#4b5563", lineHeight: "1.65", fontSize: "16px" }}>
-        Every message comes out clean, confident, and polished — even if writing isn’t your thing.
+        Every message comes out clean, confident, and polished. Even if writing isn’t your thing.
       </p>
     </div>
 
@@ -1913,7 +1913,7 @@ function RotatingHeroText() {
       </h3>
       <p style={{ color: "#4b5563", lineHeight: "1.65", fontSize: "16px" }}>
         From About Us pages to contracts and purchase orders, SnapCopy keeps expanding  
-        to support your business as it grows.
+        to support more business functions.
       </p>
     </div>
   </div>
