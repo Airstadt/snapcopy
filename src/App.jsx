@@ -108,13 +108,6 @@ useEffect(() => {
 
 
 
-
-
-
-
-
-
-
   // ⬆️ END — this is the ONLY correct place
 
   // ... all your other state + helpers ...
